@@ -40,14 +40,14 @@ const validateConfig = (
 export const configValidators = {
   [CONFIG_KEYS.OPENAI_API_KEY](value: any) {
     validateConfig(CONFIG_KEYS.OPENAI_API_KEY, value, 'Cannot be empty');
+    // validateConfig(
+    //   CONFIG_KEYS.OPENAI_API_KEY,
+    //   value.startsWith('sk-'),
+    //   'Must start with "sk-"'
+    // );
     validateConfig(
       CONFIG_KEYS.OPENAI_API_KEY,
-      value.startsWith('sk-'),
-      'Must start with "sk-"'
-    );
-    validateConfig(
-      CONFIG_KEYS.OPENAI_API_KEY,
-      value.length === 51,
+      value.length === 51 || value.length === 32 ,
       'Must be 51 characters long'
     );
 
@@ -105,7 +105,7 @@ export const configValidators = {
   [CONFIG_KEYS.model](value: any) {
     validateConfig(
       CONFIG_KEYS.OPENAI_BASE_PATH,
-      value === 'gpt-3.5-turbo' || value === 'gpt-4',
+      value === 'gpt-3.5-turbo' || value === 'gpt-4' || value === 'gpt-35-turbo' || value === 'GPT35',
       `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default)`
     );
     return value;
