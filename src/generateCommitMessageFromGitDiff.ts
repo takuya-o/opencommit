@@ -29,18 +29,18 @@ index ad4db42..f3b18a9 100644
 @@ -10,7 +10,7 @@
 import {
   initWinstonLogger();
-  
+
   const app = express();
  -const port = 7799;
  +const PORT = 7799;
-  
+
   app.use(express.json());
-  
+
 @@ -34,6 +34,6 @@
 app.use((_, res, next) => {
   // ROUTES
   app.use(PROTECTED_ROUTER_URL, protectedRouter);
-  
+
  -app.listen(port, () => {
  -  console.log(\`Server listening on port \${port}\`);
  +app.listen(process.env.PORT || PORT, () => {
@@ -51,7 +51,7 @@ app.use((_, res, next) => {
     role: ChatCompletionRequestMessageRoleEnum.Assistant,
     content: `${config?.emoji ? '🐛 ' : ''}${translation.commitFix}
 ${config?.emoji ? '✨ ' : ''}${translation.commitFeat}
-${config?.description ? translation.commitDescription : ''}`
+${config?.description ? '\n' + translation.commitDescription : ''}`
   }
 ];
 

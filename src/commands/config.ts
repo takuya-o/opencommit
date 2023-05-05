@@ -48,7 +48,7 @@ export const configValidators = {
     validateConfig(
       CONFIG_KEYS.OPENAI_API_KEY,
       value.length === 51 || value.length === 32 ,
-      'Must be 51 characters long'
+      'Must be 32 or 51 characters long'
     );
 
     return value;
@@ -65,6 +65,15 @@ export const configValidators = {
   },
 
   [CONFIG_KEYS.OPENAI_MAX_TOKENS](value: any) {
+    // If the value is a string, convert it to a number.
+    if (typeof value === 'string') {
+      value = parseInt(value);
+      validateConfig(
+        CONFIG_KEYS.OPENAI_MAX_TOKENS,
+        !isNaN(value),
+        'Must be a number'
+      );
+    }
     validateConfig(
       CONFIG_KEYS.OPENAI_MAX_TOKENS,
       typeof value === 'number',
@@ -96,16 +105,16 @@ export const configValidators = {
   [CONFIG_KEYS.OPENAI_BASE_PATH](value: any) {
     validateConfig(
       CONFIG_KEYS.OPENAI_BASE_PATH,
-      typeof value == 'string',
-      `${value} is not supported yet`
+      typeof value === 'string',
+      'Must be string'
     );
     return value;
   },
 
   [CONFIG_KEYS.model](value: any) {
     validateConfig(
-      CONFIG_KEYS.OPENAI_BASE_PATH,
-      value === 'gpt-3.5-turbo' || value === 'gpt-4' || value === 'gpt-35-turbo' || value === 'GPT35',
+      CONFIG_KEYS.model,
+      value === 'gpt-3.5-turbo' || value === 'gpt-4' || value === 'gpt-35-turbo',
       `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default)`
     );
     return value;
@@ -126,11 +135,23 @@ export const getConfig = (): ConfigType | null => {
   const config = iniParse(configFile);
 
   for (const configKey of Object.keys(config)) {
-    const validValue = configValidators[configKey as CONFIG_KEYS](
-      config[configKey]
-    );
+    try {
+      const validValue = configValidators[configKey as CONFIG_KEYS](
+        config[configKey]
+      );
+      config[configKey] = validValue;
+    } catch (error) {
+      if (error instanceof TypeError) {
+        // Make a mistake by manually editing the configuration file
+        outro(
+          `${chalk.red('✖')} Unsupported config key ${configKey}: ${config[configKey]}`
+        );
+        // continue next key
+      } else {
+        throw error
+      }
+    }
 
-    config[configKey] = validValue;
   }
 
   return config;

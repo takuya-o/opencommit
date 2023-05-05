@@ -64,7 +64,7 @@ export const i18n = {
 export const I18N_CONFIG_ALIAS: { [key: string]: string[] } = {
   zh_CN: ['zh_CN', '简体中文', '中文', '简体'],
   zh_TW: ['zh_TW', '繁體中文', '繁體'],
-  ja: ['ja', 'Japanese', 'にほんご'],
+  ja: ['ja', 'Japanese', 'にほんご','日本語','ja_JP'],
   ko: ['ko', 'Korean', '한국어'],
   cs: ['cs', 'Czech', 'česky'],
   de: ['de', 'German', 'Deutsch'],

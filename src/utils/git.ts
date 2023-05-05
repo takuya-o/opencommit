@@ -101,6 +101,7 @@ export const getDiff = async ({ files }: { files: string[] }) => {
   const { stdout: diff } = await execa('git', [
     'diff',
     '--staged',
+    '--ignore-all-space',
     '--',
     ...filesWithoutLocks
   ]);
