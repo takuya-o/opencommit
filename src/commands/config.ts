@@ -14,6 +14,7 @@ export enum CONFIG_KEYS {
   OPENAI_API_KEY = 'OPENAI_API_KEY',
   OPENAI_MAX_TOKENS = 'OPENAI_MAX_TOKENS',
   OPENAI_BASE_PATH = 'OPENAI_BASE_PATH',
+  OPENAI_API_TYPE = 'OPENAI_API_TYPE',
   description = 'description',
   emoji = 'emoji',
   model = 'model',
@@ -122,11 +123,35 @@ export const configValidators = {
     return value;
   },
 
+  [CONFIG_KEYS.OPENAI_API_TYPE](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OPENAI_API_TYPE,
+      typeof value === 'string',
+      'Must be string'
+    );
+    validateConfig(
+      CONFIG_KEYS.OPENAI_API_TYPE,
+      value === 'azure' || value === 'openai' || value === '',
+      `${value} is not supported yet, use 'azure' or 'openai' (default)`
+    );
+    return value;
+  },
+
   [CONFIG_KEYS.model](value: any) {
     validateConfig(
       CONFIG_KEYS.model,
-      value === 'gpt-3.5-turbo' || value === 'gpt-4' || value === 'gpt-35-turbo',
-      `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default)`
+      value === 'gpt-3.5-turbo' || value === 'gpt-4'
+      || ( typeof value === 'string' && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/) ),
+      `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default) or model deployed name.`
+    );
+    return value;
+  },
+
+  [CONFIG_KEYS.prefix](value: any) {
+    validateConfig(
+      CONFIG_KEYS.prefix,
+      true,
+      'Cannot be empty'
     );
     return value;
   },
