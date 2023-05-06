@@ -85,13 +85,15 @@ const INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
 const MAX_REQ_TOKENS = 3900 - INIT_MESSAGES_PROMPT_LENGTH;
 
 export const generateCommitMessageWithChatCompletion = async (
-  diff: string
+  diff: string,
+  prefix: string
 ): Promise<string | GenerateCommitMessageError> => {
   try {
     if (tokenCount(diff) >= MAX_REQ_TOKENS) {
       const commitMessagePromises = getCommitMsgsPromisesFromFileDiffs(
         diff,
-        MAX_REQ_TOKENS
+        MAX_REQ_TOKENS,
+        prefix
       );
 
       const commitMessages = await Promise.all(commitMessagePromises);
@@ -100,7 +102,7 @@ export const generateCommitMessageWithChatCompletion = async (
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(diff);
 
-      const commitMessage = await api.generateCommitMessage(messages);
+      const commitMessage = await api.generateCommitMessage(messages, prefix);
 
       if (!commitMessage)
         return { error: GenerateCommitMessageErrorEnum.emptyMessage };
@@ -115,7 +117,8 @@ export const generateCommitMessageWithChatCompletion = async (
 function getMessagesPromisesByChangesInFile(
   fileDiff: string,
   separator: string,
-  maxChangeLength: number
+  maxChangeLength: number,
+  prefix: string
 ) {
   const hunkHeaderSeparator = '@@ ';
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
@@ -135,7 +138,7 @@ function getMessagesPromisesByChangesInFile(
       separator + lineDiff
     );
 
-    return api.generateCommitMessage(messages);
+    return api.generateCommitMessage(messages, prefix);
   });
 
   return commitMsgsFromFileLineDiffs;
@@ -143,7 +146,8 @@ function getMessagesPromisesByChangesInFile(
 
 export function getCommitMsgsPromisesFromFileDiffs(
   diff: string,
-  maxDiffLength: number
+  maxDiffLength: number,
+  prefix: string
 ) {
   const separator = 'diff --git ';
 
@@ -160,7 +164,8 @@ export function getCommitMsgsPromisesFromFileDiffs(
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
-        maxDiffLength
+        maxDiffLength,
+        prefix
       );
 
       commitMessagePromises.push(...messagesPromises);
@@ -169,7 +174,7 @@ export function getCommitMsgsPromisesFromFileDiffs(
         separator + fileDiff
       );
 
-      commitMessagePromises.push(api.generateCommitMessage(messages));
+      commitMessagePromises.push(api.generateCommitMessage(messages, prefix));
     }
   }
   return commitMessagePromises;

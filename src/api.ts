@@ -46,7 +46,8 @@ class OpenAi {
   }
 
   public generateCommitMessage = async (
-    messages: Array<ChatCompletionRequestMessage>
+    messages: Array<ChatCompletionRequestMessage>,
+    prefix: string | undefined
   ): Promise<string | undefined> => {
     try {
       const { data } = await this.openAI.createChatCompletion({
@@ -59,7 +60,9 @@ class OpenAi {
 
       const message = data.choices[0].message;
 
-      return message?.content;
+      const finalMessage = (prefix != "undefined" ? prefix + ' ' : '') + (message?.content || '')
+
+      return finalMessage;
     } catch (error: unknown) {
       outro(`${chalk.red('✖')} ${error}`);
 

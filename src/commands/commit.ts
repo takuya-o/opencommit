@@ -8,7 +8,8 @@ import {
   getChangedFiles,
   getDiff,
   getStagedFiles,
-  gitAdd
+  gitAdd,
+  getCurrentGitBranch
 } from '../utils/git';
 import {
   spinner,
@@ -35,7 +36,7 @@ const generateCommitMessageFromGitDiff = async (
 
   const commitSpinner = spinner();
   commitSpinner.start('Generating the commit message');
-  const commitMessage = await generateCommitMessageWithChatCompletion(diff);
+  const commitMessage = await generateCommitMessageWithChatCompletion(diff, await generatePrefix());
 
   // TODO: show proper error messages
   if (typeof commitMessage !== 'string') {
@@ -219,3 +220,46 @@ export async function commit(
 
   process.exit(0);
 }
+
+async function generatePrefix() {
+  const prefix = config?.prefix
+
+  if (prefix === undefined) {
+    return undefined;
+  }
+
+  const prefixIsRegexString = prefix.startsWith('/') && prefix.endsWith('/');
+
+  if (prefixIsRegexString) {
+    try {
+      return await generatePrefixFromRegex(prefix);
+    } catch (error) {
+      outro(`${chalk.red('✖')} Prefix Regex is invalid : ${error}`);
+      process.exit(1);
+    }
+  }
+
+  return prefix;
+}
+
+async function generatePrefixFromRegex(regex: string) {
+
+  // We currently only support regex input from git branch name
+
+  const branch = await getCurrentGitBranch();
+
+  if (branch === undefined) {
+    return undefined;
+  }
+
+  const regexWithoutSlashes = regex.slice(1, -1);
+  const regexObject = new RegExp(regexWithoutSlashes);
+  const match = branch.match(regexObject);
+
+  if (match === null) {
+    return undefined;
+  }
+
+  return match[0];
+}
+

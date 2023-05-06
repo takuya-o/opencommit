@@ -107,3 +107,12 @@ export const getDiff = async ({ files }: { files: string[] }) => {
 
   return diff;
 };
+
+export async function getCurrentGitBranch() {
+  try {
+    const { stdout: branchName } = await execa('git', ["symbolic-ref", "--short", "HEAD"]);
+    return branchName;
+  } catch (error) {
+    throw new Error(`Failed to get current git branch: ${error}`);
+  }
+}
