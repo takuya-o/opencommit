@@ -18,7 +18,7 @@ const INIT_MESSAGES_PROMPT: Array<ChatCompletionRequestMessage> = [
     content: `You are to act as the author of a commit message in git. Your mission is to create clean and comprehensive commit messages in the conventional commit convention and explain WHAT were the changes and WHY the changes were done. I'll send you an output of 'git diff --staged' command, and you convert it into a commit message.
 ${config?.emoji? 'Use GitMoji convention to preface the commit.': 'Do not preface the commit with anything.'}
 ${config?.description  ? 'Add a short description of WHY the changes are done after the commit message. Don\'t start it with "This commit", just describe the changes.': "Don't add any descriptions to the commit, only commit message."}
-Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer.`
+Use the present tense. Lines must not be longer than 74 characters. And add its translation by ${translation.localLanguage}.`
   },
   {
     role: ChatCompletionRequestMessageRoleEnum.User,
@@ -49,9 +49,13 @@ app.use((_, res, next) => {
   },
   {
     role: ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: `${config?.emoji ? '🐛 ' : ''}${translation.commitFix}
+    content: `${config?.emoji ? '🐛 ' : ''}${i18n['en'].commitFix}
+${config?.emoji ? '✨ ' : ''}${i18n['en'].commitFeat}
+${config?.description ? '\n' + i18n['en'].commitDescription : ''}`
+ + (translation === i18n['en'] ? '' : `
+${config?.emoji ? '🐛 ' : ''}${translation.commitFix}
 ${config?.emoji ? '✨ ' : ''}${translation.commitFeat}
-${config?.description ? '\n' + translation.commitDescription : ''}`
+${config?.description ? '\n' + translation.commitDescription : ''}`)
   }
 ];
 
@@ -85,13 +89,15 @@ const INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
 const MAX_REQ_TOKENS = 3900 - INIT_MESSAGES_PROMPT_LENGTH;
 
 export const generateCommitMessageWithChatCompletion = async (
-  diff: string
+  diff: string,
+  prefix: string
 ): Promise<string | GenerateCommitMessageError> => {
   try {
     if (tokenCount(diff) >= MAX_REQ_TOKENS) {
       const commitMessagePromises = getCommitMsgsPromisesFromFileDiffs(
         diff,
-        MAX_REQ_TOKENS
+        MAX_REQ_TOKENS,
+        prefix
       );
 
       const commitMessages = await Promise.all(commitMessagePromises);
@@ -100,7 +106,7 @@ export const generateCommitMessageWithChatCompletion = async (
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(diff);
 
-      const commitMessage = await api.generateCommitMessage(messages);
+      const commitMessage = await api.generateCommitMessage(messages, prefix);
 
       if (!commitMessage)
         return { error: GenerateCommitMessageErrorEnum.emptyMessage };
@@ -115,7 +121,8 @@ export const generateCommitMessageWithChatCompletion = async (
 function getMessagesPromisesByChangesInFile(
   fileDiff: string,
   separator: string,
-  maxChangeLength: number
+  maxChangeLength: number,
+  prefix: string
 ) {
   const hunkHeaderSeparator = '@@ ';
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
@@ -135,7 +142,7 @@ function getMessagesPromisesByChangesInFile(
       separator + lineDiff
     );
 
-    return api.generateCommitMessage(messages);
+    return api.generateCommitMessage(messages, prefix);
   });
 
   return commitMsgsFromFileLineDiffs;
@@ -143,7 +150,8 @@ function getMessagesPromisesByChangesInFile(
 
 export function getCommitMsgsPromisesFromFileDiffs(
   diff: string,
-  maxDiffLength: number
+  maxDiffLength: number,
+  prefix: string
 ) {
   const separator = 'diff --git ';
 
@@ -160,7 +168,8 @@ export function getCommitMsgsPromisesFromFileDiffs(
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
-        maxDiffLength
+        maxDiffLength,
+        prefix
       );
 
       commitMessagePromises.push(...messagesPromises);
@@ -169,7 +178,7 @@ export function getCommitMsgsPromisesFromFileDiffs(
         separator + fileDiff
       );
 
-      commitMessagePromises.push(api.generateCommitMessage(messages));
+      commitMessagePromises.push(api.generateCommitMessage(messages, prefix));
     }
   }
   return commitMessagePromises;

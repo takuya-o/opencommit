@@ -8,6 +8,8 @@ import chalk from 'chalk';
 import { COMMANDS } from '../CommandsEnum';
 import { getI18nLocal } from '../i18n';
 
+let configCache:ConfigType | null = null
+
 export enum CONFIG_KEYS {
   OPENAI_API_KEY = 'OPENAI_API_KEY',
   OPENAI_MAX_TOKENS = 'OPENAI_MAX_TOKENS',
@@ -15,7 +17,9 @@ export enum CONFIG_KEYS {
   description = 'description',
   emoji = 'emoji',
   model = 'model',
-  language = 'language'
+  language = 'language',
+  gitpush = 'gitpush',
+  prefix = 'prefix',
 }
 
 export enum CONFIG_MODES {
@@ -92,7 +96,14 @@ export const configValidators = {
 
     return value;
   },
-
+  [CONFIG_KEYS.gitpush](value: any) {
+    validateConfig(
+      CONFIG_KEYS.gitpush,
+      typeof value === 'boolean',
+      'Must be true or false'
+    );
+    return value;
+  },
   [CONFIG_KEYS.language](value: any) {
     validateConfig(
       CONFIG_KEYS.language,
@@ -118,7 +129,17 @@ export const configValidators = {
       `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default)`
     );
     return value;
+  },
+
+  [CONFIG_KEYS.prefix](value: any) {
+    validateConfig(
+      CONFIG_KEYS.prefix,
+      true,
+      'Cannot be empty'
+    );
+    return value;
   }
+
 };
 
 export type ConfigType = {
@@ -128,6 +149,9 @@ export type ConfigType = {
 const configPath = pathJoin(homedir(), '.opencommit');
 
 export const getConfig = (): ConfigType | null => {
+  // If it is enable, use configCache
+  if (configCache) return configCache
+
   const configExists = existsSync(configPath);
   if (!configExists) return null;
 
@@ -154,6 +178,8 @@ export const getConfig = (): ConfigType | null => {
 
   }
 
+  // Store configCache
+  configCache = config
   return config;
 };
 

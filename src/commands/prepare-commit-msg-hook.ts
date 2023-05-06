@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import chalk from 'chalk';
 import { intro, outro, spinner } from '@clack/prompts';
-import { getChangedFiles, getDiff, getStagedFiles, gitAdd } from '../utils/git';
+import { getChangedFiles, getDiff, getStagedFiles, gitAdd, getCurrentGitBranch } from '../utils/git';
 import { getConfig } from './config';
 import { generateCommitMessageWithChatCompletion } from '../generateCommitMessageFromGitDiff';
 
@@ -46,7 +46,8 @@ export const prepareCommitMessageHook = async (
     const spin = spinner();
     spin.start('Generating commit message');
     const commitMessage = await generateCommitMessageWithChatCompletion(
-      await getDiff({ files: staged })
+      await getDiff({ files: staged }),
+      await getCurrentGitBranch()
     );
     if (typeof commitMessage !== 'string') {
       spin.stop('Error');
