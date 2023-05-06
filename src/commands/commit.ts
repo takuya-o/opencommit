@@ -260,6 +260,6 @@ async function generatePrefixFromRegex(regex: string) {
     return undefined;
   }
 
-  return match[0];
+  return match.length > 1 ? match[1] : match[0];
 }
 
