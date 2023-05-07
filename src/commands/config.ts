@@ -154,15 +154,6 @@ export const configValidators = {
       'Cannot be empty'
     );
     return value;
-  },
-
-  [CONFIG_KEYS.prefix](value: any) {
-    validateConfig(
-      CONFIG_KEYS.prefix,
-      true,
-      'Cannot be empty'
-    );
-    return value;
   }
 
 };
