@@ -4421,7 +4421,7 @@ var require_base = __commonJS({
       tsv: "	",
       pipes: "|"
     };
-    var BaseAPI2 = class {
+    var BaseAPI = class {
       constructor(configuration, basePath2 = exports.BASE_PATH, axios2 = axios_1.default) {
         this.basePath = basePath2;
         this.axios = axios2;
@@ -4431,7 +4431,7 @@ var require_base = __commonJS({
         }
       }
     };
-    exports.BaseAPI = BaseAPI2;
+    exports.BaseAPI = BaseAPI;
     var RequiredError = class extends Error {
       constructor(field, msg) {
         super(msg);
@@ -17287,6 +17287,7 @@ var package_default = {
     watch: "npm run -S build -- --sourcemap --watch",
     start: "node ./out/cli.cjs",
     dev: "ts-node ./src/cli.ts",
+    clean: "rm -rf .npm/ node_modules/ out/*; npm ci",
     build: "rimraf out && node esbuild.config.js",
     deploy: "npm run build && npm version patch && npm publish --tag latest",
     lint: "eslint src --ext ts && tsc --noEmit",
@@ -17295,9 +17296,9 @@ var package_default = {
   devDependencies: {
     "@types/ini": "^1.3.31",
     "@types/inquirer": "^9.0.3",
-    "@types/node": "^20.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
-    "@typescript-eslint/parser": "^5.59.2",
+    "@types/node": "^20.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
+    "@typescript-eslint/parser": "^5.59.5",
     dotenv: "^16.0.3",
     esbuild: "^0.17.18",
     eslint: "^8.40.0",
@@ -17314,7 +17315,7 @@ var package_default = {
     execa: "^7.1.1",
     ignore: "^5.2.4",
     ini: "^4.1.0",
-    inquirer: "^9.2.1",
+    inquirer: "^9.2.2",
     openai: "^3.2.1"
   }
 };
@@ -18592,7 +18593,7 @@ var configValidators = {
     validateConfig(
       "OPENAI_API_KEY" /* OPENAI_API_KEY */,
       value.length === 51 || value.length === 32,
-      "Must be 32 or 51 characters long"
+      "Must be 51 or 32 characters long"
     );
     return value;
   },
@@ -23006,56 +23007,6 @@ var {
 
 // src/api.ts
 var import_openai = __toESM(require_dist(), 1);
-
-// src/utils/AzureOpenAI.ts
-var import_base = __toESM(require_base(), 1);
-var AzureOpenAIApi = class extends import_base.BaseAPI {
-  constructor(configuration) {
-    super(configuration);
-  }
-  /**
-   *
-   * @summary Creates a completion for the chat message
-   * @param {CreateChatCompletionRequest} createChatCompletionRequest
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AzureOpenAIApi
-   */
-  async createChatCompletion(createChatCompletionRequest, options) {
-    if (!this.configuration) {
-      throw new Error("Required parameter configuration was null or undefined when calling createChatCompletion.");
-    }
-    if (!this.configuration.basePath) {
-      throw new Error("Required parameter basePath was null or undefined when calling createChatCompletion.");
-    }
-    if (!this.configuration.apiKey) {
-      throw new Error("Required parameter apiKey was null or undefined when calling createChatCompletion.");
-    }
-    if (typeof this.configuration.apiKey !== "string") {
-      throw new Error("Required parameter apiKey was of type string when calling createChatCompletion.");
-    }
-    const url3 = this.configuration.basePath + "openai/deployments/" + createChatCompletionRequest.model + "/chat/completions";
-    if (!options)
-      options = {};
-    if (!options.headers)
-      options.headers = {};
-    if (!options.params)
-      options.params = {};
-    options.headers = {
-      "Content-Type": "application/json",
-      "api-key": this.configuration.apiKey,
-      ...options.headers
-    };
-    options.params = {
-      "api-version": "2023-03-15-preview",
-      ...options.params
-    };
-    const response = await this.axios.post(url3, createChatCompletionRequest, options);
-    return response;
-  }
-};
-
-// src/api.ts
 var config = getConfig();
 var apiKey = config?.OPENAI_API_KEY;
 var basePath = config?.OPENAI_BASE_PATH;
@@ -23079,10 +23030,28 @@ var OpenAi = class {
   });
   openAI;
   constructor() {
-    if (basePath) {
-      this.openAiApiConfiguration.basePath = basePath;
+    switch (apiType) {
+      case "azure":
+        this.openAiApiConfiguration.baseOptions = {
+          headers: {
+            "api-key": apiKey
+          },
+          params: {
+            "api-version": "2023-03-15-preview"
+          }
+        };
+        if (basePath) {
+          this.openAiApiConfiguration.basePath = basePath + "openai/deployments/" + MODEL;
+        }
+        break;
+      case "openai":
+      default:
+        if (basePath) {
+          this.openAiApiConfiguration.basePath = basePath;
+        }
+        break;
     }
-    this.openAI = apiType === "azure" ? new AzureOpenAIApi(this.openAiApiConfiguration) : new import_openai.OpenAIApi(this.openAiApiConfiguration);
+    this.openAI = new import_openai.OpenAIApi(this.openAiApiConfiguration);
   }
   generateCommitMessage = async (messages, prefix) => {
     try {

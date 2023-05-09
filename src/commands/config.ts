@@ -53,7 +53,7 @@ export const configValidators = {
     validateConfig(
       CONFIG_KEYS.OPENAI_API_KEY,
       value.length === 51 || value.length === 32 ,
-      'Must be 32 or 51 characters long'
+      'Must be 51 or 32 characters long'
     );
 
     return value;
