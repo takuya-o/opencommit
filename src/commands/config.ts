@@ -8,20 +8,25 @@ import chalk from 'chalk';
 import { COMMANDS } from '../CommandsEnum';
 import { getI18nLocal } from '../i18n';
 
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 let configCache:ConfigType | null = null
 
 export enum CONFIG_KEYS {
-  OPENAI_API_KEY = 'OPENAI_API_KEY',
-  OPENAI_MAX_TOKENS = 'OPENAI_MAX_TOKENS',
-  OPENAI_BASE_PATH = 'OPENAI_BASE_PATH',
-  OPENAI_API_TYPE = 'OPENAI_API_TYPE',
-  description = 'description',
-  emoji = 'emoji',
-  model = 'model',
-  language = 'language',
-  gitpush = 'gitpush',
-  prefix = 'prefix',
+  OCO_OPENAI_API_KEY = 'OCO_OPENAI_API_KEY',
+  OCO_OPENAI_MAX_TOKENS = 'OCO_OPENAI_MAX_TOKENS',
+  OCO_OPENAI_BASE_PATH = 'OCO_OPENAI_BASE_PATH',
+  OCO_OPENAI_API_TYPE = 'OCO_OPENAI_API_TYPE',
+  OCO_DESCRIPTION = 'OCO_DESCRIPTION',
+  OCO_EMOJI = 'OCO_EMOJI',
+  OCO_MODEL = 'OCO_MODEL',
+  OCO_LANGUAGE = 'OCO_LANGUAGE',
+  OCO_GIT_PUSH = 'OCO_GIT_PUSH',
+  OCO_PREFIX = 'OCO_PREFIX'
 }
+
+export const DEFAULT_MODEL_TOKEN_LIMIT = 4096;
 
 export enum CONFIG_MODES {
   get = 'get',
@@ -43,15 +48,15 @@ const validateConfig = (
 };
 
 export const configValidators = {
-  [CONFIG_KEYS.OPENAI_API_KEY](value: any) {
-    validateConfig(CONFIG_KEYS.OPENAI_API_KEY, value, 'Cannot be empty');
+  [CONFIG_KEYS.OCO_OPENAI_API_KEY](value: any) {
+    validateConfig(CONFIG_KEYS.OCO_OPENAI_API_KEY, value, 'Cannot be empty');
     // validateConfig(
-    //   CONFIG_KEYS.OPENAI_API_KEY,
+    //   CONFIG_KEYS.OCO_OPENAI_API_KEY,
     //   value.startsWith('sk-'),
     //   'Must start with "sk-"'
     // );
     validateConfig(
-      CONFIG_KEYS.OPENAI_API_KEY,
+      CONFIG_KEYS.OCO_OPENAI_API_KEY,
       value.length === 51 || value.length === 32 ,
       'Must be 51 or 32 characters long'
     );
@@ -59,9 +64,9 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.description](value: any) {
+  [CONFIG_KEYS.OCO_DESCRIPTION](value: any) {
     validateConfig(
-      CONFIG_KEYS.description,
+      CONFIG_KEYS.OCO_DESCRIPTION,
       typeof value === 'boolean',
       'Must be true or false'
     );
@@ -69,87 +74,87 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OPENAI_MAX_TOKENS](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS](value: any) {
     // If the value is a string, convert it to a number.
     if (typeof value === 'string') {
       value = parseInt(value);
       validateConfig(
-        CONFIG_KEYS.OPENAI_MAX_TOKENS,
+        CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS,
         !isNaN(value),
         'Must be a number'
       );
     }
     validateConfig(
-      CONFIG_KEYS.OPENAI_MAX_TOKENS,
-      typeof value === 'number',
+      CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS,
+      value ? typeof value === 'number' : undefined,
       'Must be a number'
     );
 
     return value;
   },
 
-  [CONFIG_KEYS.emoji](value: any) {
+  [CONFIG_KEYS.OCO_EMOJI](value: any) {
     validateConfig(
-      CONFIG_KEYS.emoji,
+      CONFIG_KEYS.OCO_EMOJI,
       typeof value === 'boolean',
       'Must be true or false'
     );
 
     return value;
   },
-  [CONFIG_KEYS.gitpush](value: any) {
+  [CONFIG_KEYS.OCO_GIT_PUSH](value: any) {
     validateConfig(
-      CONFIG_KEYS.gitpush,
+      CONFIG_KEYS.OCO_GIT_PUSH,
       typeof value === 'boolean',
       'Must be true or false'
     );
     return value;
   },
-  [CONFIG_KEYS.language](value: any) {
+  [CONFIG_KEYS.OCO_LANGUAGE](value: any) {
     validateConfig(
-      CONFIG_KEYS.language,
+      CONFIG_KEYS.OCO_LANGUAGE,
       getI18nLocal(value),
       `${value} is not supported yet`
     );
     return getI18nLocal(value);
   },
 
-  [CONFIG_KEYS.OPENAI_BASE_PATH](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_BASE_PATH](value: any) {
     validateConfig(
-      CONFIG_KEYS.OPENAI_BASE_PATH,
+      CONFIG_KEYS.OCO_OPENAI_BASE_PATH,
       typeof value === 'string',
       'Must be string'
     );
     return value;
   },
 
-  [CONFIG_KEYS.OPENAI_API_TYPE](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_API_TYPE](value: any) {
     validateConfig(
-      CONFIG_KEYS.OPENAI_API_TYPE,
+      CONFIG_KEYS.OCO_OPENAI_API_TYPE,
       typeof value === 'string',
       'Must be string'
     );
     validateConfig(
-      CONFIG_KEYS.OPENAI_API_TYPE,
+      CONFIG_KEYS.OCO_OPENAI_API_TYPE,
       value === 'azure' || value === 'openai' || value === '',
       `${value} is not supported yet, use 'azure' or 'openai' (default)`
     );
     return value;
   },
 
-  [CONFIG_KEYS.model](value: any) {
+  [CONFIG_KEYS.OCO_MODEL](value: any) {
     validateConfig(
-      CONFIG_KEYS.model,
-      value === 'gpt-3.5-turbo' || value === 'gpt-4'
+      CONFIG_KEYS.OCO_MODEL,
+      ['gpt-3.5-turbo', 'gpt-4'].includes(value)
       || ( typeof value === 'string' && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/) ),
       `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default) or model deployed name.`
     );
     return value;
   },
 
-  [CONFIG_KEYS.prefix](value: any) {
+  [CONFIG_KEYS.OCO_PREFIX](value: any) {
     validateConfig(
-      CONFIG_KEYS.prefix,
+      CONFIG_KEYS.OCO_PREFIX,
       true,
       'Cannot be empty'
     );
@@ -168,30 +173,49 @@ export const getConfig = (): ConfigType | null => {
   // If it is enable, use configCache
   if (configCache) return configCache
 
+  const configFromEnv = {
+    OCO_OPENAI_API_KEY: process.env.OCO_OPENAI_API_KEY,
+    OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : undefined,
+    OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
+    OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
+    OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === 'true' ? true : false,
+    OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
+    OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo',
+    OCO_LANGUAGE: process.env.OCO_LANGUAGE || 'en',
+    OCO_GIT_PUSH: process.env.OCO_GITPUSH === 'true' ? true : false,
+    OCO_PREFIX: process.env.OCO_PREFIX || '',
+  };
+
   const configExists = existsSync(configPath);
-  if (!configExists) return null;
+  if (!configExists) {
+    configCache = configFromEnv;
+    return configFromEnv;
+  }
 
   const configFile = readFileSync(configPath, 'utf8');
   const config = iniParse(configFile);
 
   for (const configKey of Object.keys(config)) {
+    if (!config[configKey] || ['null', 'undefined'].includes(config[configKey])) {
+      config[configKey] = undefined;
+      continue;
+    }
     try {
-      const validValue = configValidators[configKey as CONFIG_KEYS](
-        config[configKey]
+      const validator = configValidators[configKey as CONFIG_KEYS];
+      const validValue = validator(
+        config[configKey] ?? configFromEnv[configKey as CONFIG_KEYS]
       );
+
       config[configKey] = validValue;
     } catch (error) {
-      if (error instanceof TypeError) {
-        // Make a mistake by manually editing the configuration file
-        outro(
-          `${chalk.red('✖')} Unsupported config key ${configKey}: ${config[configKey]}`
-        );
-        // continue next key
-      } else {
-        throw error
-      }
+      outro(
+        `'${configKey}' name is invalid, it should be either 'OCO_${configKey.toUpperCase()}' or it doesn't exist.`
+      );
+      outro(
+        `Manually fix the '.env' file or global '~/.opencommit' config file.`
+      );
+      process.exit(1);
     }
-
   }
 
   // Store configCache
