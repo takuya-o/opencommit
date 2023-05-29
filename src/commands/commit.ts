@@ -67,7 +67,7 @@ ${chalk.grey('——————————————————')}`
       outro(stdout);
 
       // user isn't pushing, return early
-      if(config?.OCO_GIT_PUSH === false) return
+      if(config?.OCO_DISABLE_GIT_PUSH === true) return
 
       const remotes = await getGitRemotes();
 

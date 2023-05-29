@@ -22,7 +22,7 @@ export enum CONFIG_KEYS {
   OCO_EMOJI = 'OCO_EMOJI',
   OCO_MODEL = 'OCO_MODEL',
   OCO_LANGUAGE = 'OCO_LANGUAGE',
-  OCO_GIT_PUSH = 'OCO_GIT_PUSH',
+  OCO_DISABLE_GIT_PUSH = 'OCO_DISABLE_GIT_PUSH',
   OCO_PREFIX = 'OCO_PREFIX'
 }
 
@@ -102,9 +102,9 @@ export const configValidators = {
 
     return value;
   },
-  [CONFIG_KEYS.OCO_GIT_PUSH](value: any) {
+  [CONFIG_KEYS.OCO_DISABLE_GIT_PUSH](value: any) {
     validateConfig(
-      CONFIG_KEYS.OCO_GIT_PUSH,
+      CONFIG_KEYS.OCO_DISABLE_GIT_PUSH,
       typeof value === 'boolean',
       'Must be true or false'
     );
@@ -182,7 +182,7 @@ export const getConfig = (): ConfigType | null => {
     OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo',
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || 'en',
-    OCO_GIT_PUSH: process.env.OCO_GITPUSH === 'true' ? true : false,
+    OCO_DISABLE_GIT_PUSH: process.env.OCO_DISABLE_GITPUSH === 'true' ? true : false,
     OCO_PREFIX: process.env.OCO_PREFIX || '',
   };
 

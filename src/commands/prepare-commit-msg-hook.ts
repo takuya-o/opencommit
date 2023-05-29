@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import chalk from 'chalk';
 import { intro, outro, spinner } from '@clack/prompts';
-import { getChangedFiles, getDiff, getStagedFiles, gitAdd, getCurrentGitBranch } from '../utils/git';
+import { getChangedFiles, getDiff, getStagedFiles, gitAdd } from '../utils/git';
 import { getConfig } from './config';
 import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff';
 

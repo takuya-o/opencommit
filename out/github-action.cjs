@@ -27676,9 +27676,9 @@ var configValidators = {
     );
     return value;
   },
-  ["OCO_GIT_PUSH" /* OCO_GIT_PUSH */](value) {
+  ["OCO_DISABLE_GIT_PUSH" /* OCO_DISABLE_GIT_PUSH */](value) {
     validateConfig(
-      "OCO_GIT_PUSH" /* OCO_GIT_PUSH */,
+      "OCO_DISABLE_GIT_PUSH" /* OCO_DISABLE_GIT_PUSH */,
       typeof value === "boolean",
       "Must be true or false"
     );
@@ -27743,7 +27743,7 @@ var getConfig = () => {
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo",
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || "en",
-    OCO_GIT_PUSH: process.env.OCO_GITPUSH === "true" ? true : false,
+    OCO_DISABLE_GIT_PUSH: process.env.OCO_DISABLE_GITPUSH === "true" ? true : false,
     OCO_PREFIX: process.env.OCO_PREFIX || ""
   };
   const configExists = (0, import_fs.existsSync)(configPath);
