@@ -155,25 +155,11 @@ By default OpenCommit uses [OpenAI](https://openai.com).
 You could switch to [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/)🚀
 
 ```sh
-opencommit config set OPENAI_API_TYPE=azure
+opencommit config set OCO_OPENAI_API_TYPE=azure
 ```
 
-Of course need to set 'OPENAI_API_KEY'. And also need to set the
-'OPENAI_BASE_PATH' for the endpoint and set the deployment name to
-'model'.
-
-### Switch to Azure OpenAI
-
-By default OpenCommit uses [OpenAI](https://openai.com).
-
-You could switch to [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/)🚀
-
-```sh
-opencommit config set OPENAI_API_TYPE=azure
-```
-
-Of course need to set 'OPENAI_API_KEY'. And also need to set the
-'OPENAI_BASE_PATH' for the endpoint and set the deployment name to
+Of course need to set 'OCO_OPENAI_API_KEY'. And also need to set the
+'OCO_OPENAI_BASE_PATH' for the endpoint and set the deployment name to
 'model'.
 
 ### Switch to GPT-4
