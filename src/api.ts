@@ -39,6 +39,7 @@ if (!apiKey && command !== 'config' && mode !== CONFIG_MODES.set) {
 }
 
 const MODEL = config?.OCO_MODEL || 'gpt-3.5-turbo';
+const VERSION = config?.OCO_OPENAI_VERSION || '2023-05-15';
 
 class OpenAi {
   private openAiApiConfiguration = new OpenAiApiConfiguration({
@@ -54,7 +55,7 @@ class OpenAi {
             "api-key": apiKey,
           },
           params: {
-            'api-version': '2023-03-15-preview',
+            'api-version': VERSION,
           }
         };
         if (basePath) {

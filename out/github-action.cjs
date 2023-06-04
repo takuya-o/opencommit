@@ -2768,8 +2768,8 @@ var require_dist_node2 = __commonJS({
         parse
       });
     }
-    var VERSION3 = "6.0.12";
-    var userAgent = `octokit-endpoint.js/${VERSION3} ${universalUserAgent.getUserAgent()}`;
+    var VERSION4 = "6.0.12";
+    var userAgent = `octokit-endpoint.js/${VERSION4} ${universalUserAgent.getUserAgent()}`;
     var DEFAULTS = {
       method: "GET",
       baseUrl: "https://api.github.com",
@@ -5857,7 +5857,7 @@ var require_dist_node5 = __commonJS({
     var isPlainObject2 = require_is_plain_object();
     var nodeFetch = _interopDefault(require_lib3());
     var requestError = require_dist_node4();
-    var VERSION3 = "5.6.3";
+    var VERSION4 = "5.6.3";
     function getBufferResponse(response) {
       return response.arrayBuffer();
     }
@@ -5990,7 +5990,7 @@ var require_dist_node5 = __commonJS({
     }
     var request = withDefaults(endpoint.endpoint, {
       headers: {
-        "user-agent": `octokit-request.js/${VERSION3} ${universalUserAgent.getUserAgent()}`
+        "user-agent": `octokit-request.js/${VERSION4} ${universalUserAgent.getUserAgent()}`
       }
     });
     exports.request = request;
@@ -6004,7 +6004,7 @@ var require_dist_node6 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     var request = require_dist_node5();
     var universalUserAgent = require_dist_node();
-    var VERSION3 = "4.8.0";
+    var VERSION4 = "4.8.0";
     function _buildMessageForResponseErrors(data) {
       return `Request failed due to following response errors:
 ` + data.errors.map((e2) => ` - ${e2.message}`).join("\n");
@@ -6078,7 +6078,7 @@ var require_dist_node6 = __commonJS({
     }
     var graphql$1 = withDefaults(request.request, {
       headers: {
-        "user-agent": `octokit-graphql.js/${VERSION3} ${universalUserAgent.getUserAgent()}`
+        "user-agent": `octokit-graphql.js/${VERSION4} ${universalUserAgent.getUserAgent()}`
       },
       method: "POST",
       url: "/graphql"
@@ -6183,7 +6183,7 @@ var require_dist_node8 = __commonJS({
       }
       return target;
     }
-    var VERSION3 = "3.6.0";
+    var VERSION4 = "3.6.0";
     var _excluded = ["authStrategy"];
     var Octokit = class {
       constructor(options = {}) {
@@ -6199,7 +6199,7 @@ var require_dist_node8 = __commonJS({
             format: ""
           }
         };
-        requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION3} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
+        requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION4} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
         if (options.baseUrl) {
           requestDefaults.baseUrl = options.baseUrl;
         }
@@ -6271,7 +6271,7 @@ var require_dist_node8 = __commonJS({
         return NewOctokit;
       }
     };
-    Octokit.VERSION = VERSION3;
+    Octokit.VERSION = VERSION4;
     Octokit.plugins = [];
     exports.Octokit = Octokit;
   }
@@ -7273,7 +7273,7 @@ var require_dist_node9 = __commonJS({
         updateAuthenticated: ["PATCH /user"]
       }
     };
-    var VERSION3 = "5.16.2";
+    var VERSION4 = "5.16.2";
     function endpointsToMethods(octokit2, endpointsMap) {
       const newMethods = {};
       for (const [scope, endpoints] of Object.entries(endpointsMap)) {
@@ -7338,14 +7338,14 @@ var require_dist_node9 = __commonJS({
         rest: api2
       };
     }
-    restEndpointMethods.VERSION = VERSION3;
+    restEndpointMethods.VERSION = VERSION4;
     function legacyRestEndpointMethods(octokit2) {
       const api2 = endpointsToMethods(octokit2, Endpoints);
       return _objectSpread2(_objectSpread2({}, api2), {}, {
         rest: api2
       });
     }
-    legacyRestEndpointMethods.VERSION = VERSION3;
+    legacyRestEndpointMethods.VERSION = VERSION4;
     exports.legacyRestEndpointMethods = legacyRestEndpointMethods;
     exports.restEndpointMethods = restEndpointMethods;
   }
@@ -7356,7 +7356,7 @@ var require_dist_node10 = __commonJS({
   "node_modules/@octokit/plugin-paginate-rest/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var VERSION3 = "2.21.3";
+    var VERSION4 = "2.21.3";
     function ownKeys(object, enumerableOnly) {
       var keys = Object.keys(object);
       if (Object.getOwnPropertySymbols) {
@@ -7499,7 +7499,7 @@ var require_dist_node10 = __commonJS({
         })
       };
     }
-    paginateRest.VERSION = VERSION3;
+    paginateRest.VERSION = VERSION4;
     exports.composePaginateRest = composePaginateRest;
     exports.isPaginatingEndpoint = isPaginatingEndpoint;
     exports.paginateRest = paginateRest;
@@ -10655,7 +10655,7 @@ var require_http = __commonJS({
     var httpsFollow2 = require_follow_redirects().https;
     var url2 = require("url");
     var zlib2 = require("zlib");
-    var VERSION3 = require_data().version;
+    var VERSION4 = require_data().version;
     var createError = require_createError();
     var enhanceError = require_enhanceError();
     var transitionalDefaults = require_transitional();
@@ -10707,7 +10707,7 @@ var require_http = __commonJS({
             delete headers[headerNames["user-agent"]];
           }
         } else {
-          headers["User-Agent"] = "axios/" + VERSION3;
+          headers["User-Agent"] = "axios/" + VERSION4;
         }
         if (data && !utils.isStream(data)) {
           if (Buffer.isBuffer(data)) {
@@ -11245,7 +11245,7 @@ var require_mergeConfig = __commonJS({
 var require_validator = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/validator.js"(exports, module2) {
     "use strict";
-    var VERSION3 = require_data().version;
+    var VERSION4 = require_data().version;
     var validators3 = {};
     ["object", "boolean", "number", "function", "string", "symbol"].forEach(function(type, i2) {
       validators3[type] = function validator(thing) {
@@ -11255,7 +11255,7 @@ var require_validator = __commonJS({
     var deprecatedWarnings2 = {};
     validators3.transitional = function transitional2(validator, version, message) {
       function formatMessage(opt, desc) {
-        return "[Axios v" + VERSION3 + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
+        return "[Axios v" + VERSION4 + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
       }
       return function(value, opt, opts) {
         if (validator === false) {
@@ -27713,6 +27713,14 @@ var configValidators = {
     );
     return value;
   },
+  ["OCO_OPENAI_VERSION" /* OCO_OPENAI_VERSION */](value) {
+    validateConfig(
+      "OCO_OPENAI_VERSION" /* OCO_OPENAI_VERSION */,
+      typeof value === "string" && value.match(/^[1-9][0-9]{3}-[01][0-9]-[0-3][0-9]/),
+      "Must be start with YYYY-MM-DD string"
+    );
+    return value;
+  },
   ["OCO_MODEL" /* OCO_MODEL */](value) {
     validateConfig(
       "OCO_MODEL" /* OCO_MODEL */,
@@ -27739,6 +27747,7 @@ var getConfig = () => {
     OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : void 0,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-05-15",
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === "true" ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo",
@@ -27958,6 +27967,7 @@ if (!apiKey && command !== "config" && mode !== "set" /* set */) {
   process.exit(1);
 }
 var MODEL = config2?.OCO_MODEL || "gpt-3.5-turbo";
+var VERSION3 = config2?.OCO_OPENAI_VERSION || "2023-05-15";
 var OpenAi = class {
   openAiApiConfiguration = new import_openai.Configuration({
     apiKey
@@ -27971,7 +27981,7 @@ var OpenAi = class {
             "api-key": apiKey
           },
           params: {
-            "api-version": "2023-03-15-preview"
+            "api-version": VERSION3
           }
         };
         if (basePath) {

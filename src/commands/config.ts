@@ -18,6 +18,7 @@ export enum CONFIG_KEYS {
   OCO_OPENAI_MAX_TOKENS = 'OCO_OPENAI_MAX_TOKENS',
   OCO_OPENAI_BASE_PATH = 'OCO_OPENAI_BASE_PATH',
   OCO_OPENAI_API_TYPE = 'OCO_OPENAI_API_TYPE',
+  OCO_OPENAI_VERSION = 'OCO_OPENAI_VERSION',
   OCO_DESCRIPTION = 'OCO_DESCRIPTION',
   OCO_EMOJI = 'OCO_EMOJI',
   OCO_MODEL = 'OCO_MODEL',
@@ -142,6 +143,15 @@ export const configValidators = {
     return value;
   },
 
+  [CONFIG_KEYS.OCO_OPENAI_VERSION](value: any) {
+    validateConfig(
+      CONFIG_KEYS.OCO_OPENAI_VERSION,
+      typeof value === 'string' && value.match(/^[1-9][0-9]{3}-[01][0-9]-[0-3][0-9]/),
+      'Must be start with YYYY-MM-DD string'
+    );
+    return value;
+  },
+
   [CONFIG_KEYS.OCO_MODEL](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_MODEL,
@@ -178,6 +188,7 @@ export const getConfig = (): ConfigType | null => {
     OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : undefined,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || '2023-05-15',
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === 'true' ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo',

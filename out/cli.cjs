@@ -3478,7 +3478,7 @@ var require_http = __commonJS({
     var httpsFollow2 = require_follow_redirects().https;
     var url3 = require("url");
     var zlib2 = require("zlib");
-    var VERSION3 = require_data().version;
+    var VERSION4 = require_data().version;
     var createError = require_createError();
     var enhanceError = require_enhanceError();
     var transitionalDefaults = require_transitional();
@@ -3530,7 +3530,7 @@ var require_http = __commonJS({
             delete headers[headerNames["user-agent"]];
           }
         } else {
-          headers["User-Agent"] = "axios/" + VERSION3;
+          headers["User-Agent"] = "axios/" + VERSION4;
         }
         if (data && !utils.isStream(data)) {
           if (Buffer.isBuffer(data)) {
@@ -4068,7 +4068,7 @@ var require_mergeConfig = __commonJS({
 var require_validator = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/validator.js"(exports, module2) {
     "use strict";
-    var VERSION3 = require_data().version;
+    var VERSION4 = require_data().version;
     var validators3 = {};
     ["object", "boolean", "number", "function", "string", "symbol"].forEach(function(type, i2) {
       validators3[type] = function validator(thing) {
@@ -4078,7 +4078,7 @@ var require_validator = __commonJS({
     var deprecatedWarnings2 = {};
     validators3.transitional = function transitional2(validator, version, message) {
       function formatMessage(opt, desc) {
-        return "[Axios v" + VERSION3 + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
+        return "[Axios v" + VERSION4 + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
       }
       return function(value, opt, opts) {
         if (validator === false) {
@@ -17691,6 +17691,14 @@ var configValidators = {
     );
     return value;
   },
+  ["OCO_OPENAI_VERSION" /* OCO_OPENAI_VERSION */](value) {
+    validateConfig(
+      "OCO_OPENAI_VERSION" /* OCO_OPENAI_VERSION */,
+      typeof value === "string" && value.match(/^[1-9][0-9]{3}-[01][0-9]-[0-3][0-9]/),
+      "Must be start with YYYY-MM-DD string"
+    );
+    return value;
+  },
   ["OCO_MODEL" /* OCO_MODEL */](value) {
     validateConfig(
       "OCO_MODEL" /* OCO_MODEL */,
@@ -17717,6 +17725,7 @@ var getConfig = () => {
     OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : void 0,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-05-15",
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === "true" ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo",
@@ -21758,6 +21767,7 @@ if (!apiKey && command !== "config" && mode !== "set" /* set */) {
   process.exit(1);
 }
 var MODEL = config2?.OCO_MODEL || "gpt-3.5-turbo";
+var VERSION3 = config2?.OCO_OPENAI_VERSION || "2023-05-15";
 var OpenAi = class {
   openAiApiConfiguration = new import_openai.Configuration({
     apiKey
@@ -21771,7 +21781,7 @@ var OpenAi = class {
             "api-key": apiKey
           },
           params: {
-            "api-version": "2023-03-15-preview"
+            "api-version": VERSION3
           }
         };
         if (basePath) {
