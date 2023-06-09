@@ -18,7 +18,7 @@ const INIT_MESSAGES_PROMPT: Array<ChatCompletionRequestMessage> = [
         content: `You are to act as the author of a commit message in git. Your mission is to create clean and comprehensive commit messages in the conventional commit convention and explain WHAT were the changes and WHY the changes were done. I'll send you an output of 'git diff --staged' command, and you convert it into a commit message.
 ${config?.OCO_EMOJI ? 'Use GitMoji convention to preface the commit.' : 'Do not preface the commit with anything.'}
 ${config?.OCO_DESCRIPTION ? 'Add a short description of WHY the changes are done after the commit message. Don\'t start it with "This commit", just describe the changes.' : "Don't add any descriptions to the commit, only commit message."}
-Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And add its translation by ${translation.localLanguage}.`
+Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And insert its translation by ${translation.localLanguage}.`
     },
     {
         role: ChatCompletionRequestMessageRoleEnum.User,
@@ -49,13 +49,13 @@ app.use((_, res, next) => {
   },
   {
     role: ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: `${config?.OCO_EMOJI ? '🐛 ' : ''}${i18n['en'].commitFix}
+    content: (translation === i18n['en'] ? '' :
+`${config?.OCO_EMOJI ? '🐛 ' : ''}${translation.commitFix}
+${config?.OCO_EMOJI ? '✨ ' : ''}${translation.commitFeat}
+${config?.OCO_DESCRIPTION ? '\n' + translation.commitDescription + '\n\n' : ''}`) +
+`${config?.OCO_EMOJI ? '🐛 ' : ''}${i18n['en'].commitFix}
 ${config?.OCO_EMOJI ? '✨ ' : ''}${i18n['en'].commitFeat}
 ${config?.OCO_DESCRIPTION ? '\n' + i18n['en'].commitDescription : ''}`
- + (translation === i18n['en'] ? '' : `
-${config?.OCO_EMOJI ? '🐛 ' : ''}${translation.commitFix}
-${config?.OCO_EMOJI ? '✨ ' : ''}${translation.commitFeat}
-${config?.OCO_DESCRIPTION ? '\n' + translation.commitDescription : ''}`)
   }
 ];
 
