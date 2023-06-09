@@ -5,8 +5,15 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target, all3) => {
+  for (var name in all3)
+    __defProp(target, name, { get: all3[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -17,9 +24,14 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -87,11 +99,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os2 = __importStar(require("os"));
+    var os3 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command2, properties, message) {
       const cmd = new Command(command2, properties, message);
-      process.stdout.write(cmd.toString() + os2.EOL);
+      process.stdout.write(cmd.toString() + os3.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -140,494 +152,336 @@ var require_command = __commonJS({
   }
 });
 
-// node_modules/uuid/dist/rng.js
-var require_rng = __commonJS({
-  "node_modules/uuid/dist/rng.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = rng;
-    var _crypto = _interopRequireDefault(require("crypto"));
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    var rnds8Pool = new Uint8Array(256);
-    var poolPtr = rnds8Pool.length;
-    function rng() {
-      if (poolPtr > rnds8Pool.length - 16) {
-        _crypto.default.randomFillSync(rnds8Pool);
-        poolPtr = 0;
-      }
-      return rnds8Pool.slice(poolPtr, poolPtr += 16);
-    }
+// node_modules/uuid/dist/esm-node/rng.js
+function rng() {
+  if (poolPtr > rnds8Pool.length - 16) {
+    import_crypto.default.randomFillSync(rnds8Pool);
+    poolPtr = 0;
+  }
+  return rnds8Pool.slice(poolPtr, poolPtr += 16);
+}
+var import_crypto, rnds8Pool, poolPtr;
+var init_rng = __esm({
+  "node_modules/uuid/dist/esm-node/rng.js"() {
+    import_crypto = __toESM(require("crypto"));
+    rnds8Pool = new Uint8Array(256);
+    poolPtr = rnds8Pool.length;
   }
 });
 
-// node_modules/uuid/dist/regex.js
-var require_regex = __commonJS({
-  "node_modules/uuid/dist/regex.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/regex.js
+var regex_default;
+var init_regex = __esm({
+  "node_modules/uuid/dist/esm-node/regex.js"() {
+    regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
   }
 });
 
-// node_modules/uuid/dist/validate.js
-var require_validate = __commonJS({
-  "node_modules/uuid/dist/validate.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _regex = _interopRequireDefault(require_regex());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    function validate(uuid) {
-      return typeof uuid === "string" && _regex.default.test(uuid);
-    }
-    var _default = validate;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/validate.js
+function validate(uuid) {
+  return typeof uuid === "string" && regex_default.test(uuid);
+}
+var validate_default;
+var init_validate = __esm({
+  "node_modules/uuid/dist/esm-node/validate.js"() {
+    init_regex();
+    validate_default = validate;
   }
 });
 
-// node_modules/uuid/dist/stringify.js
-var require_stringify = __commonJS({
-  "node_modules/uuid/dist/stringify.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _validate = _interopRequireDefault(require_validate());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    var byteToHex = [];
+// node_modules/uuid/dist/esm-node/stringify.js
+function stringify(arr, offset = 0) {
+  const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+  if (!validate_default(uuid)) {
+    throw TypeError("Stringified UUID is invalid");
+  }
+  return uuid;
+}
+var byteToHex, stringify_default;
+var init_stringify = __esm({
+  "node_modules/uuid/dist/esm-node/stringify.js"() {
+    init_validate();
+    byteToHex = [];
     for (let i2 = 0; i2 < 256; ++i2) {
       byteToHex.push((i2 + 256).toString(16).substr(1));
     }
-    function stringify(arr, offset = 0) {
-      const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
-      if (!(0, _validate.default)(uuid)) {
-        throw TypeError("Stringified UUID is invalid");
-      }
-      return uuid;
-    }
-    var _default = stringify;
-    exports.default = _default;
+    stringify_default = stringify;
   }
 });
 
-// node_modules/uuid/dist/v1.js
-var require_v1 = __commonJS({
-  "node_modules/uuid/dist/v1.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _rng = _interopRequireDefault(require_rng());
-    var _stringify = _interopRequireDefault(require_stringify());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
+// node_modules/uuid/dist/esm-node/v1.js
+function v1(options, buf, offset) {
+  let i2 = buf && offset || 0;
+  const b = buf || new Array(16);
+  options = options || {};
+  let node = options.node || _nodeId;
+  let clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq;
+  if (node == null || clockseq == null) {
+    const seedBytes = options.random || (options.rng || rng)();
+    if (node == null) {
+      node = _nodeId = [seedBytes[0] | 1, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
     }
-    var _nodeId;
-    var _clockseq;
-    var _lastMSecs = 0;
-    var _lastNSecs = 0;
-    function v1(options, buf, offset) {
-      let i2 = buf && offset || 0;
-      const b = buf || new Array(16);
-      options = options || {};
-      let node = options.node || _nodeId;
-      let clockseq = options.clockseq !== void 0 ? options.clockseq : _clockseq;
-      if (node == null || clockseq == null) {
-        const seedBytes = options.random || (options.rng || _rng.default)();
-        if (node == null) {
-          node = _nodeId = [seedBytes[0] | 1, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
-        }
-        if (clockseq == null) {
-          clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
-        }
-      }
-      let msecs = options.msecs !== void 0 ? options.msecs : Date.now();
-      let nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs + 1;
-      const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 1e4;
-      if (dt < 0 && options.clockseq === void 0) {
-        clockseq = clockseq + 1 & 16383;
-      }
-      if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === void 0) {
-        nsecs = 0;
-      }
-      if (nsecs >= 1e4) {
-        throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
-      }
-      _lastMSecs = msecs;
-      _lastNSecs = nsecs;
-      _clockseq = clockseq;
-      msecs += 122192928e5;
-      const tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
-      b[i2++] = tl >>> 24 & 255;
-      b[i2++] = tl >>> 16 & 255;
-      b[i2++] = tl >>> 8 & 255;
-      b[i2++] = tl & 255;
-      const tmh = msecs / 4294967296 * 1e4 & 268435455;
-      b[i2++] = tmh >>> 8 & 255;
-      b[i2++] = tmh & 255;
-      b[i2++] = tmh >>> 24 & 15 | 16;
-      b[i2++] = tmh >>> 16 & 255;
-      b[i2++] = clockseq >>> 8 | 128;
-      b[i2++] = clockseq & 255;
-      for (let n = 0; n < 6; ++n) {
-        b[i2 + n] = node[n];
-      }
-      return buf || (0, _stringify.default)(b);
+    if (clockseq == null) {
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 16383;
     }
-    var _default = v1;
-    exports.default = _default;
+  }
+  let msecs = options.msecs !== void 0 ? options.msecs : Date.now();
+  let nsecs = options.nsecs !== void 0 ? options.nsecs : _lastNSecs + 1;
+  const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 1e4;
+  if (dt < 0 && options.clockseq === void 0) {
+    clockseq = clockseq + 1 & 16383;
+  }
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === void 0) {
+    nsecs = 0;
+  }
+  if (nsecs >= 1e4) {
+    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+  }
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq;
+  msecs += 122192928e5;
+  const tl = ((msecs & 268435455) * 1e4 + nsecs) % 4294967296;
+  b[i2++] = tl >>> 24 & 255;
+  b[i2++] = tl >>> 16 & 255;
+  b[i2++] = tl >>> 8 & 255;
+  b[i2++] = tl & 255;
+  const tmh = msecs / 4294967296 * 1e4 & 268435455;
+  b[i2++] = tmh >>> 8 & 255;
+  b[i2++] = tmh & 255;
+  b[i2++] = tmh >>> 24 & 15 | 16;
+  b[i2++] = tmh >>> 16 & 255;
+  b[i2++] = clockseq >>> 8 | 128;
+  b[i2++] = clockseq & 255;
+  for (let n = 0; n < 6; ++n) {
+    b[i2 + n] = node[n];
+  }
+  return buf || stringify_default(b);
+}
+var _nodeId, _clockseq, _lastMSecs, _lastNSecs, v1_default;
+var init_v1 = __esm({
+  "node_modules/uuid/dist/esm-node/v1.js"() {
+    init_rng();
+    init_stringify();
+    _lastMSecs = 0;
+    _lastNSecs = 0;
+    v1_default = v1;
   }
 });
 
-// node_modules/uuid/dist/parse.js
-var require_parse = __commonJS({
-  "node_modules/uuid/dist/parse.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _validate = _interopRequireDefault(require_validate());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    function parse(uuid) {
-      if (!(0, _validate.default)(uuid)) {
-        throw TypeError("Invalid UUID");
-      }
-      let v2;
-      const arr = new Uint8Array(16);
-      arr[0] = (v2 = parseInt(uuid.slice(0, 8), 16)) >>> 24;
-      arr[1] = v2 >>> 16 & 255;
-      arr[2] = v2 >>> 8 & 255;
-      arr[3] = v2 & 255;
-      arr[4] = (v2 = parseInt(uuid.slice(9, 13), 16)) >>> 8;
-      arr[5] = v2 & 255;
-      arr[6] = (v2 = parseInt(uuid.slice(14, 18), 16)) >>> 8;
-      arr[7] = v2 & 255;
-      arr[8] = (v2 = parseInt(uuid.slice(19, 23), 16)) >>> 8;
-      arr[9] = v2 & 255;
-      arr[10] = (v2 = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255;
-      arr[11] = v2 / 4294967296 & 255;
-      arr[12] = v2 >>> 24 & 255;
-      arr[13] = v2 >>> 16 & 255;
-      arr[14] = v2 >>> 8 & 255;
-      arr[15] = v2 & 255;
-      return arr;
-    }
-    var _default = parse;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/parse.js
+function parse(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
+  }
+  let v2;
+  const arr = new Uint8Array(16);
+  arr[0] = (v2 = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+  arr[1] = v2 >>> 16 & 255;
+  arr[2] = v2 >>> 8 & 255;
+  arr[3] = v2 & 255;
+  arr[4] = (v2 = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+  arr[5] = v2 & 255;
+  arr[6] = (v2 = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+  arr[7] = v2 & 255;
+  arr[8] = (v2 = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+  arr[9] = v2 & 255;
+  arr[10] = (v2 = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255;
+  arr[11] = v2 / 4294967296 & 255;
+  arr[12] = v2 >>> 24 & 255;
+  arr[13] = v2 >>> 16 & 255;
+  arr[14] = v2 >>> 8 & 255;
+  arr[15] = v2 & 255;
+  return arr;
+}
+var parse_default;
+var init_parse = __esm({
+  "node_modules/uuid/dist/esm-node/parse.js"() {
+    init_validate();
+    parse_default = parse;
   }
 });
 
-// node_modules/uuid/dist/v35.js
-var require_v35 = __commonJS({
-  "node_modules/uuid/dist/v35.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = _default;
-    exports.URL = exports.DNS = void 0;
-    var _stringify = _interopRequireDefault(require_stringify());
-    var _parse = _interopRequireDefault(require_parse());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
+// node_modules/uuid/dist/esm-node/v35.js
+function stringToBytes(str) {
+  str = unescape(encodeURIComponent(str));
+  const bytes = [];
+  for (let i2 = 0; i2 < str.length; ++i2) {
+    bytes.push(str.charCodeAt(i2));
+  }
+  return bytes;
+}
+function v35_default(name, version2, hashfunc) {
+  function generateUUID(value, namespace, buf, offset) {
+    if (typeof value === "string") {
+      value = stringToBytes(value);
     }
-    function stringToBytes(str) {
-      str = unescape(encodeURIComponent(str));
-      const bytes = [];
-      for (let i2 = 0; i2 < str.length; ++i2) {
-        bytes.push(str.charCodeAt(i2));
-      }
-      return bytes;
+    if (typeof namespace === "string") {
+      namespace = parse_default(namespace);
     }
-    var DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
-    exports.DNS = DNS;
-    var URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
-    exports.URL = URL2;
-    function _default(name, version, hashfunc) {
-      function generateUUID(value, namespace, buf, offset) {
-        if (typeof value === "string") {
-          value = stringToBytes(value);
-        }
-        if (typeof namespace === "string") {
-          namespace = (0, _parse.default)(namespace);
-        }
-        if (namespace.length !== 16) {
-          throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
-        }
-        let bytes = new Uint8Array(16 + value.length);
-        bytes.set(namespace);
-        bytes.set(value, namespace.length);
-        bytes = hashfunc(bytes);
-        bytes[6] = bytes[6] & 15 | version;
-        bytes[8] = bytes[8] & 63 | 128;
-        if (buf) {
-          offset = offset || 0;
-          for (let i2 = 0; i2 < 16; ++i2) {
-            buf[offset + i2] = bytes[i2];
-          }
-          return buf;
-        }
-        return (0, _stringify.default)(bytes);
-      }
-      try {
-        generateUUID.name = name;
-      } catch (err) {
-      }
-      generateUUID.DNS = DNS;
-      generateUUID.URL = URL2;
-      return generateUUID;
+    if (namespace.length !== 16) {
+      throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
     }
+    let bytes = new Uint8Array(16 + value.length);
+    bytes.set(namespace);
+    bytes.set(value, namespace.length);
+    bytes = hashfunc(bytes);
+    bytes[6] = bytes[6] & 15 | version2;
+    bytes[8] = bytes[8] & 63 | 128;
+    if (buf) {
+      offset = offset || 0;
+      for (let i2 = 0; i2 < 16; ++i2) {
+        buf[offset + i2] = bytes[i2];
+      }
+      return buf;
+    }
+    return stringify_default(bytes);
+  }
+  try {
+    generateUUID.name = name;
+  } catch (err) {
+  }
+  generateUUID.DNS = DNS;
+  generateUUID.URL = URL2;
+  return generateUUID;
+}
+var DNS, URL2;
+var init_v35 = __esm({
+  "node_modules/uuid/dist/esm-node/v35.js"() {
+    init_stringify();
+    init_parse();
+    DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
   }
 });
 
-// node_modules/uuid/dist/md5.js
-var require_md5 = __commonJS({
-  "node_modules/uuid/dist/md5.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _crypto = _interopRequireDefault(require("crypto"));
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    function md5(bytes) {
-      if (Array.isArray(bytes)) {
-        bytes = Buffer.from(bytes);
-      } else if (typeof bytes === "string") {
-        bytes = Buffer.from(bytes, "utf8");
-      }
-      return _crypto.default.createHash("md5").update(bytes).digest();
-    }
-    var _default = md5;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/md5.js
+function md5(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === "string") {
+    bytes = Buffer.from(bytes, "utf8");
+  }
+  return import_crypto2.default.createHash("md5").update(bytes).digest();
+}
+var import_crypto2, md5_default;
+var init_md5 = __esm({
+  "node_modules/uuid/dist/esm-node/md5.js"() {
+    import_crypto2 = __toESM(require("crypto"));
+    md5_default = md5;
   }
 });
 
-// node_modules/uuid/dist/v3.js
-var require_v3 = __commonJS({
-  "node_modules/uuid/dist/v3.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _v = _interopRequireDefault(require_v35());
-    var _md = _interopRequireDefault(require_md5());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    var v3 = (0, _v.default)("v3", 48, _md.default);
-    var _default = v3;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/v3.js
+var v3, v3_default;
+var init_v3 = __esm({
+  "node_modules/uuid/dist/esm-node/v3.js"() {
+    init_v35();
+    init_md5();
+    v3 = v35_default("v3", 48, md5_default);
+    v3_default = v3;
   }
 });
 
-// node_modules/uuid/dist/v4.js
-var require_v4 = __commonJS({
-  "node_modules/uuid/dist/v4.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _rng = _interopRequireDefault(require_rng());
-    var _stringify = _interopRequireDefault(require_stringify());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
+// node_modules/uuid/dist/esm-node/v4.js
+function v4(options, buf, offset) {
+  options = options || {};
+  const rnds = options.random || (options.rng || rng)();
+  rnds[6] = rnds[6] & 15 | 64;
+  rnds[8] = rnds[8] & 63 | 128;
+  if (buf) {
+    offset = offset || 0;
+    for (let i2 = 0; i2 < 16; ++i2) {
+      buf[offset + i2] = rnds[i2];
     }
-    function v4(options, buf, offset) {
-      options = options || {};
-      const rnds = options.random || (options.rng || _rng.default)();
-      rnds[6] = rnds[6] & 15 | 64;
-      rnds[8] = rnds[8] & 63 | 128;
-      if (buf) {
-        offset = offset || 0;
-        for (let i2 = 0; i2 < 16; ++i2) {
-          buf[offset + i2] = rnds[i2];
-        }
-        return buf;
-      }
-      return (0, _stringify.default)(rnds);
-    }
-    var _default = v4;
-    exports.default = _default;
+    return buf;
+  }
+  return stringify_default(rnds);
+}
+var v4_default;
+var init_v4 = __esm({
+  "node_modules/uuid/dist/esm-node/v4.js"() {
+    init_rng();
+    init_stringify();
+    v4_default = v4;
   }
 });
 
-// node_modules/uuid/dist/sha1.js
-var require_sha1 = __commonJS({
-  "node_modules/uuid/dist/sha1.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _crypto = _interopRequireDefault(require("crypto"));
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    function sha1(bytes) {
-      if (Array.isArray(bytes)) {
-        bytes = Buffer.from(bytes);
-      } else if (typeof bytes === "string") {
-        bytes = Buffer.from(bytes, "utf8");
-      }
-      return _crypto.default.createHash("sha1").update(bytes).digest();
-    }
-    var _default = sha1;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/sha1.js
+function sha1(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === "string") {
+    bytes = Buffer.from(bytes, "utf8");
+  }
+  return import_crypto3.default.createHash("sha1").update(bytes).digest();
+}
+var import_crypto3, sha1_default;
+var init_sha1 = __esm({
+  "node_modules/uuid/dist/esm-node/sha1.js"() {
+    import_crypto3 = __toESM(require("crypto"));
+    sha1_default = sha1;
   }
 });
 
-// node_modules/uuid/dist/v5.js
-var require_v5 = __commonJS({
-  "node_modules/uuid/dist/v5.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _v = _interopRequireDefault(require_v35());
-    var _sha = _interopRequireDefault(require_sha1());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    var v5 = (0, _v.default)("v5", 80, _sha.default);
-    var _default = v5;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/v5.js
+var v5, v5_default;
+var init_v5 = __esm({
+  "node_modules/uuid/dist/esm-node/v5.js"() {
+    init_v35();
+    init_sha1();
+    v5 = v35_default("v5", 80, sha1_default);
+    v5_default = v5;
   }
 });
 
-// node_modules/uuid/dist/nil.js
-var require_nil = __commonJS({
-  "node_modules/uuid/dist/nil.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _default = "00000000-0000-0000-0000-000000000000";
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/nil.js
+var nil_default;
+var init_nil = __esm({
+  "node_modules/uuid/dist/esm-node/nil.js"() {
+    nil_default = "00000000-0000-0000-0000-000000000000";
   }
 });
 
-// node_modules/uuid/dist/version.js
-var require_version = __commonJS({
-  "node_modules/uuid/dist/version.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-    var _validate = _interopRequireDefault(require_validate());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
-    function version(uuid) {
-      if (!(0, _validate.default)(uuid)) {
-        throw TypeError("Invalid UUID");
-      }
-      return parseInt(uuid.substr(14, 1), 16);
-    }
-    var _default = version;
-    exports.default = _default;
+// node_modules/uuid/dist/esm-node/version.js
+function version(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
+  }
+  return parseInt(uuid.substr(14, 1), 16);
+}
+var version_default;
+var init_version = __esm({
+  "node_modules/uuid/dist/esm-node/version.js"() {
+    init_validate();
+    version_default = version;
   }
 });
 
-// node_modules/uuid/dist/index.js
-var require_dist = __commonJS({
-  "node_modules/uuid/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    Object.defineProperty(exports, "v1", {
-      enumerable: true,
-      get: function() {
-        return _v.default;
-      }
-    });
-    Object.defineProperty(exports, "v3", {
-      enumerable: true,
-      get: function() {
-        return _v2.default;
-      }
-    });
-    Object.defineProperty(exports, "v4", {
-      enumerable: true,
-      get: function() {
-        return _v3.default;
-      }
-    });
-    Object.defineProperty(exports, "v5", {
-      enumerable: true,
-      get: function() {
-        return _v4.default;
-      }
-    });
-    Object.defineProperty(exports, "NIL", {
-      enumerable: true,
-      get: function() {
-        return _nil.default;
-      }
-    });
-    Object.defineProperty(exports, "version", {
-      enumerable: true,
-      get: function() {
-        return _version.default;
-      }
-    });
-    Object.defineProperty(exports, "validate", {
-      enumerable: true,
-      get: function() {
-        return _validate.default;
-      }
-    });
-    Object.defineProperty(exports, "stringify", {
-      enumerable: true,
-      get: function() {
-        return _stringify.default;
-      }
-    });
-    Object.defineProperty(exports, "parse", {
-      enumerable: true,
-      get: function() {
-        return _parse.default;
-      }
-    });
-    var _v = _interopRequireDefault(require_v1());
-    var _v2 = _interopRequireDefault(require_v3());
-    var _v3 = _interopRequireDefault(require_v4());
-    var _v4 = _interopRequireDefault(require_v5());
-    var _nil = _interopRequireDefault(require_nil());
-    var _version = _interopRequireDefault(require_version());
-    var _validate = _interopRequireDefault(require_validate());
-    var _stringify = _interopRequireDefault(require_stringify());
-    var _parse = _interopRequireDefault(require_parse());
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : { default: obj };
-    }
+// node_modules/uuid/dist/esm-node/index.js
+var esm_node_exports = {};
+__export(esm_node_exports, {
+  NIL: () => nil_default,
+  parse: () => parse_default,
+  stringify: () => stringify_default,
+  v1: () => v1_default,
+  v3: () => v3_default,
+  v4: () => v4_default,
+  v5: () => v5_default,
+  validate: () => validate_default,
+  version: () => version_default
+});
+var init_esm_node = __esm({
+  "node_modules/uuid/dist/esm-node/index.js"() {
+    init_v1();
+    init_v3();
+    init_v4();
+    init_v5();
+    init_nil();
+    init_version();
+    init_validate();
+    init_stringify();
+    init_parse();
   }
 });
 
@@ -666,8 +520,8 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs = __importStar(require("fs"));
-    var os2 = __importStar(require("os"));
-    var uuid_1 = require_dist();
+    var os3 = __importStar(require("os"));
+    var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command2, message) {
       const filePath = process.env[`GITHUB_${command2}`];
@@ -677,7 +531,7 @@ var require_file_command = __commonJS({
       if (!fs.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os2.EOL}`, {
+      fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -691,7 +545,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os2.EOL}${convertedValue}${os2.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os3.EOL}${convertedValue}${os3.EOL}${delimiter}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -1233,6 +1087,10 @@ var require_lib = __commonJS({
           return this.request(verb, requestUrl, stream4, additionalHeaders);
         });
       }
+      /**
+       * Gets a typed object from an endpoint
+       * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+       */
       getJson(requestUrl, additionalHeaders = {}) {
         return __awaiter(this, void 0, void 0, function* () {
           additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
@@ -1267,6 +1125,11 @@ var require_lib = __commonJS({
           return this._processResponse(res, this.requestOptions);
         });
       }
+      /**
+       * Makes a raw http request.
+       * All other methods such as get, post, patch, and request ultimately call this.
+       * Prefer get, del, post and patch
+       */
       request(verb, requestUrl, data, headers) {
         return __awaiter(this, void 0, void 0, function* () {
           if (this._disposed) {
@@ -1327,12 +1190,20 @@ var require_lib = __commonJS({
           return response;
         });
       }
+      /**
+       * Needs to be called if keepAlive is set to true in request options.
+       */
       dispose() {
         if (this._agent) {
           this._agent.destroy();
         }
         this._disposed = true;
       }
+      /**
+       * Raw request.
+       * @param info
+       * @param data
+       */
       requestRaw(info, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
@@ -1349,6 +1220,12 @@ var require_lib = __commonJS({
           });
         });
       }
+      /**
+       * Raw request with callback.
+       * @param info
+       * @param data
+       * @param onResult
+       */
       requestRawWithCallback(info, data, onResult) {
         if (typeof data === "string") {
           if (!info.options.headers) {
@@ -1392,6 +1269,11 @@ var require_lib = __commonJS({
           req.end();
         }
       }
+      /**
+       * Gets an http agent. This function is useful when you need an http agent that handles
+       * routing through a proxy server - depending upon the url and proxy environment variables.
+       * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+       */
       getAgent(serverUrl) {
         const parsedUrl = new URL(serverUrl);
         return this._getAgent(parsedUrl);
@@ -1594,6 +1476,7 @@ var require_auth = __commonJS({
         }
         options.headers["Authorization"] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString("base64")}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1608,12 +1491,15 @@ var require_auth = __commonJS({
       constructor(token) {
         this.token = token;
       }
+      // currently implements pre-authorization
+      // TODO: support preAuth = false where it hooks on 401
       prepareRequest(options) {
         if (!options.headers) {
           throw Error("The request has no headers");
         }
         options.headers["Authorization"] = `Bearer ${this.token}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1628,12 +1514,15 @@ var require_auth = __commonJS({
       constructor(token) {
         this.token = token;
       }
+      // currently implements pre-authorization
+      // TODO: support preAuth = false where it hooks on 401
       prepareRequest(options) {
         if (!options.headers) {
           throw Error("The request has no headers");
         }
         options.headers["Authorization"] = `Basic ${Buffer.from(`PAT:${this.token}`).toString("base64")}`;
       }
+      // This handler cannot handle 401
       canHandleAuthentication() {
         return false;
       }
@@ -1787,6 +1676,12 @@ var require_summary = __commonJS({
       constructor() {
         this._buffer = "";
       }
+      /**
+       * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
+       * Also checks r/w permissions.
+       *
+       * @returns step summary file path
+       */
       filePath() {
         return __awaiter(this, void 0, void 0, function* () {
           if (this._filePath) {
@@ -1805,6 +1700,15 @@ var require_summary = __commonJS({
           return this._filePath;
         });
       }
+      /**
+       * Wraps content in an HTML tag, adding any HTML attributes
+       *
+       * @param {string} tag HTML tag to wrap
+       * @param {string | null} content content within the tag
+       * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
+       *
+       * @returns {string} content wrapped in HTML element
+       */
       wrap(tag, content, attrs = {}) {
         const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
         if (!content) {
@@ -1812,6 +1716,13 @@ var require_summary = __commonJS({
         }
         return `<${tag}${htmlAttrs}>${content}</${tag}>`;
       }
+      /**
+       * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
+       *
+       * @param {SummaryWriteOptions} [options] (optional) options for write operation
+       *
+       * @returns {Promise<Summary>} summary instance
+       */
       write(options) {
         return __awaiter(this, void 0, void 0, function* () {
           const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
@@ -1821,39 +1732,95 @@ var require_summary = __commonJS({
           return this.emptyBuffer();
         });
       }
+      /**
+       * Clears the summary buffer and wipes the summary file
+       *
+       * @returns {Summary} summary instance
+       */
       clear() {
         return __awaiter(this, void 0, void 0, function* () {
           return this.emptyBuffer().write({ overwrite: true });
         });
       }
+      /**
+       * Returns the current summary buffer as a string
+       *
+       * @returns {string} string of summary buffer
+       */
       stringify() {
         return this._buffer;
       }
+      /**
+       * If the summary buffer is empty
+       *
+       * @returns {boolen} true if the buffer is empty
+       */
       isEmptyBuffer() {
         return this._buffer.length === 0;
       }
+      /**
+       * Resets the summary buffer without writing to summary file
+       *
+       * @returns {Summary} summary instance
+       */
       emptyBuffer() {
         this._buffer = "";
         return this;
       }
+      /**
+       * Adds raw text to the summary buffer
+       *
+       * @param {string} text content to add
+       * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
+       *
+       * @returns {Summary} summary instance
+       */
       addRaw(text, addEOL = false) {
         this._buffer += text;
         return addEOL ? this.addEOL() : this;
       }
+      /**
+       * Adds the operating system-specific end-of-line marker to the buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addEOL() {
         return this.addRaw(os_1.EOL);
       }
+      /**
+       * Adds an HTML codeblock to the summary buffer
+       *
+       * @param {string} code content to render within fenced code block
+       * @param {string} lang (optional) language to syntax highlight code
+       *
+       * @returns {Summary} summary instance
+       */
       addCodeBlock(code, lang) {
         const attrs = Object.assign({}, lang && { lang });
         const element = this.wrap("pre", this.wrap("code", code), attrs);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML list to the summary buffer
+       *
+       * @param {string[]} items list of items to render
+       * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
+       *
+       * @returns {Summary} summary instance
+       */
       addList(items, ordered = false) {
         const tag = ordered ? "ol" : "ul";
         const listItems = items.map((item) => this.wrap("li", item)).join("");
         const element = this.wrap(tag, listItems);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML table to the summary buffer
+       *
+       * @param {SummaryTableCell[]} rows table rows
+       *
+       * @returns {Summary} summary instance
+       */
       addTable(rows) {
         const tableBody = rows.map((row) => {
           const cells = row.map((cell) => {
@@ -1870,35 +1837,86 @@ var require_summary = __commonJS({
         const element = this.wrap("table", tableBody);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds a collapsable HTML details element to the summary buffer
+       *
+       * @param {string} label text for the closed state
+       * @param {string} content collapsable content
+       *
+       * @returns {Summary} summary instance
+       */
       addDetails(label, content) {
         const element = this.wrap("details", this.wrap("summary", label) + content);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML image tag to the summary buffer
+       *
+       * @param {string} src path to the image you to embed
+       * @param {string} alt text description of the image
+       * @param {SummaryImageOptions} options (optional) addition image attributes
+       *
+       * @returns {Summary} summary instance
+       */
       addImage(src, alt, options) {
         const { width, height } = options || {};
         const attrs = Object.assign(Object.assign({}, width && { width }), height && { height });
         const element = this.wrap("img", null, Object.assign({ src, alt }, attrs));
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML section heading element
+       *
+       * @param {string} text heading text
+       * @param {number | string} [level=1] (optional) the heading level, default: 1
+       *
+       * @returns {Summary} summary instance
+       */
       addHeading(text, level) {
         const tag = `h${level}`;
         const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
         const element = this.wrap(allowedTag, text);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML thematic break (<hr>) to the summary buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addSeparator() {
         const element = this.wrap("hr", null);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML line break (<br>) to the summary buffer
+       *
+       * @returns {Summary} summary instance
+       */
       addBreak() {
         const element = this.wrap("br", null);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML blockquote to the summary buffer
+       *
+       * @param {string} text quote text
+       * @param {string} cite (optional) citation url
+       *
+       * @returns {Summary} summary instance
+       */
       addQuote(text, cite) {
         const attrs = Object.assign({}, cite && { cite });
         const element = this.wrap("blockquote", text, attrs);
         return this.addRaw(element).addEOL();
       }
+      /**
+       * Adds an HTML anchor tag to the summary buffer
+       *
+       * @param {string} text link text/content
+       * @param {string} href hyperlink
+       *
+       * @returns {Summary} summary instance
+       */
       addLink(text, href) {
         const element = this.wrap("a", text, { href });
         return this.addRaw(element).addEOL();
@@ -1944,7 +1962,7 @@ var require_path_utils = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.toPlatformPath = exports.toWin32Path = exports.toPosixPath = void 0;
-    var path = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -1954,7 +1972,7 @@ var require_path_utils = __commonJS({
     }
     exports.toWin32Path = toWin32Path;
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path.sep);
+      return pth.replace(/[/\\]/g, path3.sep);
     }
     exports.toPlatformPath = toPlatformPath;
   }
@@ -2024,8 +2042,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os2 = __importStar(require("os"));
-    var path = __importStar(require("path"));
+    var os3 = __importStar(require("os"));
+    var path3 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -2053,10 +2071,10 @@ var require_core = __commonJS({
       } else {
         command_1.issueCommand("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path3.delimiter}${process.env["PATH"]}`;
     }
     exports.addPath = addPath;
-    function getInput(name, options) {
+    function getInput2(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
@@ -2066,9 +2084,9 @@ var require_core = __commonJS({
       }
       return val.trim();
     }
-    exports.getInput = getInput;
+    exports.getInput = getInput2;
     function getMultilineInput(name, options) {
-      const inputs = getInput(name, options).split("\n").filter((x2) => x2 !== "");
+      const inputs = getInput2(name, options).split("\n").filter((x2) => x2 !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
@@ -2078,7 +2096,7 @@ var require_core = __commonJS({
     function getBooleanInput(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput(name, options);
+      const val = getInput2(name, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
@@ -2092,7 +2110,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os2.EOL);
+      process.stdout.write(os3.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput;
@@ -2126,7 +2144,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.notice = notice;
     function info(message) {
-      process.stdout.write(message + os2.EOL);
+      process.stdout.write(message + os3.EOL);
     }
     exports.info = info;
     function startGroup(name) {
@@ -2198,6 +2216,9 @@ var require_context = __commonJS({
     var fs_1 = require("fs");
     var os_1 = require("os");
     var Context = class {
+      /**
+       * Hydrate the context from the environment
+       */
       constructor() {
         var _a, _b, _c;
         this.payload = {};
@@ -2205,8 +2226,8 @@ var require_context = __commonJS({
           if (fs_1.existsSync(process.env.GITHUB_EVENT_PATH)) {
             this.payload = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
           } else {
-            const path = process.env.GITHUB_EVENT_PATH;
-            process.stdout.write(`GITHUB_EVENT_PATH ${path} does not exist${os_1.EOL}`);
+            const path3 = process.env.GITHUB_EVENT_PATH;
+            process.stdout.write(`GITHUB_EVENT_PATH ${path3} does not exist${os_1.EOL}`);
           }
         }
         this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -2488,9 +2509,9 @@ var require_is_plain_object = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js
+// node_modules/@octokit/endpoint/dist-node/index.js
 var require_dist_node2 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/endpoint/dist-node/index.js"(exports) {
+  "node_modules/@octokit/endpoint/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var isPlainObject2 = require_is_plain_object();
@@ -2532,10 +2553,10 @@ var require_dist_node2 = __commonJS({
     }
     function merge2(defaults2, route, options) {
       if (typeof route === "string") {
-        let [method, url2] = route.split(" ");
-        options = Object.assign(url2 ? {
+        let [method, url3] = route.split(" ");
+        options = Object.assign(url3 ? {
           method,
-          url: url2
+          url: url3
         } : {
           url: method
         }, options);
@@ -2552,13 +2573,13 @@ var require_dist_node2 = __commonJS({
       mergedOptions.mediaType.previews = mergedOptions.mediaType.previews.map((preview) => preview.replace(/-preview/, ""));
       return mergedOptions;
     }
-    function addQueryParameters(url2, parameters) {
-      const separator = /\?/.test(url2) ? "&" : "?";
+    function addQueryParameters(url3, parameters) {
+      const separator = /\?/.test(url3) ? "&" : "?";
       const names = Object.keys(parameters);
       if (names.length === 0) {
-        return url2;
+        return url3;
       }
-      return url2 + separator + names.map((name) => {
+      return url3 + separator + names.map((name) => {
         if (name === "q") {
           return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
         }
@@ -2569,8 +2590,8 @@ var require_dist_node2 = __commonJS({
     function removeNonChars(variableName) {
       return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
     }
-    function extractUrlVariableNames(url2) {
-      const matches = url2.match(urlVariableRegex);
+    function extractUrlVariableNames(url3) {
+      const matches = url3.match(urlVariableRegex);
       if (!matches) {
         return [];
       }
@@ -2700,16 +2721,16 @@ var require_dist_node2 = __commonJS({
         }
       });
     }
-    function parse(options) {
+    function parse2(options) {
       let method = options.method.toUpperCase();
-      let url2 = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
+      let url3 = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
       let headers = Object.assign({}, options.headers);
       let body;
       let parameters = omit(options, ["method", "baseUrl", "url", "headers", "request", "mediaType"]);
-      const urlVariableNames = extractUrlVariableNames(url2);
-      url2 = parseUrl(url2).expand(parameters);
-      if (!/^http/.test(url2)) {
-        url2 = options.baseUrl + url2;
+      const urlVariableNames = extractUrlVariableNames(url3);
+      url3 = parseUrl(url3).expand(parameters);
+      if (!/^http/.test(url3)) {
+        url3 = options.baseUrl + url3;
       }
       const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
       const remainingParameters = omit(parameters, omittedParameters);
@@ -2727,7 +2748,7 @@ var require_dist_node2 = __commonJS({
         }
       }
       if (["GET", "HEAD"].includes(method)) {
-        url2 = addQueryParameters(url2, remainingParameters);
+        url3 = addQueryParameters(url3, remainingParameters);
       } else {
         if ("data" in remainingParameters) {
           body = remainingParameters.data;
@@ -2747,7 +2768,7 @@ var require_dist_node2 = __commonJS({
       }
       return Object.assign({
         method,
-        url: url2,
+        url: url3,
         headers
       }, typeof body !== "undefined" ? {
         body
@@ -2756,7 +2777,7 @@ var require_dist_node2 = __commonJS({
       } : null);
     }
     function endpointWithDefaults(defaults2, route, options) {
-      return parse(merge2(defaults2, route, options));
+      return parse2(merge2(defaults2, route, options));
     }
     function withDefaults(oldDefaults, newDefaults) {
       const DEFAULTS2 = merge2(oldDefaults, newDefaults);
@@ -2765,7 +2786,7 @@ var require_dist_node2 = __commonJS({
         DEFAULTS: DEFAULTS2,
         defaults: withDefaults.bind(null, DEFAULTS2),
         merge: merge2.bind(null, DEFAULTS2),
-        parse
+        parse: parse2
       });
     }
     var VERSION4 = "6.0.12";
@@ -3194,8 +3215,8 @@ var require_url_state_machine = __commonJS({
     function isSpecialScheme(scheme) {
       return specialSchemes[scheme] !== void 0;
     }
-    function isSpecial(url2) {
-      return isSpecialScheme(url2.scheme);
+    function isSpecial(url3) {
+      return isSpecialScheme(url3.scheme);
     }
     function defaultPort(scheme) {
       return specialSchemes[scheme];
@@ -3517,38 +3538,38 @@ var require_url_state_machine = __commonJS({
       }
       return host;
     }
-    function trimControlChars(url2) {
-      return url2.replace(/^[\u0000-\u001F\u0020]+|[\u0000-\u001F\u0020]+$/g, "");
+    function trimControlChars(url3) {
+      return url3.replace(/^[\u0000-\u001F\u0020]+|[\u0000-\u001F\u0020]+$/g, "");
     }
-    function trimTabAndNewline(url2) {
-      return url2.replace(/\u0009|\u000A|\u000D/g, "");
+    function trimTabAndNewline(url3) {
+      return url3.replace(/\u0009|\u000A|\u000D/g, "");
     }
-    function shortenPath(url2) {
-      const path = url2.path;
-      if (path.length === 0) {
+    function shortenPath(url3) {
+      const path3 = url3.path;
+      if (path3.length === 0) {
         return;
       }
-      if (url2.scheme === "file" && path.length === 1 && isNormalizedWindowsDriveLetter(path[0])) {
+      if (url3.scheme === "file" && path3.length === 1 && isNormalizedWindowsDriveLetter(path3[0])) {
         return;
       }
-      path.pop();
+      path3.pop();
     }
-    function includesCredentials(url2) {
-      return url2.username !== "" || url2.password !== "";
+    function includesCredentials(url3) {
+      return url3.username !== "" || url3.password !== "";
     }
-    function cannotHaveAUsernamePasswordPort(url2) {
-      return url2.host === null || url2.host === "" || url2.cannotBeABaseURL || url2.scheme === "file";
+    function cannotHaveAUsernamePasswordPort(url3) {
+      return url3.host === null || url3.host === "" || url3.cannotBeABaseURL || url3.scheme === "file";
     }
     function isNormalizedWindowsDriveLetter(string) {
       return /^[A-Za-z]:$/.test(string);
     }
-    function URLStateMachine(input, base, encodingOverride, url2, stateOverride) {
+    function URLStateMachine(input, base, encodingOverride, url3, stateOverride) {
       this.pointer = 0;
       this.input = input;
       this.base = base || null;
       this.encodingOverride = encodingOverride || "utf-8";
       this.stateOverride = stateOverride;
-      this.url = url2;
+      this.url = url3;
       this.failure = false;
       this.parseError = false;
       if (!this.url) {
@@ -3906,7 +3927,9 @@ var require_url_state_machine = __commonJS({
           this.url.fragment = "";
           this.state = "fragment";
         } else {
-          if (this.input.length - this.pointer - 1 === 0 || !isWindowsDriveLetterCodePoints(c, this.input[this.pointer + 1]) || this.input.length - this.pointer - 1 >= 2 && !fileOtherwiseCodePoints.has(this.input[this.pointer + 2])) {
+          if (this.input.length - this.pointer - 1 === 0 || // remaining consists of 0 code points
+          !isWindowsDriveLetterCodePoints(c, this.input[this.pointer + 1]) || this.input.length - this.pointer - 1 >= 2 && // remaining has at least 2 code points
+          !fileOtherwiseCodePoints.has(this.input[this.pointer + 2])) {
             this.url.host = this.base.host;
             this.url.path = this.base.path.slice();
             shortenPath(this.url);
@@ -4099,36 +4122,36 @@ var require_url_state_machine = __commonJS({
       }
       return true;
     };
-    function serializeURL(url2, excludeFragment) {
-      let output = url2.scheme + ":";
-      if (url2.host !== null) {
+    function serializeURL(url3, excludeFragment) {
+      let output = url3.scheme + ":";
+      if (url3.host !== null) {
         output += "//";
-        if (url2.username !== "" || url2.password !== "") {
-          output += url2.username;
-          if (url2.password !== "") {
-            output += ":" + url2.password;
+        if (url3.username !== "" || url3.password !== "") {
+          output += url3.username;
+          if (url3.password !== "") {
+            output += ":" + url3.password;
           }
           output += "@";
         }
-        output += serializeHost(url2.host);
-        if (url2.port !== null) {
-          output += ":" + url2.port;
+        output += serializeHost(url3.host);
+        if (url3.port !== null) {
+          output += ":" + url3.port;
         }
-      } else if (url2.host === null && url2.scheme === "file") {
+      } else if (url3.host === null && url3.scheme === "file") {
         output += "//";
       }
-      if (url2.cannotBeABaseURL) {
-        output += url2.path[0];
+      if (url3.cannotBeABaseURL) {
+        output += url3.path[0];
       } else {
-        for (const string of url2.path) {
+        for (const string of url3.path) {
           output += "/" + string;
         }
       }
-      if (url2.query !== null) {
-        output += "?" + url2.query;
+      if (url3.query !== null) {
+        output += "?" + url3.query;
       }
-      if (!excludeFragment && url2.fragment !== null) {
-        output += "#" + url2.fragment;
+      if (!excludeFragment && url3.fragment !== null) {
+        output += "#" + url3.fragment;
       }
       return output;
     }
@@ -4141,11 +4164,11 @@ var require_url_state_machine = __commonJS({
       return result;
     }
     module2.exports.serializeURL = serializeURL;
-    module2.exports.serializeURLOrigin = function(url2) {
-      switch (url2.scheme) {
+    module2.exports.serializeURLOrigin = function(url3) {
+      switch (url3.scheme) {
         case "blob":
           try {
-            return module2.exports.serializeURLOrigin(module2.exports.parseURL(url2.path[0]));
+            return module2.exports.serializeURLOrigin(module2.exports.parseURL(url3.path[0]));
           } catch (e2) {
             return "null";
           }
@@ -4156,9 +4179,9 @@ var require_url_state_machine = __commonJS({
         case "ws":
         case "wss":
           return serializeOrigin({
-            scheme: url2.scheme,
-            host: url2.host,
-            port: url2.port
+            scheme: url3.scheme,
+            host: url3.host,
+            port: url3.port
           });
         case "file":
           return "file://";
@@ -4176,18 +4199,18 @@ var require_url_state_machine = __commonJS({
       }
       return usm.url;
     };
-    module2.exports.setTheUsername = function(url2, username) {
-      url2.username = "";
+    module2.exports.setTheUsername = function(url3, username) {
+      url3.username = "";
       const decoded = punycode.ucs2.decode(username);
       for (let i2 = 0; i2 < decoded.length; ++i2) {
-        url2.username += percentEncodeChar(decoded[i2], isUserinfoPercentEncode);
+        url3.username += percentEncodeChar(decoded[i2], isUserinfoPercentEncode);
       }
     };
-    module2.exports.setThePassword = function(url2, password) {
-      url2.password = "";
+    module2.exports.setThePassword = function(url3, password) {
+      url3.password = "";
       const decoded = punycode.ucs2.decode(password);
       for (let i2 = 0; i2 < decoded.length; ++i2) {
-        url2.password += percentEncodeChar(decoded[i2], isUserinfoPercentEncode);
+        url3.password += percentEncodeChar(decoded[i2], isUserinfoPercentEncode);
       }
     };
     module2.exports.serializeHost = serializeHost;
@@ -4211,7 +4234,7 @@ var require_URL_impl = __commonJS({
     var usm = require_url_state_machine();
     exports.implementation = class URLImpl {
       constructor(constructorArgs) {
-        const url2 = constructorArgs[0];
+        const url3 = constructorArgs[0];
         const base = constructorArgs[1];
         let parsedBase = null;
         if (base !== void 0) {
@@ -4220,7 +4243,7 @@ var require_URL_impl = __commonJS({
             throw new TypeError("Invalid base URL");
           }
         }
-        const parsedURL = usm.basicURLParse(url2, { baseURL: parsedBase });
+        const parsedURL = usm.basicURLParse(url3, { baseURL: parsedBase });
         if (parsedURL === "failure") {
           throw new TypeError("Invalid URL");
         }
@@ -4264,14 +4287,14 @@ var require_URL_impl = __commonJS({
         usm.setThePassword(this._url, v2);
       }
       get host() {
-        const url2 = this._url;
-        if (url2.host === null) {
+        const url3 = this._url;
+        if (url3.host === null) {
           return "";
         }
-        if (url2.port === null) {
-          return usm.serializeHost(url2.host);
+        if (url3.port === null) {
+          return usm.serializeHost(url3.host);
         }
-        return usm.serializeHost(url2.host) + ":" + usm.serializeInteger(url2.port);
+        return usm.serializeHost(url3.host) + ":" + usm.serializeInteger(url3.port);
       }
       set host(v2) {
         if (this._url.cannotBeABaseURL) {
@@ -4330,14 +4353,14 @@ var require_URL_impl = __commonJS({
         return "?" + this._url.query;
       }
       set search(v2) {
-        const url2 = this._url;
+        const url3 = this._url;
         if (v2 === "") {
-          url2.query = null;
+          url3.query = null;
           return;
         }
         const input = v2[0] === "?" ? v2.substring(1) : v2;
-        url2.query = "";
-        usm.basicURLParse(input, { url: url2, stateOverride: "query" });
+        url3.query = "";
+        usm.basicURLParse(input, { url: url3, stateOverride: "query" });
       }
       get hash() {
         if (this._url.fragment === null || this._url.fragment === "") {
@@ -4369,8 +4392,8 @@ var require_URL = __commonJS({
     var utils = require_utils3();
     var Impl = require_URL_impl();
     var impl = utils.implSymbol;
-    function URL2(url2) {
-      if (!this || this[impl] || !(this instanceof URL2)) {
+    function URL3(url3) {
+      if (!this || this[impl] || !(this instanceof URL3)) {
         throw new TypeError("Failed to construct 'URL': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
       }
       if (arguments.length < 1) {
@@ -4386,7 +4409,7 @@ var require_URL = __commonJS({
       }
       module2.exports.setup(this, args);
     }
-    URL2.prototype.toJSON = function toJSON2() {
+    URL3.prototype.toJSON = function toJSON2() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
@@ -4396,7 +4419,7 @@ var require_URL = __commonJS({
       }
       return this[impl].toJSON.apply(this[impl], args);
     };
-    Object.defineProperty(URL2.prototype, "href", {
+    Object.defineProperty(URL3.prototype, "href", {
       get() {
         return this[impl].href;
       },
@@ -4407,20 +4430,20 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    URL2.prototype.toString = function() {
+    URL3.prototype.toString = function() {
       if (!this || !module2.exports.is(this)) {
         throw new TypeError("Illegal invocation");
       }
       return this.href;
     };
-    Object.defineProperty(URL2.prototype, "origin", {
+    Object.defineProperty(URL3.prototype, "origin", {
       get() {
         return this[impl].origin;
       },
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "protocol", {
+    Object.defineProperty(URL3.prototype, "protocol", {
       get() {
         return this[impl].protocol;
       },
@@ -4431,7 +4454,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "username", {
+    Object.defineProperty(URL3.prototype, "username", {
       get() {
         return this[impl].username;
       },
@@ -4442,7 +4465,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "password", {
+    Object.defineProperty(URL3.prototype, "password", {
       get() {
         return this[impl].password;
       },
@@ -4453,7 +4476,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "host", {
+    Object.defineProperty(URL3.prototype, "host", {
       get() {
         return this[impl].host;
       },
@@ -4464,7 +4487,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "hostname", {
+    Object.defineProperty(URL3.prototype, "hostname", {
       get() {
         return this[impl].hostname;
       },
@@ -4475,7 +4498,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "port", {
+    Object.defineProperty(URL3.prototype, "port", {
       get() {
         return this[impl].port;
       },
@@ -4486,7 +4509,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "pathname", {
+    Object.defineProperty(URL3.prototype, "pathname", {
       get() {
         return this[impl].pathname;
       },
@@ -4497,7 +4520,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "search", {
+    Object.defineProperty(URL3.prototype, "search", {
       get() {
         return this[impl].search;
       },
@@ -4508,7 +4531,7 @@ var require_URL = __commonJS({
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(URL2.prototype, "hash", {
+    Object.defineProperty(URL3.prototype, "hash", {
       get() {
         return this[impl].hash;
       },
@@ -4524,7 +4547,7 @@ var require_URL = __commonJS({
         return !!obj && obj[impl] instanceof Impl.implementation;
       },
       create(constructorArgs, privateData) {
-        let obj = Object.create(URL2.prototype);
+        let obj = Object.create(URL3.prototype);
         this.setup(obj, constructorArgs, privateData);
         return obj;
       },
@@ -4535,10 +4558,10 @@ var require_URL = __commonJS({
         obj[impl] = new Impl.implementation(constructorArgs, privateData);
         obj[impl][utils.wrapperSymbol] = obj;
       },
-      interface: URL2,
+      interface: URL3,
       expose: {
-        Window: { URL: URL2 },
-        Worker: { URL: URL2 }
+        Window: { URL: URL3 },
+        Worker: { URL: URL3 }
       }
     };
   }
@@ -4737,15 +4760,26 @@ var require_lib3 = __commonJS({
       get bodyUsed() {
         return this[INTERNALS].disturbed;
       },
+      /**
+       * Decode response as ArrayBuffer
+       *
+       * @return  Promise
+       */
       arrayBuffer() {
         return consumeBody.call(this).then(function(buf) {
           return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
         });
       },
+      /**
+       * Return raw response as Blob
+       *
+       * @return Promise
+       */
       blob() {
         let ct = this.headers && this.headers.get("content-type") || "";
         return consumeBody.call(this).then(function(buf) {
           return Object.assign(
+            // Prevent copying
             new Blob2([], {
               type: ct.toLowerCase()
             }),
@@ -4755,6 +4789,11 @@ var require_lib3 = __commonJS({
           );
         });
       },
+      /**
+       * Decode response as json
+       *
+       * @return  Promise
+       */
       json() {
         var _this2 = this;
         return consumeBody.call(this).then(function(buffer) {
@@ -4765,14 +4804,30 @@ var require_lib3 = __commonJS({
           }
         });
       },
+      /**
+       * Decode response as text
+       *
+       * @return  Promise
+       */
       text() {
         return consumeBody.call(this).then(function(buffer) {
           return buffer.toString();
         });
       },
+      /**
+       * Decode response as buffer (non-spec api)
+       *
+       * @return  Promise
+       */
       buffer() {
         return consumeBody.call(this);
       },
+      /**
+       * Decode response as text, while automatically detecting the encoding and
+       * trying to decode to UTF-8 (non-spec api)
+       *
+       * @return  Promise
+       */
       textConverted() {
         var _this3 = this;
         return consumeBody.call(this).then(function(buffer) {
@@ -4956,7 +5011,8 @@ var require_lib3 = __commonJS({
       } else if (Buffer.isBuffer(body)) {
         return body.length;
       } else if (body && typeof body.getLengthSync === "function") {
-        if (body._lengthRetrievers && body._lengthRetrievers.length == 0 || body.hasKnownLength && body.hasKnownLength()) {
+        if (body._lengthRetrievers && body._lengthRetrievers.length == 0 || // 1.x
+        body.hasKnownLength && body.hasKnownLength()) {
           return body.getLengthSync();
         }
         return null;
@@ -5003,6 +5059,12 @@ var require_lib3 = __commonJS({
     }
     var MAP = Symbol("map");
     var Headers = class {
+      /**
+       * Headers class
+       *
+       * @param   Object  headers  Response headers
+       * @return  Void
+       */
       constructor() {
         let init = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : void 0;
         this[MAP] = /* @__PURE__ */ Object.create(null);
@@ -5047,6 +5109,12 @@ var require_lib3 = __commonJS({
           throw new TypeError("Provided initializer must be an object");
         }
       }
+      /**
+       * Return combined header value given name
+       *
+       * @param   String  name  Header name
+       * @return  Mixed
+       */
       get(name) {
         name = `${name}`;
         validateName(name);
@@ -5056,6 +5124,13 @@ var require_lib3 = __commonJS({
         }
         return this[MAP][key].join(", ");
       }
+      /**
+       * Iterate over all headers
+       *
+       * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
+       * @param   Boolean   thisArg   `this` context for callback function
+       * @return  Void
+       */
       forEach(callback) {
         let thisArg = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : void 0;
         let pairs = getHeaders(this);
@@ -5068,6 +5143,13 @@ var require_lib3 = __commonJS({
           i2++;
         }
       }
+      /**
+       * Overwrite header values given name
+       *
+       * @param   String  name   Header name
+       * @param   String  value  Header value
+       * @return  Void
+       */
       set(name, value) {
         name = `${name}`;
         value = `${value}`;
@@ -5076,6 +5158,13 @@ var require_lib3 = __commonJS({
         const key = find(this[MAP], name);
         this[MAP][key !== void 0 ? key : name] = [value];
       }
+      /**
+       * Append a value onto existing header
+       *
+       * @param   String  name   Header name
+       * @param   String  value  Header value
+       * @return  Void
+       */
       append(name, value) {
         name = `${name}`;
         value = `${value}`;
@@ -5088,11 +5177,23 @@ var require_lib3 = __commonJS({
           this[MAP][name] = [value];
         }
       }
+      /**
+       * Check for header name existence
+       *
+       * @param   String   name  Header name
+       * @return  Boolean
+       */
       has(name) {
         name = `${name}`;
         validateName(name);
         return find(this[MAP], name) !== void 0;
       }
+      /**
+       * Delete all header values given name
+       *
+       * @param   String  name  Header name
+       * @return  Void
+       */
       delete(name) {
         name = `${name}`;
         validateName(name);
@@ -5101,15 +5202,37 @@ var require_lib3 = __commonJS({
           delete this[MAP][key];
         }
       }
+      /**
+       * Return raw headers (non-spec api)
+       *
+       * @return  Object
+       */
       raw() {
         return this[MAP];
       }
+      /**
+       * Get an iterator on keys.
+       *
+       * @return  Iterator
+       */
       keys() {
         return createHeadersIterator(this, "key");
       }
+      /**
+       * Get an iterator on values.
+       *
+       * @return  Iterator
+       */
       values() {
         return createHeadersIterator(this, "value");
       }
+      /**
+       * Get an iterator on entries.
+       *
+       * This is the default iterator of the Headers object.
+       *
+       * @return  Iterator
+       */
       [Symbol.iterator]() {
         return createHeadersIterator(this, "key+value");
       }
@@ -5241,6 +5364,9 @@ var require_lib3 = __commonJS({
       get status() {
         return this[INTERNALS$1].status;
       }
+      /**
+       * Convenience property representing if the request ended normally
+       */
       get ok() {
         return this[INTERNALS$1].status >= 200 && this[INTERNALS$1].status < 300;
       }
@@ -5253,6 +5379,11 @@ var require_lib3 = __commonJS({
       get headers() {
         return this[INTERNALS$1].headers;
       }
+      /**
+       * Clone this response
+       *
+       * @return  Response
+       */
       clone() {
         return new Response(clone(this), {
           url: this.url,
@@ -5281,12 +5412,12 @@ var require_lib3 = __commonJS({
       configurable: true
     });
     var INTERNALS$2 = Symbol("Request internals");
-    var URL2 = Url.URL || whatwgUrl.URL;
+    var URL3 = Url.URL || whatwgUrl.URL;
     var parse_url = Url.parse;
     var format_url = Url.format;
     function parseURL(urlStr) {
       if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.exec(urlStr)) {
-        urlStr = new URL2(urlStr).toString();
+        urlStr = new URL3(urlStr).toString();
       }
       return parse_url(urlStr);
     }
@@ -5362,6 +5493,11 @@ var require_lib3 = __commonJS({
       get signal() {
         return this[INTERNALS$2].signal;
       }
+      /**
+       * Clone this request
+       *
+       * @return  Request
+       */
       clone() {
         return new Request(this);
       }
@@ -5449,13 +5585,13 @@ var require_lib3 = __commonJS({
       const dest = new URL$1(destination).protocol;
       return orig === dest;
     };
-    function fetch(url2, opts) {
+    function fetch(url3, opts) {
       if (!fetch.Promise) {
         throw new Error("native promise missing, set fetch.Promise to your favorite alternative");
       }
       Body.Promise = fetch.Promise;
       return new fetch.Promise(function(resolve, reject) {
-        const request = new Request(url2, opts);
+        const request = new Request(url3, opts);
         const options = getNodeRequestOptions(request);
         const send = (options.protocol === "https:" ? https2 : http2).request;
         const signal = request.signal;
@@ -5790,9 +5926,9 @@ var require_once = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js
+// node_modules/@octokit/request-error/dist-node/index.js
 var require_dist_node4 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/request-error/dist-node/index.js"(exports) {
+  "node_modules/@octokit/request-error/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -5844,9 +5980,9 @@ var require_dist_node4 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js
+// node_modules/@octokit/request/dist-node/index.js
 var require_dist_node5 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/request/dist-node/index.js"(exports) {
+  "node_modules/@octokit/request/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function _interopDefault(ex) {
@@ -5868,7 +6004,7 @@ var require_dist_node5 = __commonJS({
       }
       let headers = {};
       let status;
-      let url2;
+      let url3;
       const fetch = requestOptions.request && requestOptions.request.fetch || nodeFetch;
       return fetch(requestOptions.url, Object.assign(
         {
@@ -5877,9 +6013,11 @@ var require_dist_node5 = __commonJS({
           headers: requestOptions.headers,
           redirect: requestOptions.redirect
         },
+        // `requestOptions.request.agent` type is incompatible
+        // see https://github.com/octokit/types.ts/pull/264
         requestOptions.request
       )).then(async (response) => {
-        url2 = response.url;
+        url3 = response.url;
         status = response.status;
         for (const keyAndValue of response.headers) {
           headers[keyAndValue[0]] = keyAndValue[1];
@@ -5898,7 +6036,7 @@ var require_dist_node5 = __commonJS({
           }
           throw new requestError.RequestError(response.statusText, status, {
             response: {
-              url: url2,
+              url: url3,
               status,
               headers,
               data: void 0
@@ -5909,7 +6047,7 @@ var require_dist_node5 = __commonJS({
         if (status === 304) {
           throw new requestError.RequestError("Not modified", status, {
             response: {
-              url: url2,
+              url: url3,
               status,
               headers,
               data: await getResponseData(response)
@@ -5921,7 +6059,7 @@ var require_dist_node5 = __commonJS({
           const data = await getResponseData(response);
           const error = new requestError.RequestError(toErrorMessage(data), status, {
             response: {
-              url: url2,
+              url: url3,
               status,
               headers,
               data
@@ -5934,7 +6072,7 @@ var require_dist_node5 = __commonJS({
       }).then((data) => {
         return {
           status,
-          url: url2,
+          url: url3,
           headers,
           data
         };
@@ -5997,9 +6135,9 @@ var require_dist_node5 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js
+// node_modules/@octokit/graphql/dist-node/index.js
 var require_dist_node6 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/graphql/dist-node/index.js"(exports) {
+  "node_modules/@octokit/graphql/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var request = require_dist_node5();
@@ -6095,9 +6233,9 @@ var require_dist_node6 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js
+// node_modules/@octokit/auth-token/dist-node/index.js
 var require_dist_node7 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/auth-token/dist-node/index.js"(exports) {
+  "node_modules/@octokit/auth-token/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
@@ -6141,9 +6279,9 @@ var require_dist_node7 = __commonJS({
   }
 });
 
-// node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js
+// node_modules/@octokit/core/dist-node/index.js
 var require_dist_node8 = __commonJS({
-  "node_modules/@actions/github/node_modules/@octokit/core/dist-node/index.js"(exports) {
+  "node_modules/@octokit/core/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var universalUserAgent = require_dist_node();
@@ -6192,6 +6330,7 @@ var require_dist_node8 = __commonJS({
           baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
           headers: {},
           request: Object.assign({}, options.request, {
+            // @ts-ignore internal usage only, no need to type
             hook: hook.bind(null, "request")
           }),
           mediaType: {
@@ -6237,6 +6376,11 @@ var require_dist_node8 = __commonJS({
           const auth = authStrategy(Object.assign({
             request: this.request,
             log: this.log,
+            // we pass the current octokit instance as well as its constructor options
+            // to allow for authentication strategies that return a new octokit instance
+            // that shares the same internal state as the current one. The original
+            // requirement for this was the "event-octokit" authentication strategy
+            // of https://github.com/probot/octokit-auth-probot.
             octokit: this,
             octokitOptions: otherOptions
           }, options.auth));
@@ -6263,6 +6407,12 @@ var require_dist_node8 = __commonJS({
         };
         return OctokitWithDefaults;
       }
+      /**
+       * Attach a plugin (or many) to your Octokit instance.
+       *
+       * @example
+       * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+       */
       static plugin(...newPlugins) {
         var _a;
         const currentPlugins = this.plugins;
@@ -7279,10 +7429,10 @@ var require_dist_node9 = __commonJS({
       for (const [scope, endpoints] of Object.entries(endpointsMap)) {
         for (const [methodName, endpoint] of Object.entries(endpoints)) {
           const [route, defaults2, decorations] = endpoint;
-          const [method, url2] = route.split(/ /);
+          const [method, url3] = route.split(/ /);
           const endpointDefaults = Object.assign({
             method,
-            url: url2
+            url: url3
           }, defaults2);
           if (!newMethods[scope]) {
             newMethods[scope] = {};
@@ -7423,29 +7573,29 @@ var require_dist_node10 = __commonJS({
       const requestMethod = typeof route === "function" ? route : octokit2.request;
       const method = options.method;
       const headers = options.headers;
-      let url2 = options.url;
+      let url3 = options.url;
       return {
         [Symbol.asyncIterator]: () => ({
           async next() {
-            if (!url2)
+            if (!url3)
               return {
                 done: true
               };
             try {
               const response = await requestMethod({
                 method,
-                url: url2,
+                url: url3,
                 headers
               });
               const normalizedResponse = normalizePaginatedListResponse(response);
-              url2 = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+              url3 = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
               return {
                 value: normalizedResponse
               };
             } catch (error) {
               if (error.status !== 409)
                 throw error;
-              url2 = "";
+              url3 = "";
               return {
                 value: {
                   status: 200,
@@ -7675,7 +7825,7 @@ var require_io_util = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
     var fs = __importStar(require("fs"));
-    var path = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
     exports.IS_WINDOWS = process.platform === "win32";
     exports.UV_FS_O_EXLOCK = 268435456;
@@ -7724,7 +7874,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports.IS_WINDOWS) {
-            const upperExt = path.extname(filePath).toUpperCase();
+            const upperExt = path3.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -7748,11 +7898,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports.IS_WINDOWS) {
               try {
-                const directory = path.dirname(filePath);
-                const upperName = path.basename(filePath).toUpperCase();
+                const directory = path3.dirname(filePath);
+                const upperName = path3.basename(filePath).toUpperCase();
                 for (const actualName of yield exports.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path.join(directory, actualName);
+                    filePath = path3.join(directory, actualName);
                     break;
                   }
                 }
@@ -7852,7 +8002,7 @@ var require_io = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.findInPath = exports.which = exports.mkdirP = exports.rmRF = exports.mv = exports.cp = void 0;
     var assert_1 = require("assert");
-    var path = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -7861,7 +8011,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path.join(dest, path.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path3.join(dest, path3.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -7873,7 +8023,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path.relative(source, newDest) === "") {
+          if (path3.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -7886,7 +8036,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path.join(dest, path.basename(source));
+            dest = path3.join(dest, path3.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -7897,7 +8047,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path.dirname(dest));
+        yield mkdirP(path3.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -7960,7 +8110,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path3.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -7973,12 +8123,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path.sep)) {
+        if (tool.includes(path3.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p2 of process.env.PATH.split(path.delimiter)) {
+          for (const p2 of process.env.PATH.split(path3.delimiter)) {
             if (p2) {
               directories.push(p2);
             }
@@ -7986,7 +8136,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path3.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -8104,10 +8254,10 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.argStringToArray = exports.ToolRunner = void 0;
-    var os2 = __importStar(require("os"));
+    var os3 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
-    var path = __importStar(require("path"));
+    var path3 = __importStar(require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = require("timers");
@@ -8159,12 +8309,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os2.EOL);
+          let n = s.indexOf(os3.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os2.EOL.length);
-            n = s.indexOf(os2.EOL);
+            s = s.substring(n + os3.EOL.length);
+            n = s.indexOf(os3.EOL);
           }
           return s;
         } catch (err) {
@@ -8310,10 +8460,19 @@ var require_toolrunner = __commonJS({
         }
         return result;
       }
+      /**
+       * Exec a tool.
+       * Output will be streamed to the live console.
+       * Returns promise with return code
+       *
+       * @param     tool     path to tool to exec
+       * @param     options  optional exec options.  See ExecOptions
+       * @returns   number
+       */
       exec() {
         return __awaiter(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path3.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -8324,7 +8483,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os2.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -8922,9 +9081,9 @@ var require_buildURL = __commonJS({
     function encode3(val) {
       return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
     }
-    module2.exports = function buildURL2(url2, params, paramsSerializer) {
+    module2.exports = function buildURL2(url3, params, paramsSerializer) {
       if (!params) {
-        return url2;
+        return url3;
       }
       var serializedParams;
       if (paramsSerializer) {
@@ -8954,13 +9113,13 @@ var require_buildURL = __commonJS({
         serializedParams = parts.join("&");
       }
       if (serializedParams) {
-        var hashmarkIndex = url2.indexOf("#");
+        var hashmarkIndex = url3.indexOf("#");
         if (hashmarkIndex !== -1) {
-          url2 = url2.slice(0, hashmarkIndex);
+          url3 = url3.slice(0, hashmarkIndex);
         }
-        url2 += (url2.indexOf("?") === -1 ? "?" : "&") + serializedParams;
+        url3 += (url3.indexOf("?") === -1 ? "?" : "&") + serializedParams;
       }
-      return url2;
+      return url3;
     };
   }
 });
@@ -9028,14 +9187,18 @@ var require_enhanceError = __commonJS({
       error.isAxiosError = true;
       error.toJSON = function toJSON2() {
         return {
+          // Standard
           message: this.message,
           name: this.name,
+          // Microsoft
           description: this.description,
           number: this.number,
+          // Mozilla
           fileName: this.fileName,
           lineNumber: this.lineNumber,
           columnNumber: this.columnNumber,
           stack: this.stack,
+          // Axios
           config: this.config,
           code: this.code,
           status: this.response && this.response.status ? this.response.status : null
@@ -9097,44 +9260,50 @@ var require_cookies = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/cookies.js"(exports, module2) {
     "use strict";
     var utils = require_utils5();
-    module2.exports = utils.isStandardBrowserEnv() ? function standardBrowserEnv3() {
-      return {
-        write: function write(name, value, expires, path, domain, secure) {
-          var cookie = [];
-          cookie.push(name + "=" + encodeURIComponent(value));
-          if (utils.isNumber(expires)) {
-            cookie.push("expires=" + new Date(expires).toGMTString());
+    module2.exports = utils.isStandardBrowserEnv() ? (
+      // Standard browser envs support document.cookie
+      function standardBrowserEnv3() {
+        return {
+          write: function write(name, value, expires, path3, domain, secure) {
+            var cookie = [];
+            cookie.push(name + "=" + encodeURIComponent(value));
+            if (utils.isNumber(expires)) {
+              cookie.push("expires=" + new Date(expires).toGMTString());
+            }
+            if (utils.isString(path3)) {
+              cookie.push("path=" + path3);
+            }
+            if (utils.isString(domain)) {
+              cookie.push("domain=" + domain);
+            }
+            if (secure === true) {
+              cookie.push("secure");
+            }
+            document.cookie = cookie.join("; ");
+          },
+          read: function read(name) {
+            var match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+            return match ? decodeURIComponent(match[3]) : null;
+          },
+          remove: function remove(name) {
+            this.write(name, "", Date.now() - 864e5);
           }
-          if (utils.isString(path)) {
-            cookie.push("path=" + path);
+        };
+      }()
+    ) : (
+      // Non standard browser env (web workers, react-native) lack needed support.
+      function nonStandardBrowserEnv3() {
+        return {
+          write: function write() {
+          },
+          read: function read() {
+            return null;
+          },
+          remove: function remove() {
           }
-          if (utils.isString(domain)) {
-            cookie.push("domain=" + domain);
-          }
-          if (secure === true) {
-            cookie.push("secure");
-          }
-          document.cookie = cookie.join("; ");
-        },
-        read: function read(name) {
-          var match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-          return match ? decodeURIComponent(match[3]) : null;
-        },
-        remove: function remove(name) {
-          this.write(name, "", Date.now() - 864e5);
-        }
-      };
-    }() : function nonStandardBrowserEnv3() {
-      return {
-        write: function write() {
-        },
-        read: function read() {
-          return null;
-        },
-        remove: function remove() {
-        }
-      };
-    }();
+        };
+      }()
+    );
   }
 });
 
@@ -9142,8 +9311,8 @@ var require_cookies = __commonJS({
 var require_isAbsoluteURL = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/isAbsoluteURL.js"(exports, module2) {
     "use strict";
-    module2.exports = function isAbsoluteURL2(url2) {
-      return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url2);
+    module2.exports = function isAbsoluteURL2(url3) {
+      return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url3);
     };
   }
 });
@@ -9230,38 +9399,45 @@ var require_isURLSameOrigin = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/isURLSameOrigin.js"(exports, module2) {
     "use strict";
     var utils = require_utils5();
-    module2.exports = utils.isStandardBrowserEnv() ? function standardBrowserEnv3() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement("a");
-      var originURL;
-      function resolveURL(url2) {
-        var href = url2;
-        if (msie) {
+    module2.exports = utils.isStandardBrowserEnv() ? (
+      // Standard browser envs have full support of the APIs needed to test
+      // whether the request URL is of the same origin as current location.
+      function standardBrowserEnv3() {
+        var msie = /(msie|trident)/i.test(navigator.userAgent);
+        var urlParsingNode = document.createElement("a");
+        var originURL;
+        function resolveURL(url3) {
+          var href = url3;
+          if (msie) {
+            urlParsingNode.setAttribute("href", href);
+            href = urlParsingNode.href;
+          }
           urlParsingNode.setAttribute("href", href);
-          href = urlParsingNode.href;
+          return {
+            href: urlParsingNode.href,
+            protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
+            host: urlParsingNode.host,
+            search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
+            hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
+            hostname: urlParsingNode.hostname,
+            port: urlParsingNode.port,
+            pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+          };
         }
-        urlParsingNode.setAttribute("href", href);
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
-          host: urlParsingNode.host,
-          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
-          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
-          hostname: urlParsingNode.hostname,
-          port: urlParsingNode.port,
-          pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+        originURL = resolveURL(window.location.href);
+        return function isURLSameOrigin(requestURL) {
+          var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+          return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
         };
-      }
-      originURL = resolveURL(window.location.href);
-      return function isURLSameOrigin(requestURL) {
-        var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-        return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-      };
-    }() : function nonStandardBrowserEnv3() {
-      return function isURLSameOrigin() {
-        return true;
-      };
-    }();
+      }()
+    ) : (
+      // Non standard browser envs (web workers, react-native) lack needed support.
+      function nonStandardBrowserEnv3() {
+        return function isURLSameOrigin() {
+          return true;
+        };
+      }()
+    );
   }
 });
 
@@ -9444,7 +9620,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse(val);
+        return parse2(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -9452,7 +9628,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse(str) {
+    function parse2(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -9584,7 +9760,7 @@ var require_common = __commonJS({
             return;
           }
           const self2 = debug;
-          const curr = Number(new Date());
+          const curr = Number(/* @__PURE__ */ new Date());
           const ms = curr - (prevTime || curr);
           self2.diff = ms;
           self2.prev = prevTime;
@@ -9812,7 +9988,11 @@ var require_browser = __commonJS({
       if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
         return false;
       }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
     function formatArgs(args) {
       args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
@@ -9892,7 +10072,7 @@ var require_has_flag = __commonJS({
 var require_supports_color = __commonJS({
   "node_modules/supports-color/index.js"(exports, module2) {
     "use strict";
-    var os2 = require("os");
+    var os3 = require("os");
     var tty2 = require("tty");
     var hasFlag2 = require_has_flag();
     var { env: env2 } = process;
@@ -9940,7 +10120,7 @@ var require_supports_color = __commonJS({
         return min;
       }
       if (process.platform === "win32") {
-        const osRelease = os2.release().split(".");
+        const osRelease = os3.release().split(".");
         if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
           return Number(osRelease[2]) >= 14931 ? 3 : 2;
         }
@@ -9959,10 +10139,10 @@ var require_supports_color = __commonJS({
         return 3;
       }
       if ("TERM_PROGRAM" in env2) {
-        const version = parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        const version2 = parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
         switch (env2.TERM_PROGRAM) {
           case "iTerm.app":
-            return version >= 3 ? 3 : 2;
+            return version2 >= 3 ? 3 : 2;
           case "Apple_Terminal":
             return 2;
         }
@@ -10129,7 +10309,7 @@ var require_node = __commonJS({
       if (exports.inspectOpts.hideDate) {
         return "";
       }
-      return new Date().toISOString() + " ";
+      return (/* @__PURE__ */ new Date()).toISOString() + " ";
     }
     function log(...args) {
       return process.stderr.write(util2.format(...args) + "\n");
@@ -10198,8 +10378,8 @@ var require_debug = __commonJS({
 // node_modules/follow-redirects/index.js
 var require_follow_redirects = __commonJS({
   "node_modules/follow-redirects/index.js"(exports, module2) {
-    var url2 = require("url");
-    var URL2 = url2.URL;
+    var url3 = require("url");
+    var URL3 = url3.URL;
     var http2 = require("http");
     var https2 = require("https");
     var Writable = require("stream").Writable;
@@ -10411,7 +10591,11 @@ var require_follow_redirects = __commonJS({
       for (var event of events) {
         request.on(event, eventHandlers[event]);
       }
-      this._currentUrl = /^\//.test(this._options.path) ? url2.format(this._options) : this._options.path;
+      this._currentUrl = /^\//.test(this._options.path) ? url3.format(this._options) : (
+        // When making a request to a proxy, […]
+        // a client MUST send the target URI in absolute-form […].
+        this._options.path
+      );
       if (this._isRedirect) {
         var i2 = 0;
         var self2 = this;
@@ -10459,29 +10643,34 @@ var require_follow_redirects = __commonJS({
       var beforeRedirect = this._options.beforeRedirect;
       if (beforeRedirect) {
         requestHeaders = Object.assign({
+          // The Host header was set by nativeProtocol.request
           Host: response.req.getHeader("host")
         }, this._options.headers);
       }
       var method = this._options.method;
-      if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" || statusCode === 303 && !/^(?:GET|HEAD)$/.test(this._options.method)) {
+      if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" || // RFC7231§6.4.4: The 303 (See Other) status code indicates that
+      // the server is redirecting the user agent to a different resource […]
+      // A user agent can perform a retrieval request targeting that URI
+      // (a GET or HEAD request if using HTTP) […]
+      statusCode === 303 && !/^(?:GET|HEAD)$/.test(this._options.method)) {
         this._options.method = "GET";
         this._requestBodyBuffers = [];
         removeMatchingHeaders(/^content-/i, this._options.headers);
       }
       var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
-      var currentUrlParts = url2.parse(this._currentUrl);
+      var currentUrlParts = url3.parse(this._currentUrl);
       var currentHost = currentHostHeader || currentUrlParts.host;
-      var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url2.format(Object.assign(currentUrlParts, { host: currentHost }));
+      var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url3.format(Object.assign(currentUrlParts, { host: currentHost }));
       var redirectUrl;
       try {
-        redirectUrl = url2.resolve(currentUrl, location);
+        redirectUrl = url3.resolve(currentUrl, location);
       } catch (cause) {
         this.emit("error", new RedirectionError({ cause }));
         return;
       }
       debug("redirecting to", redirectUrl);
       this._isRedirect = true;
-      var redirectUrlParts = url2.parse(redirectUrl);
+      var redirectUrlParts = url3.parse(redirectUrl);
       Object.assign(this._options, redirectUrlParts);
       if (redirectUrlParts.protocol !== currentUrlParts.protocol && redirectUrlParts.protocol !== "https:" || redirectUrlParts.host !== currentHost && !isSubdomain(redirectUrlParts.host, currentHost)) {
         removeMatchingHeaders(/^(?:authorization|cookie)$/i, this._options.headers);
@@ -10524,15 +10713,15 @@ var require_follow_redirects = __commonJS({
           if (isString2(input)) {
             var parsed;
             try {
-              parsed = urlToOptions(new URL2(input));
+              parsed = urlToOptions(new URL3(input));
             } catch (err) {
-              parsed = url2.parse(input);
+              parsed = url3.parse(input);
             }
             if (!isString2(parsed.protocol)) {
               throw new InvalidUrlError({ input });
             }
             input = parsed;
-          } else if (URL2 && input instanceof URL2) {
+          } else if (URL3 && input instanceof URL3) {
             input = urlToOptions(input);
           } else {
             callback = options;
@@ -10572,7 +10761,10 @@ var require_follow_redirects = __commonJS({
     function urlToOptions(urlObject) {
       var options = {
         protocol: urlObject.protocol,
-        hostname: urlObject.hostname.startsWith("[") ? urlObject.hostname.slice(1, -1) : urlObject.hostname,
+        hostname: urlObject.hostname.startsWith("[") ? (
+          /* istanbul ignore next */
+          urlObject.hostname.slice(1, -1)
+        ) : urlObject.hostname,
         hash: urlObject.hash,
         search: urlObject.search,
         pathname: urlObject.pathname,
@@ -10653,7 +10845,7 @@ var require_http = __commonJS({
     var https2 = require("https");
     var httpFollow2 = require_follow_redirects().http;
     var httpsFollow2 = require_follow_redirects().https;
-    var url2 = require("url");
+    var url3 = require("url");
     var zlib2 = require("zlib");
     var VERSION4 = require_data().version;
     var createError = require_createError();
@@ -10735,7 +10927,7 @@ var require_http = __commonJS({
           auth = username + ":" + password;
         }
         var fullPath = buildFullPath2(config4.baseURL, config4.url);
-        var parsed = url2.parse(fullPath);
+        var parsed = url3.parse(fullPath);
         var protocol = parsed.protocol || "http:";
         if (!auth && parsed.auth) {
           var urlAuth = parsed.auth.split(":");
@@ -10776,7 +10968,7 @@ var require_http = __commonJS({
           var proxyEnv = protocol.slice(0, -1) + "_proxy";
           var proxyUrl = process.env[proxyEnv] || process.env[proxyEnv.toUpperCase()];
           if (proxyUrl) {
-            var parsedProxyUrl = url2.parse(proxyUrl);
+            var parsedProxyUrl = url3.parse(proxyUrl);
             var noProxyEnv = process.env.no_proxy || process.env.NO_PROXY;
             var shouldProxy = true;
             if (noProxyEnv) {
@@ -11044,6 +11236,10 @@ var require_defaults = __commonJS({
         }
         return data;
       }],
+      /**
+       * A timeout in milliseconds to abort a request. If set to 0 (default) a
+       * timeout is not created.
+       */
       timeout: 0,
       xsrfCookieName: "XSRF-TOKEN",
       xsrfHeaderName: "X-XSRF-TOKEN",
@@ -11253,20 +11449,20 @@ var require_validator = __commonJS({
       };
     });
     var deprecatedWarnings2 = {};
-    validators3.transitional = function transitional2(validator, version, message) {
+    validators3.transitional = function transitional2(validator, version2, message) {
       function formatMessage(opt, desc) {
         return "[Axios v" + VERSION4 + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
       }
       return function(value, opt, opts) {
         if (validator === false) {
-          throw new Error(formatMessage(opt, " has been removed" + (version ? " in " + version : "")));
+          throw new Error(formatMessage(opt, " has been removed" + (version2 ? " in " + version2 : "")));
         }
-        if (version && !deprecatedWarnings2[opt]) {
+        if (version2 && !deprecatedWarnings2[opt]) {
           deprecatedWarnings2[opt] = true;
           console.warn(
             formatMessage(
               opt,
-              " has been deprecated since v" + version + " and will be removed in the near future"
+              " has been deprecated since v" + version2 + " and will be removed in the near future"
             )
           );
         }
@@ -11393,19 +11589,19 @@ var require_Axios = __commonJS({
       return buildURL2(config4.url, config4.params, config4.paramsSerializer).replace(/^\?/, "");
     };
     utils.forEach(["delete", "get", "head", "options"], function forEachMethodNoData3(method) {
-      Axios3.prototype[method] = function(url2, config4) {
+      Axios3.prototype[method] = function(url3, config4) {
         return this.request(mergeConfig3(config4 || {}, {
           method,
-          url: url2,
+          url: url3,
           data: (config4 || {}).data
         }));
       };
     });
     utils.forEach(["post", "put", "patch"], function forEachMethodWithData3(method) {
-      Axios3.prototype[method] = function(url2, data, config4) {
+      Axios3.prototype[method] = function(url3, data, config4) {
         return this.request(mergeConfig3(config4 || {}, {
           method,
-          url: url2,
+          url: url3,
           data
         }));
       };
@@ -11683,18 +11879,18 @@ var require_common2 = __commonJS({
         }
       }
     }
-    exports.setSearchParams = function(url2, ...objects) {
-      const searchParams = new URLSearchParams(url2.search);
+    exports.setSearchParams = function(url3, ...objects) {
+      const searchParams = new URLSearchParams(url3.search);
       setFlattenedQueryParams(searchParams, objects);
-      url2.search = searchParams.toString();
+      url3.search = searchParams.toString();
     };
     exports.serializeDataIfNeeded = function(value, requestOptions, configuration) {
       const nonString = typeof value !== "string";
       const needsSerialization = nonString && configuration && configuration.isJsonMime ? configuration.isJsonMime(requestOptions.headers["Content-Type"]) : nonString;
       return needsSerialization ? JSON.stringify(value !== void 0 ? value : {}) : value || "";
     };
-    exports.toPathString = function(url2) {
-      return url2.pathname + url2.search + url2.hash;
+    exports.toPathString = function(url3) {
+      return url3.pathname + url3.search + url3.hash;
     };
     exports.createRequestFunction = function(axiosArgs, globalAxios, BASE_PATH, configuration) {
       return (axios2 = globalAxios, basePath2 = BASE_PATH) => {
@@ -11762,6 +11958,13 @@ var require_api = __commonJS({
     };
     exports.OpenAIApiAxiosParamCreator = function(configuration) {
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune: (fineTuneId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("cancelFineTune", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}/cancel`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -11781,6 +11984,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer: (createAnswerRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createAnswer", "createAnswerRequest", createAnswerRequest);
           const localVarPath = `/answers`;
@@ -11802,6 +12013,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion: (createChatCompletionRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createChatCompletion", "createChatCompletionRequest", createChatCompletionRequest);
           const localVarPath = `/chat/completions`;
@@ -11823,6 +12041,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification: (createClassificationRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createClassification", "createClassificationRequest", createClassificationRequest);
           const localVarPath = `/classifications`;
@@ -11844,6 +12070,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion: (createCompletionRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createCompletion", "createCompletionRequest", createCompletionRequest);
           const localVarPath = `/completions`;
@@ -11865,6 +12098,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit: (createEditRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createEdit", "createEditRequest", createEditRequest);
           const localVarPath = `/edits`;
@@ -11886,6 +12126,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding: (createEmbeddingRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createEmbedding", "createEmbeddingRequest", createEmbeddingRequest);
           const localVarPath = `/embeddings`;
@@ -11907,6 +12154,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile: (file, purpose, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createFile", "file", file);
           common_1.assertParamExists("createFile", "purpose", purpose);
@@ -11936,6 +12191,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune: (createFineTuneRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createFineTune", "createFineTuneRequest", createFineTuneRequest);
           const localVarPath = `/fine-tunes`;
@@ -11957,6 +12219,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage: (createImageRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImage", "createImageRequest", createImageRequest);
           const localVarPath = `/images/generations`;
@@ -11978,6 +12247,19 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit: (image, prompt, mask, n, size, responseFormat, user, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImageEdit", "image", image);
           common_1.assertParamExists("createImageEdit", "prompt", prompt);
@@ -12022,6 +12304,17 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation: (image, n, size, responseFormat, user, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImageVariation", "image", image);
           const localVarPath = `/images/variations`;
@@ -12059,6 +12352,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration: (createModerationRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createModeration", "createModerationRequest", createModerationRequest);
           const localVarPath = `/moderations`;
@@ -12080,6 +12380,15 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch: (engineId, createSearchRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createSearch", "engineId", engineId);
           common_1.assertParamExists("createSearch", "createSearchRequest", createSearchRequest);
@@ -12102,6 +12411,18 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription: (file, model, prompt, responseFormat, temperature, language, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createTranscription", "file", file);
           common_1.assertParamExists("createTranscription", "model", model);
@@ -12143,6 +12464,17 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation: (file, model, prompt, responseFormat, temperature, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createTranslation", "file", file);
           common_1.assertParamExists("createTranslation", "model", model);
@@ -12181,6 +12513,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("deleteFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -12200,6 +12539,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel: (model, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("deleteModel", "model", model);
           const localVarPath = `/models/{model}`.replace(`{${"model"}}`, encodeURIComponent(String(model)));
@@ -12219,6 +12565,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("downloadFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}/content`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -12238,6 +12591,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/engines`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -12256,6 +12616,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/files`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -12274,6 +12640,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents: (fineTuneId, stream4, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("listFineTuneEvents", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}/events`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -12296,6 +12670,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/fine-tunes`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -12314,6 +12694,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/models`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -12332,6 +12718,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine: (engineId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveEngine", "engineId", engineId);
           const localVarPath = `/engines/{engine_id}`.replace(`{${"engine_id"}}`, encodeURIComponent(String(engineId)));
@@ -12351,6 +12745,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -12370,6 +12771,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune: (fineTuneId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveFineTune", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -12389,6 +12797,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel: (model, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveModel", "model", model);
           const localVarPath = `/models/{model}`.replace(`{${"model"}}`, encodeURIComponent(String(model)));
@@ -12413,168 +12828,387 @@ var require_api = __commonJS({
     exports.OpenAIApiFp = function(configuration) {
       const localVarAxiosParamCreator = exports.OpenAIApiAxiosParamCreator(configuration);
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune(fineTuneId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.cancelFineTune(fineTuneId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer(createAnswerRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createAnswer(createAnswerRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion(createChatCompletionRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createChatCompletion(createChatCompletionRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification(createClassificationRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createClassification(createClassificationRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion(createCompletionRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createCompletion(createCompletionRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit(createEditRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createEdit(createEditRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding(createEmbeddingRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createEmbedding(createEmbeddingRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile(file, purpose, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createFile(file, purpose, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune(createFineTuneRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createFineTune(createFineTuneRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage(createImageRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImage(createImageRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImageEdit(image, prompt, mask, n, size, responseFormat, user, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation(image, n, size, responseFormat, user, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImageVariation(image, n, size, responseFormat, user, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration(createModerationRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createModeration(createModerationRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch(engineId, createSearchRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createSearch(engineId, createSearchRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createTranscription(file, model, prompt, responseFormat, temperature, language, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation(file, model, prompt, responseFormat, temperature, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createTranslation(file, model, prompt, responseFormat, temperature, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.deleteFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel(model, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.deleteModel(model, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.downloadFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listEngines(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFiles(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents(fineTuneId, stream4, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFineTuneEvents(fineTuneId, stream4, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFineTunes(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listModels(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine(engineId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveEngine(engineId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune(fineTuneId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveFineTune(fineTuneId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel(model, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveModel(model, options);
@@ -12586,174 +13220,640 @@ var require_api = __commonJS({
     exports.OpenAIApiFactory = function(configuration, basePath2, axios2) {
       const localVarFp = exports.OpenAIApiFp(configuration);
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune(fineTuneId, options) {
           return localVarFp.cancelFineTune(fineTuneId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer(createAnswerRequest, options) {
           return localVarFp.createAnswer(createAnswerRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion(createChatCompletionRequest, options) {
           return localVarFp.createChatCompletion(createChatCompletionRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification(createClassificationRequest, options) {
           return localVarFp.createClassification(createClassificationRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion(createCompletionRequest, options) {
           return localVarFp.createCompletion(createCompletionRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit(createEditRequest, options) {
           return localVarFp.createEdit(createEditRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding(createEmbeddingRequest, options) {
           return localVarFp.createEmbedding(createEmbeddingRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile(file, purpose, options) {
           return localVarFp.createFile(file, purpose, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune(createFineTuneRequest, options) {
           return localVarFp.createFineTune(createFineTuneRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage(createImageRequest, options) {
           return localVarFp.createImage(createImageRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
           return localVarFp.createImageEdit(image, prompt, mask, n, size, responseFormat, user, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation(image, n, size, responseFormat, user, options) {
           return localVarFp.createImageVariation(image, n, size, responseFormat, user, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration(createModerationRequest, options) {
           return localVarFp.createModeration(createModerationRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch(engineId, createSearchRequest, options) {
           return localVarFp.createSearch(engineId, createSearchRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
           return localVarFp.createTranscription(file, model, prompt, responseFormat, temperature, language, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation(file, model, prompt, responseFormat, temperature, options) {
           return localVarFp.createTranslation(file, model, prompt, responseFormat, temperature, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile(fileId, options) {
           return localVarFp.deleteFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel(model, options) {
           return localVarFp.deleteModel(model, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile(fileId, options) {
           return localVarFp.downloadFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines(options) {
           return localVarFp.listEngines(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles(options) {
           return localVarFp.listFiles(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents(fineTuneId, stream4, options) {
           return localVarFp.listFineTuneEvents(fineTuneId, stream4, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes(options) {
           return localVarFp.listFineTunes(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels(options) {
           return localVarFp.listModels(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine(engineId, options) {
           return localVarFp.retrieveEngine(engineId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile(fileId, options) {
           return localVarFp.retrieveFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune(fineTuneId, options) {
           return localVarFp.retrieveFineTune(fineTuneId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel(model, options) {
           return localVarFp.retrieveModel(model, options).then((request) => request(axios2, basePath2));
         }
       };
     };
     var OpenAIApi2 = class extends base_1.BaseAPI {
+      /**
+       *
+       * @summary Immediately cancel a fine-tune job.
+       * @param {string} fineTuneId The ID of the fine-tune job to cancel
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       cancelFineTune(fineTuneId, options) {
         return exports.OpenAIApiFp(this.configuration).cancelFineTune(fineTuneId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+       * @param {CreateAnswerRequest} createAnswerRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createAnswer(createAnswerRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createAnswer(createAnswerRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a completion for the chat message
+       * @param {CreateChatCompletionRequest} createChatCompletionRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createChatCompletion(createChatCompletionRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createChatCompletion(createChatCompletionRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+       * @param {CreateClassificationRequest} createClassificationRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createClassification(createClassificationRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createClassification(createClassificationRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a completion for the provided prompt and parameters
+       * @param {CreateCompletionRequest} createCompletionRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createCompletion(createCompletionRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createCompletion(createCompletionRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a new edit for the provided input, instruction, and parameters.
+       * @param {CreateEditRequest} createEditRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createEdit(createEditRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createEdit(createEditRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an embedding vector representing the input text.
+       * @param {CreateEmbeddingRequest} createEmbeddingRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createEmbedding(createEmbeddingRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createEmbedding(createEmbeddingRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+       * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+       * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createFile(file, purpose, options) {
         return exports.OpenAIApiFp(this.configuration).createFile(file, purpose, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+       * @param {CreateFineTuneRequest} createFineTuneRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createFineTune(createFineTuneRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createFineTune(createFineTuneRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an image given a prompt.
+       * @param {CreateImageRequest} createImageRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImage(createImageRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createImage(createImageRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an edited or extended image given an original image and a prompt.
+       * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+       * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+       * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+       * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+       * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+       * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+       * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
         return exports.OpenAIApiFp(this.configuration).createImageEdit(image, prompt, mask, n, size, responseFormat, user, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a variation of a given image.
+       * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+       * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+       * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+       * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+       * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImageVariation(image, n, size, responseFormat, user, options) {
         return exports.OpenAIApiFp(this.configuration).createImageVariation(image, n, size, responseFormat, user, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Classifies if text violates OpenAI\'s Content Policy
+       * @param {CreateModerationRequest} createModerationRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createModeration(createModerationRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createModeration(createModerationRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+       * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+       * @param {CreateSearchRequest} createSearchRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createSearch(engineId, createSearchRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createSearch(engineId, createSearchRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Transcribes audio into the input language.
+       * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+       * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+       * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+       * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+       * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
         return exports.OpenAIApiFp(this.configuration).createTranscription(file, model, prompt, responseFormat, temperature, language, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Translates audio into into English.
+       * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+       * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+       * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+       * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createTranslation(file, model, prompt, responseFormat, temperature, options) {
         return exports.OpenAIApiFp(this.configuration).createTranslation(file, model, prompt, responseFormat, temperature, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Delete a file.
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       deleteFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).deleteFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+       * @param {string} model The model to delete
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       deleteModel(model, options) {
         return exports.OpenAIApiFp(this.configuration).deleteModel(model, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns the contents of the specified file
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       downloadFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).downloadFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listEngines(options) {
         return exports.OpenAIApiFp(this.configuration).listEngines(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns a list of files that belong to the user\'s organization.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFiles(options) {
         return exports.OpenAIApiFp(this.configuration).listFiles(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Get fine-grained status updates for a fine-tune job.
+       * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+       * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFineTuneEvents(fineTuneId, stream4, options) {
         return exports.OpenAIApiFp(this.configuration).listFineTuneEvents(fineTuneId, stream4, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary List your organization\'s fine-tuning jobs
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFineTunes(options) {
         return exports.OpenAIApiFp(this.configuration).listFineTunes(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listModels(options) {
         return exports.OpenAIApiFp(this.configuration).listModels(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+       * @param {string} engineId The ID of the engine to use for this request
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveEngine(engineId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveEngine(engineId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns information about a specific file.
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+       * @param {string} fineTuneId The ID of the fine-tune job
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveFineTune(fineTuneId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveFineTune(fineTuneId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+       * @param {string} model The ID of the model to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveModel(model, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveModel(model, options).then((request) => request(this.axios, this.basePath));
       }
@@ -21649,11 +22749,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path) {
-      if (!path || typeof path !== "string") {
+    function lookup(path3) {
+      if (!path3 || typeof path3 !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path).toLowerCase().substr(1);
+      var extension2 = extname("x." + path3).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -21910,7 +23010,7 @@ var require_form_data = __commonJS({
   "node_modules/form-data/lib/form_data.js"(exports, module2) {
     var CombinedStream = require_combined_stream();
     var util2 = require("util");
-    var path = require("path");
+    var path3 = require("path");
     var http2 = require("http");
     var https2 = require("https");
     var parseUrl = require("url").parse;
@@ -22009,7 +23109,9 @@ var require_form_data = __commonJS({
       var contentType = this._getContentType(value, options);
       var contents = "";
       var headers = {
+        // add custom disposition as third element or keep it two elements if not
         "Content-Disposition": ["form-data", 'name="' + field + '"'].concat(contentDisposition || []),
+        // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType || [])
       };
       if (typeof options.header == "object") {
@@ -22035,11 +23137,11 @@ var require_form_data = __commonJS({
     FormData3.prototype._getContentDisposition = function(value, options) {
       var filename, contentDisposition;
       if (typeof options.filepath === "string") {
-        filename = path.normalize(options.filepath).replace(/\\/g, "/");
+        filename = path3.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value.name || value.path) {
-        filename = path.basename(options.filename || value.name || value.path);
+        filename = path3.basename(options.filename || value.name || value.path);
       } else if (value.readable && value.hasOwnProperty("httpVersion")) {
-        filename = path.basename(value.client._httpMessage.path || "");
+        filename = path3.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
         contentDisposition = 'filename="' + filename + '"';
@@ -22246,6 +23348,16 @@ var require_configuration = __commonJS({
           this.formDataCtor = require_form_data();
         }
       }
+      /**
+       * Check if the given MIME is a JSON MIME.
+       * JSON MIME examples:
+       *   application/json
+       *   application/json; charset=UTF8
+       *   APPLICATION/JSON
+       *   application/vnd.company+json
+       * @param mime - MIME (Multipurpose Internet Mail Extensions)
+       * @return True if the given MIME is JSON, false otherwise.
+       */
       isJsonMime(mime) {
         const jsonMime = new RegExp("^(application/json|[^;/ 	]+/[^;/ 	]+[+]json)[ 	]*(;.*)?$", "i");
         return mime !== null && (jsonMime.test(mime) || mime.toLowerCase() === "application/json-patch+json");
@@ -22256,7 +23368,7 @@ var require_configuration = __commonJS({
 });
 
 // node_modules/openai/dist/index.js
-var require_dist2 = __commonJS({
+var require_dist = __commonJS({
   "node_modules/openai/dist/index.js"(exports) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o2, m3, k2, k22) {
@@ -22297,8 +23409,8 @@ var require_proxy_from_env = __commonJS({
     var stringEndsWith = String.prototype.endsWith || function(s) {
       return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
     };
-    function getProxyForUrl2(url2) {
-      var parsedUrl = typeof url2 === "string" ? parseUrl(url2) : url2 || {};
+    function getProxyForUrl2(url3) {
+      var parsedUrl = typeof url3 === "string" ? parseUrl(url3) : url3 || {};
       var proto2 = parsedUrl.protocol;
       var hostname = parsedUrl.host;
       var port = parsedUrl.port;
@@ -22311,14 +23423,14 @@ var require_proxy_from_env = __commonJS({
       if (!shouldProxy(hostname, port)) {
         return "";
       }
-      var proxy = getEnv("npm_config_" + proto2 + "_proxy") || getEnv(proto2 + "_proxy") || getEnv("npm_config_proxy") || getEnv("all_proxy");
+      var proxy = getEnv2("npm_config_" + proto2 + "_proxy") || getEnv2(proto2 + "_proxy") || getEnv2("npm_config_proxy") || getEnv2("all_proxy");
       if (proxy && proxy.indexOf("://") === -1) {
         proxy = proto2 + "://" + proxy;
       }
       return proxy;
     }
     function shouldProxy(hostname, port) {
-      var NO_PROXY = (getEnv("npm_config_no_proxy") || getEnv("no_proxy")).toLowerCase();
+      var NO_PROXY = (getEnv2("npm_config_no_proxy") || getEnv2("no_proxy")).toLowerCase();
       if (!NO_PROXY) {
         return true;
       }
@@ -22344,7 +23456,7 @@ var require_proxy_from_env = __commonJS({
         return !stringEndsWith.call(hostname, parsedProxyHostname);
       });
     }
-    function getEnv(key) {
+    function getEnv2(key) {
       return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
     }
     exports.getProxyForUrl = getProxyForUrl2;
@@ -22355,42 +23467,49 @@ var require_proxy_from_env = __commonJS({
 var require_ini = __commonJS({
   "node_modules/ini/lib/ini.js"(exports, module2) {
     var { hasOwnProperty: hasOwnProperty2 } = Object.prototype;
-    var eol = typeof process !== "undefined" && process.platform === "win32" ? "\r\n" : "\n";
-    var encode3 = (obj, opt) => {
-      const children = [];
-      let out = "";
+    var encode3 = (obj, opt = {}) => {
       if (typeof opt === "string") {
-        opt = {
-          section: opt,
-          whitespace: false
-        };
-      } else {
-        opt = opt || /* @__PURE__ */ Object.create(null);
-        opt.whitespace = opt.whitespace === true;
+        opt = { section: opt };
       }
+      opt.align = opt.align === true;
+      opt.newline = opt.newline === true;
+      opt.sort = opt.sort === true;
+      opt.whitespace = opt.whitespace === true || opt.align === true;
+      opt.platform = opt.platform || typeof process !== "undefined" && process.platform;
+      opt.bracketedArray = opt.bracketedArray !== false;
+      const eol = opt.platform === "win32" ? "\r\n" : "\n";
       const separator = opt.whitespace ? " = " : "=";
-      for (const k2 of Object.keys(obj)) {
+      const children = [];
+      const keys = opt.sort ? Object.keys(obj).sort() : Object.keys(obj);
+      let padToChars = 0;
+      if (opt.align) {
+        padToChars = safe(
+          keys.filter((k2) => obj[k2] === null || Array.isArray(obj[k2]) || typeof obj[k2] !== "object").map((k2) => Array.isArray(obj[k2]) ? `${k2}[]` : k2).concat([""]).reduce((a2, b) => safe(a2).length >= safe(b).length ? a2 : b)
+        ).length;
+      }
+      let out = "";
+      const arraySuffix = opt.bracketedArray ? "[]" : "";
+      for (const k2 of keys) {
         const val = obj[k2];
         if (val && Array.isArray(val)) {
           for (const item of val) {
-            out += safe(k2 + "[]") + separator + safe(item) + eol;
+            out += safe(`${k2}${arraySuffix}`).padEnd(padToChars, " ") + separator + safe(item) + eol;
           }
         } else if (val && typeof val === "object") {
           children.push(k2);
         } else {
-          out += safe(k2) + separator + safe(val) + eol;
+          out += safe(k2).padEnd(padToChars, " ") + separator + safe(val) + eol;
         }
       }
       if (opt.section && out.length) {
-        out = "[" + safe(opt.section) + "]" + eol + out;
+        out = "[" + safe(opt.section) + "]" + (opt.newline ? eol + eol : eol) + out;
       }
       for (const k2 of children) {
-        const nk = dotSplit(k2).join("\\.");
+        const nk = splitSections(k2, ".").join("\\.");
         const section = (opt.section ? opt.section + "." : "") + nk;
-        const { whitespace } = opt;
         const child = encode3(obj[k2], {
-          section,
-          whitespace
+          ...opt,
+          section
         });
         if (out.length && child.length) {
           out += eol;
@@ -22399,15 +23518,35 @@ var require_ini = __commonJS({
       }
       return out;
     };
-    var dotSplit = (str) => str.replace(/\1/g, "LITERAL\\1LITERAL").replace(/\\\./g, "").split(/\./).map((part) => part.replace(/\1/g, "\\.").replace(/\2LITERAL\\1LITERAL\2/g, ""));
-    var decode = (str) => {
+    function splitSections(str, separator) {
+      var lastMatchIndex = 0;
+      var lastSeparatorIndex = 0;
+      var nextIndex = 0;
+      var sections = [];
+      do {
+        nextIndex = str.indexOf(separator, lastMatchIndex);
+        if (nextIndex !== -1) {
+          lastMatchIndex = nextIndex + separator.length;
+          if (nextIndex > 0 && str[nextIndex - 1] === "\\") {
+            continue;
+          }
+          sections.push(str.slice(lastSeparatorIndex, nextIndex));
+          lastSeparatorIndex = nextIndex + separator.length;
+        }
+      } while (nextIndex !== -1);
+      sections.push(str.slice(lastSeparatorIndex));
+      return sections;
+    }
+    var decode = (str, opt = {}) => {
+      opt.bracketedArray = opt.bracketedArray !== false;
       const out = /* @__PURE__ */ Object.create(null);
       let p2 = out;
       let section = null;
-      const re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i;
+      const re = /^\[([^\]]*)\]\s*$|^([^=]+)(=(.*))?$/i;
       const lines = str.split(/[\r\n]+/g);
+      const duplicates = {};
       for (const line of lines) {
-        if (!line || line.match(/^\s*[;#]/)) {
+        if (!line || line.match(/^\s*[;#]/) || line.match(/^\s*$/)) {
           continue;
         }
         const match = line.match(re);
@@ -22424,7 +23563,13 @@ var require_ini = __commonJS({
           continue;
         }
         const keyRaw = unsafe(match[2]);
-        const isArray2 = keyRaw.length > 2 && keyRaw.slice(-2) === "[]";
+        let isArray2;
+        if (opt.bracketedArray) {
+          isArray2 = keyRaw.length > 2 && keyRaw.slice(-2) === "[]";
+        } else {
+          duplicates[keyRaw] = (duplicates?.[keyRaw] || 0) + 1;
+          isArray2 = duplicates[keyRaw] > 1;
+        }
         const key = isArray2 ? keyRaw.slice(0, -2) : keyRaw;
         if (key === "__proto__") {
           continue;
@@ -22449,7 +23594,7 @@ var require_ini = __commonJS({
         if (!hasOwnProperty2.call(out, k2) || typeof out[k2] !== "object" || Array.isArray(out[k2])) {
           continue;
         }
-        const parts = dotSplit(k2);
+        const parts = splitSections(k2, ".");
         p2 = out;
         const l = parts.pop();
         const nl = l.replace(/\\\./g, ".");
@@ -22535,14 +23680,14 @@ var require_package2 = __commonJS({
   "node_modules/dotenv/package.json"(exports, module2) {
     module2.exports = {
       name: "dotenv",
-      version: "16.0.3",
+      version: "16.1.4",
       description: "Loads environment variables from .env file",
       main: "lib/main.js",
       types: "lib/main.d.ts",
       exports: {
         ".": {
-          require: "./lib/main.js",
           types: "./lib/main.d.ts",
+          require: "./lib/main.js",
           default: "./lib/main.js"
         },
         "./config": "./config.js",
@@ -22566,6 +23711,7 @@ var require_package2 = __commonJS({
         type: "git",
         url: "git://github.com/motdotla/dotenv.git"
       },
+      funding: "https://github.com/motdotla/dotenv?sponsor=1",
       keywords: [
         "dotenv",
         "env",
@@ -22578,19 +23724,22 @@ var require_package2 = __commonJS({
       readmeFilename: "README.md",
       license: "BSD-2-Clause",
       devDependencies: {
-        "@types/node": "^17.0.9",
+        "@definitelytyped/dtslint": "^0.0.133",
+        "@types/node": "^18.11.3",
         decache: "^4.6.1",
-        dtslint: "^3.7.0",
-        sinon: "^12.0.1",
-        standard: "^16.0.4",
+        sinon: "^14.0.1",
+        standard: "^17.0.0",
         "standard-markdown": "^7.1.0",
-        "standard-version": "^9.3.2",
-        tap: "^15.1.6",
+        "standard-version": "^9.5.0",
+        tap: "^16.3.0",
         tar: "^6.1.11",
-        typescript: "^4.5.4"
+        typescript: "^4.8.4"
       },
       engines: {
         node: ">=12"
+      },
+      browser: {
+        fs: false
       }
     };
   }
@@ -22600,12 +23749,13 @@ var require_package2 = __commonJS({
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports, module2) {
     var fs = require("fs");
-    var path = require("path");
-    var os2 = require("os");
+    var path3 = require("path");
+    var os3 = require("os");
+    var crypto4 = require("crypto");
     var packageJson = require_package2();
-    var version = packageJson.version;
+    var version2 = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
-    function parse(src) {
+    function parse2(src) {
       const obj = {};
       let lines = src.toString();
       lines = lines.replace(/\r\n?/mg, "\n");
@@ -22624,17 +23774,89 @@ var require_main = __commonJS({
       }
       return obj;
     }
+    function _parseVault(options) {
+      const vaultPath = _vaultPath(options);
+      const result = DotenvModule.configDotenv({ path: vaultPath });
+      if (!result.parsed) {
+        throw new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
+      }
+      const keys = _dotenvKey().split(",");
+      const length = keys.length;
+      let decrypted;
+      for (let i2 = 0; i2 < length; i2++) {
+        try {
+          const key = keys[i2].trim();
+          const attrs = _instructions(result, key);
+          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
+          break;
+        } catch (error) {
+          if (i2 + 1 >= length) {
+            throw error;
+          }
+        }
+      }
+      return DotenvModule.parse(decrypted);
+    }
     function _log(message) {
-      console.log(`[dotenv@${version}][DEBUG] ${message}`);
+      console.log(`[dotenv@${version2}][INFO] ${message}`);
+    }
+    function _warn(message) {
+      console.log(`[dotenv@${version2}][WARN] ${message}`);
+    }
+    function _debug(message) {
+      console.log(`[dotenv@${version2}][DEBUG] ${message}`);
+    }
+    function _dotenvKey() {
+      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+        return process.env.DOTENV_KEY;
+      }
+      return "";
+    }
+    function _instructions(result, dotenvKey) {
+      let uri;
+      try {
+        uri = new URL(dotenvKey);
+      } catch (error) {
+        if (error.code === "ERR_INVALID_URL") {
+          throw new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenv.org/vault/.env.vault?environment=development");
+        }
+        throw error;
+      }
+      const key = uri.password;
+      if (!key) {
+        throw new Error("INVALID_DOTENV_KEY: Missing key part");
+      }
+      const environment = uri.searchParams.get("environment");
+      if (!environment) {
+        throw new Error("INVALID_DOTENV_KEY: Missing environment part");
+      }
+      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
+      const ciphertext = result.parsed[environmentKey];
+      if (!ciphertext) {
+        throw new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
+      }
+      return { ciphertext, key };
+    }
+    function _vaultPath(options) {
+      let dotenvPath = path3.resolve(process.cwd(), ".env");
+      if (options && options.path && options.path.length > 0) {
+        dotenvPath = options.path;
+      }
+      return dotenvPath.endsWith(".vault") ? dotenvPath : `${dotenvPath}.vault`;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path.join(os2.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path3.join(os3.homedir(), envPath.slice(1)) : envPath;
     }
-    function config4(options) {
-      let dotenvPath = path.resolve(process.cwd(), ".env");
+    function _configVault(options) {
+      _log("Loading env from encrypted .env.vault");
+      const parsed = DotenvModule._parseVault(options);
+      DotenvModule.populate(process.env, parsed, options);
+      return { parsed };
+    }
+    function configDotenv(options) {
+      let dotenvPath = path3.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       const debug = Boolean(options && options.debug);
-      const override = Boolean(options && options.override);
       if (options) {
         if (options.path != null) {
           dotenvPath = _resolveHome(options.path);
@@ -22645,36 +23867,92 @@ var require_main = __commonJS({
       }
       try {
         const parsed = DotenvModule.parse(fs.readFileSync(dotenvPath, { encoding }));
-        Object.keys(parsed).forEach(function(key) {
-          if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
-            process.env[key] = parsed[key];
-          } else {
-            if (override === true) {
-              process.env[key] = parsed[key];
-            }
-            if (debug) {
-              if (override === true) {
-                _log(`"${key}" is already defined in \`process.env\` and WAS overwritten`);
-              } else {
-                _log(`"${key}" is already defined in \`process.env\` and was NOT overwritten`);
-              }
-            }
-          }
-        });
+        DotenvModule.populate(process.env, parsed, options);
         return { parsed };
       } catch (e2) {
         if (debug) {
-          _log(`Failed to load ${dotenvPath} ${e2.message}`);
+          _debug(`Failed to load ${dotenvPath} ${e2.message}`);
         }
         return { error: e2 };
       }
     }
+    function config4(options) {
+      const vaultPath = _vaultPath(options);
+      if (_dotenvKey().length === 0) {
+        return DotenvModule.configDotenv(options);
+      }
+      if (!fs.existsSync(vaultPath)) {
+        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        return DotenvModule.configDotenv(options);
+      }
+      return DotenvModule._configVault(options);
+    }
+    function decrypt(encrypted, keyStr) {
+      const key = Buffer.from(keyStr.slice(-64), "hex");
+      let ciphertext = Buffer.from(encrypted, "base64");
+      const nonce = ciphertext.slice(0, 12);
+      const authTag = ciphertext.slice(-16);
+      ciphertext = ciphertext.slice(12, -16);
+      try {
+        const aesgcm = crypto4.createDecipheriv("aes-256-gcm", key, nonce);
+        aesgcm.setAuthTag(authTag);
+        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
+      } catch (error) {
+        const isRange = error instanceof RangeError;
+        const invalidKeyLength = error.message === "Invalid key length";
+        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
+        if (isRange || invalidKeyLength) {
+          const msg = "INVALID_DOTENV_KEY: It must be 64 characters long (or more)";
+          throw new Error(msg);
+        } else if (decryptionFailed) {
+          const msg = "DECRYPTION_FAILED: Please check your DOTENV_KEY";
+          throw new Error(msg);
+        } else {
+          console.error("Error: ", error.code);
+          console.error("Error: ", error.message);
+          throw error;
+        }
+      }
+    }
+    function populate(processEnv, parsed, options = {}) {
+      const debug = Boolean(options && options.debug);
+      const override = Boolean(options && options.override);
+      if (typeof parsed !== "object") {
+        throw new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
+      }
+      for (const key of Object.keys(parsed)) {
+        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+          if (override === true) {
+            processEnv[key] = parsed[key];
+          }
+          if (debug) {
+            if (override === true) {
+              _debug(`"${key}" is already defined and WAS overwritten`);
+            } else {
+              _debug(`"${key}" is already defined and was NOT overwritten`);
+            }
+          }
+        } else {
+          processEnv[key] = parsed[key];
+        }
+      }
+    }
     var DotenvModule = {
+      configDotenv,
+      _configVault,
+      _parseVault,
       config: config4,
-      parse
+      decrypt,
+      parse: parse2,
+      populate
     };
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
     module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
     module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
     module2.exports = DotenvModule;
   }
 });
@@ -22810,6 +24088,11 @@ var require_tiktoken_bg = __commonJS({
       }
     }
     var Tiktoken2 = class {
+      /**
+       * @param {string} tiktoken_bfe
+       * @param {any} special_tokens
+       * @param {string} pat_str
+       */
       constructor(tiktoken_bfe, special_tokens, pat_str) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22820,6 +24103,7 @@ var require_tiktoken_bg = __commonJS({
         const ret = wasm.tiktoken_new(ptr0, len0, addHeapObject(special_tokens), ptr1, len1);
         return Tiktoken2.__wrap(ret);
       }
+      /** @returns {string | undefined} */
       get name() {
         try {
           const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -22852,6 +24136,12 @@ var require_tiktoken_bg = __commonJS({
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_tiktoken_free(ptr);
       }
+      /**
+       * @param {string} text
+       * @param {any} allowed_special
+       * @param {any} disallowed_special
+       * @returns {Uint32Array}
+       */
       encode(text, allowed_special, disallowed_special) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22867,13 +24157,17 @@ var require_tiktoken_bg = __commonJS({
           if (r3) {
             throw takeObject(r2);
           }
-          var v1 = getArrayU32FromWasm0(r0, r1).slice();
+          var v12 = getArrayU32FromWasm0(r0, r1).slice();
           wasm.__wbindgen_export_2(r0, r1 * 4);
-          return v1;
+          return v12;
         } finally {
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {string} text
+       * @returns {Uint32Array}
+       */
       encode_ordinary(text) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22884,13 +24178,19 @@ var require_tiktoken_bg = __commonJS({
           wasm.tiktoken_encode_ordinary(retptr, this.ptr, ptr0, len0);
           var r0 = getInt32Memory0()[retptr / 4 + 0];
           var r1 = getInt32Memory0()[retptr / 4 + 1];
-          var v1 = getArrayU32FromWasm0(r0, r1).slice();
+          var v12 = getArrayU32FromWasm0(r0, r1).slice();
           wasm.__wbindgen_export_2(r0, r1 * 4);
-          return v1;
+          return v12;
         } finally {
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {string} text
+       * @param {any} allowed_special
+       * @param {any} disallowed_special
+       * @returns {any}
+       */
       encode_with_unstable(text, allowed_special, disallowed_special) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22910,6 +24210,10 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {Uint8Array} bytes
+       * @returns {number}
+       */
       encode_single_token(bytes) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22918,6 +24222,10 @@ var require_tiktoken_bg = __commonJS({
         const ret = wasm.tiktoken_encode_single_token(this.ptr, ptr0, len0);
         return ret >>> 0;
       }
+      /**
+       * @param {Uint32Array} tokens
+       * @returns {Uint8Array}
+       */
       decode(tokens) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22928,13 +24236,17 @@ var require_tiktoken_bg = __commonJS({
           wasm.tiktoken_decode(retptr, this.ptr, ptr0, len0);
           var r0 = getInt32Memory0()[retptr / 4 + 0];
           var r1 = getInt32Memory0()[retptr / 4 + 1];
-          var v1 = getArrayU8FromWasm0(r0, r1).slice();
+          var v12 = getArrayU8FromWasm0(r0, r1).slice();
           wasm.__wbindgen_export_2(r0, r1 * 1);
-          return v1;
+          return v12;
         } finally {
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {number} token
+       * @returns {Uint8Array}
+       */
       decode_single_token_bytes(token) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -22950,6 +24262,7 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /** @returns {any} */
       token_byte_values() {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -23003,13 +24316,13 @@ var require_tiktoken = __commonJS({
     var wasm = require_tiktoken_bg();
     var imports = {};
     imports["./tiktoken_bg.js"] = wasm;
-    var path = require("path");
+    var path3 = require("path");
     var fs = require("fs");
-    var candidates = __dirname.split(path.sep).reduce((memo, _2, index, array) => {
-      const prefix = array.slice(0, index + 1).join(path.sep) + path.sep;
-      if (!prefix.includes("node_modules" + path.sep)) {
+    var candidates = __dirname.split(path3.sep).reduce((memo, _2, index, array) => {
+      const prefix = array.slice(0, index + 1).join(path3.sep) + path3.sep;
+      if (!prefix.includes("node_modules" + path3.sep)) {
         memo.unshift(
-          path.join(
+          path3.join(
             prefix,
             "node_modules",
             "@dqbd",
@@ -23021,7 +24334,7 @@ var require_tiktoken = __commonJS({
       }
       return memo;
     }, []);
-    candidates.unshift(path.join(__dirname, "./tiktoken_bg.wasm"));
+    candidates.unshift(path3.join(__dirname, "./tiktoken_bg.wasm"));
     var bytes = null;
     for (const candidate of candidates) {
       try {
@@ -23045,7 +24358,7 @@ var require_windows = __commonJS({
     module2.exports = isexe;
     isexe.sync = sync;
     var fs = require("fs");
-    function checkPathExt(path, options) {
+    function checkPathExt(path3, options) {
       var pathext = options.pathExt !== void 0 ? options.pathExt : process.env.PATHEXT;
       if (!pathext) {
         return true;
@@ -23056,25 +24369,25 @@ var require_windows = __commonJS({
       }
       for (var i2 = 0; i2 < pathext.length; i2++) {
         var p2 = pathext[i2].toLowerCase();
-        if (p2 && path.substr(-p2.length).toLowerCase() === p2) {
+        if (p2 && path3.substr(-p2.length).toLowerCase() === p2) {
           return true;
         }
       }
       return false;
     }
-    function checkStat(stat, path, options) {
+    function checkStat(stat, path3, options) {
       if (!stat.isSymbolicLink() && !stat.isFile()) {
         return false;
       }
-      return checkPathExt(path, options);
+      return checkPathExt(path3, options);
     }
-    function isexe(path, options, cb) {
-      fs.stat(path, function(er, stat) {
-        cb(er, er ? false : checkStat(stat, path, options));
+    function isexe(path3, options, cb) {
+      fs.stat(path3, function(er, stat) {
+        cb(er, er ? false : checkStat(stat, path3, options));
       });
     }
-    function sync(path, options) {
-      return checkStat(fs.statSync(path), path, options);
+    function sync(path3, options) {
+      return checkStat(fs.statSync(path3), path3, options);
     }
   }
 });
@@ -23085,13 +24398,13 @@ var require_mode = __commonJS({
     module2.exports = isexe;
     isexe.sync = sync;
     var fs = require("fs");
-    function isexe(path, options, cb) {
-      fs.stat(path, function(er, stat) {
+    function isexe(path3, options, cb) {
+      fs.stat(path3, function(er, stat) {
         cb(er, er ? false : checkStat(stat, options));
       });
     }
-    function sync(path, options) {
-      return checkStat(fs.statSync(path), options);
+    function sync(path3, options) {
+      return checkStat(fs.statSync(path3), options);
     }
     function checkStat(stat, options) {
       return stat.isFile() && checkMode(stat, options);
@@ -23124,7 +24437,7 @@ var require_isexe = __commonJS({
     }
     module2.exports = isexe;
     isexe.sync = sync;
-    function isexe(path, options, cb) {
+    function isexe(path3, options, cb) {
       if (typeof options === "function") {
         cb = options;
         options = {};
@@ -23134,7 +24447,7 @@ var require_isexe = __commonJS({
           throw new TypeError("callback not provided");
         }
         return new Promise(function(resolve, reject) {
-          isexe(path, options || {}, function(er, is) {
+          isexe(path3, options || {}, function(er, is) {
             if (er) {
               reject(er);
             } else {
@@ -23143,7 +24456,7 @@ var require_isexe = __commonJS({
           });
         });
       }
-      core2(path, options || {}, function(er, is) {
+      core2(path3, options || {}, function(er, is) {
         if (er) {
           if (er.code === "EACCES" || options && options.ignoreErrors) {
             er = null;
@@ -23153,9 +24466,9 @@ var require_isexe = __commonJS({
         cb(er, is);
       });
     }
-    function sync(path, options) {
+    function sync(path3, options) {
       try {
-        return core2.sync(path, options || {});
+        return core2.sync(path3, options || {});
       } catch (er) {
         if (options && options.ignoreErrors || er.code === "EACCES") {
           return false;
@@ -23171,15 +24484,17 @@ var require_isexe = __commonJS({
 var require_which = __commonJS({
   "node_modules/which/which.js"(exports, module2) {
     var isWindows = process.platform === "win32" || process.env.OSTYPE === "cygwin" || process.env.OSTYPE === "msys";
-    var path = require("path");
+    var path3 = require("path");
     var COLON = isWindows ? ";" : ":";
     var isexe = require_isexe();
     var getNotFoundError = (cmd) => Object.assign(new Error(`not found: ${cmd}`), { code: "ENOENT" });
     var getPathInfo = (cmd, opt) => {
       const colon = opt.colon || COLON;
       const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? [""] : [
+        // windows always checks the cwd first
         ...isWindows ? [process.cwd()] : [],
-        ...(opt.path || process.env.PATH || "").split(colon)
+        ...(opt.path || process.env.PATH || /* istanbul ignore next: very unusual */
+        "").split(colon)
       ];
       const pathExtExe = isWindows ? opt.pathExt || process.env.PATHEXT || ".EXE;.CMD;.BAT;.COM" : "";
       const pathExt = isWindows ? pathExtExe.split(colon) : [""];
@@ -23207,7 +24522,7 @@ var require_which = __commonJS({
           return opt.all && found.length ? resolve(found) : reject(getNotFoundError(cmd));
         const ppRaw = pathEnv[i2];
         const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path.join(pathPart, cmd);
+        const pCmd = path3.join(pathPart, cmd);
         const p2 = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
         resolve(subStep(p2, i2, 0));
       });
@@ -23234,7 +24549,7 @@ var require_which = __commonJS({
       for (let i2 = 0; i2 < pathEnv.length; i2++) {
         const ppRaw = pathEnv[i2];
         const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path.join(pathPart, cmd);
+        const pCmd = path3.join(pathPart, cmd);
         const p2 = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
         for (let j2 = 0; j2 < pathExt.length; j2++) {
           const cur = p2 + pathExt[j2];
@@ -23282,7 +24597,7 @@ var require_path_key = __commonJS({
 var require_resolveCommand = __commonJS({
   "node_modules/cross-spawn/lib/util/resolveCommand.js"(exports, module2) {
     "use strict";
-    var path = require("path");
+    var path3 = require("path");
     var which = require_which();
     var getPathKey = require_path_key();
     function resolveCommandAttempt(parsed, withoutPathExt) {
@@ -23300,7 +24615,7 @@ var require_resolveCommand = __commonJS({
       try {
         resolved = which.sync(parsed.command, {
           path: env2[getPathKey({ env: env2 })],
-          pathExt: withoutPathExt ? path.delimiter : void 0
+          pathExt: withoutPathExt ? path3.delimiter : void 0
         });
       } catch (e2) {
       } finally {
@@ -23309,7 +24624,7 @@ var require_resolveCommand = __commonJS({
         }
       }
       if (resolved) {
-        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : "", resolved);
+        resolved = path3.resolve(hasCustomCwd ? parsed.options.cwd : "", resolved);
       }
       return resolved;
     }
@@ -23363,8 +24678,8 @@ var require_shebang_command = __commonJS({
       if (!match) {
         return null;
       }
-      const [path, argument] = match[0].replace(/#! ?/, "").split(" ");
-      const binary = path.split("/").pop();
+      const [path3, argument] = match[0].replace(/#! ?/, "").split(" ");
+      const binary = path3.split("/").pop();
       if (binary === "env") {
         return argument;
       }
@@ -23396,10 +24711,10 @@ var require_readShebang = __commonJS({
 });
 
 // node_modules/cross-spawn/lib/parse.js
-var require_parse2 = __commonJS({
+var require_parse = __commonJS({
   "node_modules/cross-spawn/lib/parse.js"(exports, module2) {
     "use strict";
-    var path = require("path");
+    var path3 = require("path");
     var resolveCommand = require_resolveCommand();
     var escape = require_escape();
     var readShebang = require_readShebang();
@@ -23424,7 +24739,7 @@ var require_parse2 = __commonJS({
       const needsShell = !isExecutableRegExp.test(commandFile);
       if (parsed.options.forceShell || needsShell) {
         const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
-        parsed.command = path.normalize(parsed.command);
+        parsed.command = path3.normalize(parsed.command);
         parsed.command = escape.command(parsed.command);
         parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
         const shellCommand = [parsed.command].concat(parsed.args).join(" ");
@@ -23434,7 +24749,7 @@ var require_parse2 = __commonJS({
       }
       return parsed;
     }
-    function parse(command2, args, options) {
+    function parse2(command2, args, options) {
       if (args && !Array.isArray(args)) {
         options = args;
         args = null;
@@ -23453,7 +24768,7 @@ var require_parse2 = __commonJS({
       };
       return options.shell ? parsed : parseNonShell(parsed);
     }
-    module2.exports = parse;
+    module2.exports = parse2;
   }
 });
 
@@ -23512,16 +24827,16 @@ var require_cross_spawn = __commonJS({
   "node_modules/cross-spawn/index.js"(exports, module2) {
     "use strict";
     var cp = require("child_process");
-    var parse = require_parse2();
+    var parse2 = require_parse();
     var enoent = require_enoent();
     function spawn(command2, args, options) {
-      const parsed = parse(command2, args, options);
+      const parsed = parse2(command2, args, options);
       const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
       enoent.hookChildProcess(spawned, parsed);
       return spawned;
     }
     function spawnSync(command2, args, options) {
-      const parsed = parse(command2, args, options);
+      const parsed = parse2(command2, args, options);
       const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
       result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
       return result;
@@ -23529,7 +24844,7 @@ var require_cross_spawn = __commonJS({
     module2.exports = spawn;
     module2.exports.spawn = spawn;
     module2.exports.sync = spawnSync;
-    module2.exports._parse = parse;
+    module2.exports._parse = parse2;
     module2.exports._enoent = enoent;
   }
 });
@@ -23554,6 +24869,9 @@ var require_signals = __commonJS({
         "SIGSYS",
         "SIGQUIT",
         "SIGIOT"
+        // should detect profiler and enable/disable accordingly.
+        // see #21
+        // 'SIGPROF'
       );
     }
     if (process.platform === "linux") {
@@ -23571,11 +24889,11 @@ var require_signals = __commonJS({
 // node_modules/signal-exit/index.js
 var require_signal_exit = __commonJS({
   "node_modules/signal-exit/index.js"(exports, module2) {
-    var process3 = global.process;
-    var processOk = function(process4) {
-      return process4 && typeof process4 === "object" && typeof process4.removeListener === "function" && typeof process4.emit === "function" && typeof process4.reallyExit === "function" && typeof process4.listeners === "function" && typeof process4.kill === "function" && typeof process4.pid === "number" && typeof process4.on === "function";
+    var process6 = global.process;
+    var processOk = function(process7) {
+      return process7 && typeof process7 === "object" && typeof process7.removeListener === "function" && typeof process7.emit === "function" && typeof process7.reallyExit === "function" && typeof process7.listeners === "function" && typeof process7.kill === "function" && typeof process7.pid === "number" && typeof process7.on === "function";
     };
-    if (!processOk(process3)) {
+    if (!processOk(process6)) {
       module2.exports = function() {
         return function() {
         };
@@ -23583,15 +24901,15 @@ var require_signal_exit = __commonJS({
     } else {
       assert = require("assert");
       signals = require_signals();
-      isWin = /^win/i.test(process3.platform);
+      isWin = /^win/i.test(process6.platform);
       EE = require("events");
       if (typeof EE !== "function") {
         EE = EE.EventEmitter;
       }
-      if (process3.__signal_exit_emitter__) {
-        emitter = process3.__signal_exit_emitter__;
+      if (process6.__signal_exit_emitter__) {
+        emitter = process6.__signal_exit_emitter__;
       } else {
-        emitter = process3.__signal_exit_emitter__ = new EE();
+        emitter = process6.__signal_exit_emitter__ = new EE();
         emitter.count = 0;
         emitter.emitted = {};
       }
@@ -23628,12 +24946,12 @@ var require_signal_exit = __commonJS({
         loaded = false;
         signals.forEach(function(sig) {
           try {
-            process3.removeListener(sig, sigListeners[sig]);
+            process6.removeListener(sig, sigListeners[sig]);
           } catch (er) {
           }
         });
-        process3.emit = originalProcessEmit;
-        process3.reallyExit = originalProcessReallyExit;
+        process6.emit = originalProcessEmit;
+        process6.reallyExit = originalProcessReallyExit;
         emitter.count -= 1;
       };
       module2.exports.unload = unload;
@@ -23650,7 +24968,7 @@ var require_signal_exit = __commonJS({
           if (!processOk(global.process)) {
             return;
           }
-          var listeners = process3.listeners(sig);
+          var listeners = process6.listeners(sig);
           if (listeners.length === emitter.count) {
             unload();
             emit("exit", null, sig);
@@ -23658,7 +24976,7 @@ var require_signal_exit = __commonJS({
             if (isWin && sig === "SIGHUP") {
               sig = "SIGINT";
             }
-            process3.kill(process3.pid, sig);
+            process6.kill(process6.pid, sig);
           }
         };
       });
@@ -23674,35 +24992,36 @@ var require_signal_exit = __commonJS({
         emitter.count += 1;
         signals = signals.filter(function(sig) {
           try {
-            process3.on(sig, sigListeners[sig]);
+            process6.on(sig, sigListeners[sig]);
             return true;
           } catch (er) {
             return false;
           }
         });
-        process3.emit = processEmit;
-        process3.reallyExit = processReallyExit;
+        process6.emit = processEmit;
+        process6.reallyExit = processReallyExit;
       };
       module2.exports.load = load;
-      originalProcessReallyExit = process3.reallyExit;
+      originalProcessReallyExit = process6.reallyExit;
       processReallyExit = function processReallyExit2(code) {
         if (!processOk(global.process)) {
           return;
         }
-        process3.exitCode = code || 0;
-        emit("exit", process3.exitCode, null);
-        emit("afterexit", process3.exitCode, null);
-        originalProcessReallyExit.call(process3, process3.exitCode);
+        process6.exitCode = code || /* istanbul ignore next */
+        0;
+        emit("exit", process6.exitCode, null);
+        emit("afterexit", process6.exitCode, null);
+        originalProcessReallyExit.call(process6, process6.exitCode);
       };
-      originalProcessEmit = process3.emit;
+      originalProcessEmit = process6.emit;
       processEmit = function processEmit2(ev, arg) {
         if (ev === "exit" && processOk(global.process)) {
           if (arg !== void 0) {
-            process3.exitCode = arg;
+            process6.exitCode = arg;
           }
           var ret = originalProcessEmit.apply(this, arguments);
-          emit("exit", process3.exitCode, null);
-          emit("afterexit", process3.exitCode, null);
+          emit("exit", process6.exitCode, null);
+          emit("afterexit", process6.exitCode, null);
           return ret;
         } else {
           return originalProcessEmit.apply(this, arguments);
@@ -23867,7 +25186,7 @@ var require_merge_stream = __commonJS({
 });
 
 // src/github-action.ts
-var import_core3 = __toESM(require_core(), 1);
+var import_core4 = __toESM(require_core(), 1);
 var import_github = __toESM(require_github(), 1);
 var import_exec = __toESM(require_exec(), 1);
 
@@ -24000,7 +25319,7 @@ ${import_picocolors.default.gray(o)}  ${r2}
 };
 
 // src/generateCommitMessageFromGitDiff.ts
-var import_openai2 = __toESM(require_dist2(), 1);
+var import_openai2 = __toESM(require_dist(), 1);
 
 // node_modules/axios/lib/helpers/bind.js
 function bind(fn, thisArg) {
@@ -24054,8 +25373,9 @@ var isBlob = kindOfTest("Blob");
 var isFileList = kindOfTest("FileList");
 var isStream = (val) => isObject(val) && isFunction(val.pipe);
 var isFormData = (thing) => {
-  const pattern = "[object FormData]";
-  return thing && (typeof FormData === "function" && thing instanceof FormData || toString.call(thing) === pattern || isFunction(thing.toString) && thing.toString() === pattern);
+  let kind;
+  return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
+  kind === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
 };
 var isURLSearchParams = kindOfTest("URLSearchParams");
 var trim = (str) => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
@@ -24309,6 +25629,8 @@ var toJSONObject = (obj) => {
   };
   return visit(obj, 0);
 };
+var isAsyncFn = kindOfTest("AsyncFunction");
+var isThenable = (thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
 var utils_default = {
   isArray,
   isArrayBuffer,
@@ -24346,6 +25668,7 @@ var utils_default = {
   isHTMLForm,
   hasOwnProperty,
   hasOwnProp: hasOwnProperty,
+  // an alias to avoid ESLint no-prototype-builtins detection
   reduceDescriptors,
   freezeMethods,
   toObjectSet,
@@ -24358,7 +25681,9 @@ var utils_default = {
   ALPHABET,
   generateString,
   isSpecCompliantForm,
-  toJSONObject
+  toJSONObject,
+  isAsyncFn,
+  isThenable
 };
 
 // node_modules/axios/lib/core/AxiosError.js
@@ -24379,14 +25704,18 @@ function AxiosError(message, code, config4, request, response) {
 utils_default.inherits(AxiosError, Error, {
   toJSON: function toJSON() {
     return {
+      // Standard
       message: this.message,
       name: this.name,
+      // Microsoft
       description: this.description,
       number: this.number,
+      // Mozilla
       fileName: this.fileName,
       lineNumber: this.lineNumber,
       columnNumber: this.columnNumber,
       stack: this.stack,
+      // Axios
       config: utils_default.toJSONObject(this.config),
       code: this.code,
       status: this.response && this.response.status ? this.response.status : null
@@ -24408,6 +25737,7 @@ var descriptors = {};
   "ERR_CANCELED",
   "ERR_NOT_SUPPORT",
   "ERR_INVALID_URL"
+  // eslint-disable-next-line func-names
 ].forEach((code) => {
   descriptors[code] = { value: code };
 });
@@ -24439,10 +25769,10 @@ function isVisitable(thing) {
 function removeBrackets(key) {
   return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
 }
-function renderKey(path, key, dots) {
-  if (!path)
+function renderKey(path3, key, dots) {
+  if (!path3)
     return key;
-  return path.concat(key).map(function each(token, i2) {
+  return path3.concat(key).map(function each(token, i2) {
     token = removeBrackets(token);
     return !dots && i2 ? "[" + token + "]" : token;
   }).join(dots ? "." : "");
@@ -24488,9 +25818,9 @@ function toFormData(obj, formData, options) {
     }
     return value;
   }
-  function defaultVisitor(value, key, path) {
+  function defaultVisitor(value, key, path3) {
     let arr = value;
-    if (value && !path && typeof value === "object") {
+    if (value && !path3 && typeof value === "object") {
       if (utils_default.endsWith(key, "{}")) {
         key = metaTokens ? key : key.slice(0, -2);
         value = JSON.stringify(value);
@@ -24498,6 +25828,7 @@ function toFormData(obj, formData, options) {
         key = removeBrackets(key);
         arr.forEach(function each(el, index) {
           !(utils_default.isUndefined(el) || el === null) && formData.append(
+            // eslint-disable-next-line no-nested-ternary
             indexes === true ? renderKey([key], index, dots) : indexes === null ? key : key + "[]",
             convertValue(el)
           );
@@ -24508,7 +25839,7 @@ function toFormData(obj, formData, options) {
     if (isVisitable(value)) {
       return true;
     }
-    formData.append(renderKey(path, key, dots), convertValue(value));
+    formData.append(renderKey(path3, key, dots), convertValue(value));
     return false;
   }
   const stack = [];
@@ -24517,11 +25848,11 @@ function toFormData(obj, formData, options) {
     convertValue,
     isVisitable
   });
-  function build(value, path) {
+  function build(value, path3) {
     if (utils_default.isUndefined(value))
       return;
     if (stack.indexOf(value) !== -1) {
-      throw Error("Circular reference detected in " + path.join("."));
+      throw Error("Circular reference detected in " + path3.join("."));
     }
     stack.push(value);
     utils_default.forEach(value, function each(el, key) {
@@ -24529,11 +25860,11 @@ function toFormData(obj, formData, options) {
         formData,
         el,
         utils_default.isString(key) ? key.trim() : key,
-        path,
+        path3,
         exposedHelpers
       );
       if (result === true) {
-        build(el, path ? path.concat(key) : [key]);
+        build(el, path3 ? path3.concat(key) : [key]);
       }
     });
     stack.pop();
@@ -24583,9 +25914,9 @@ var AxiosURLSearchParams_default = AxiosURLSearchParams;
 function encode2(val) {
   return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
 }
-function buildURL(url2, params, options) {
+function buildURL(url3, params, options) {
   if (!params) {
-    return url2;
+    return url3;
   }
   const _encode = options && options.encode || encode2;
   const serializeFn = options && options.serialize;
@@ -24596,13 +25927,13 @@ function buildURL(url2, params, options) {
     serializedParams = utils_default.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams_default(params, options).toString(_encode);
   }
   if (serializedParams) {
-    const hashmarkIndex = url2.indexOf("#");
+    const hashmarkIndex = url3.indexOf("#");
     if (hashmarkIndex !== -1) {
-      url2 = url2.slice(0, hashmarkIndex);
+      url3 = url3.slice(0, hashmarkIndex);
     }
-    url2 += (url2.indexOf("?") === -1 ? "?" : "&") + serializedParams;
+    url3 += (url3.indexOf("?") === -1 ? "?" : "&") + serializedParams;
   }
-  return url2;
+  return url3;
 }
 
 // node_modules/axios/lib/core/InterceptorManager.js
@@ -24610,6 +25941,14 @@ var InterceptorManager = class {
   constructor() {
     this.handlers = [];
   }
+  /**
+   * Add a new interceptor to the stack
+   *
+   * @param {Function} fulfilled The function to handle `then` for a `Promise`
+   * @param {Function} rejected The function to handle `reject` for a `Promise`
+   *
+   * @return {Number} An ID used to remove interceptor later
+   */
   use(fulfilled, rejected, options) {
     this.handlers.push({
       fulfilled,
@@ -24619,16 +25958,38 @@ var InterceptorManager = class {
     });
     return this.handlers.length - 1;
   }
+  /**
+   * Remove an interceptor from the stack
+   *
+   * @param {Number} id The ID that was returned by `use`
+   *
+   * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+   */
   eject(id) {
     if (this.handlers[id]) {
       this.handlers[id] = null;
     }
   }
+  /**
+   * Clear all interceptors from the stack
+   *
+   * @returns {void}
+   */
   clear() {
     if (this.handlers) {
       this.handlers = [];
     }
   }
+  /**
+   * Iterate over all the registered interceptors
+   *
+   * This method is particularly useful for skipping over any
+   * interceptors that may have become `null` calling `eject`.
+   *
+   * @param {Function} fn The function to call for each interceptor
+   *
+   * @returns {void}
+   */
   forEach(fn) {
     utils_default.forEach(this.handlers, function forEachHandler(h2) {
       if (h2 !== null) {
@@ -24664,7 +26025,7 @@ var node_default = {
 // node_modules/axios/lib/helpers/toURLEncodedForm.js
 function toURLEncodedForm(data, options) {
   return toFormData_default(data, new node_default.classes.URLSearchParams(), Object.assign({
-    visitor: function(value, key, path, helpers) {
+    visitor: function(value, key, path3, helpers) {
       if (node_default.isNode && utils_default.isBuffer(value)) {
         this.append(key, value.toString("base64"));
         return false;
@@ -24693,10 +26054,10 @@ function arrayToObject(arr) {
   return obj;
 }
 function formDataToJSON(formData) {
-  function buildPath(path, value, target, index) {
-    let name = path[index++];
+  function buildPath(path3, value, target, index) {
+    let name = path3[index++];
     const isNumericKey = Number.isFinite(+name);
-    const isLast = index >= path.length;
+    const isLast = index >= path3.length;
     name = !name && utils_default.isArray(target) ? target.length : name;
     if (isLast) {
       if (utils_default.hasOwnProp(target, name)) {
@@ -24709,7 +26070,7 @@ function formDataToJSON(formData) {
     if (!target[name] || !utils_default.isObject(target[name])) {
       target[name] = [];
     }
-    const result = buildPath(path, value, target[name], index);
+    const result = buildPath(path3, value, target[name], index);
     if (result && utils_default.isArray(target[name])) {
       target[name] = arrayToObject(target[name]);
     }
@@ -24810,6 +26171,10 @@ var defaults = {
     }
     return data;
   }],
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
   timeout: 0,
   xsrfCookieName: "XSRF-TOKEN",
   xsrfHeaderName: "X-XSRF-TOKEN",
@@ -24901,9 +26266,7 @@ function parseTokens(str) {
   }
   return tokens;
 }
-function isValidHeaderName(str) {
-  return /^[-_a-zA-Z]+$/.test(str.trim());
-}
+var isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
 function matchHeaderValue(context2, value, header, filter2, isHeaderNameFilter) {
   if (utils_default.isFunction(filter2)) {
     return filter2.call(this, value, header);
@@ -25138,8 +26501,8 @@ function settle(resolve, reject, response) {
 }
 
 // node_modules/axios/lib/helpers/isAbsoluteURL.js
-function isAbsoluteURL(url2) {
-  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url2);
+function isAbsoluteURL(url3) {
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url3);
 }
 
 // node_modules/axios/lib/helpers/combineURLs.js
@@ -25164,11 +26527,11 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.3.4";
+var VERSION = "1.4.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
-function parseProtocol(url2) {
-  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
+function parseProtocol(url3) {
+  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url3);
   return match && match[1] || "";
 }
 
@@ -25542,6 +26905,21 @@ var ZlibHeaderTransformStream = class extends import_stream3.default.Transform {
 };
 var ZlibHeaderTransformStream_default = ZlibHeaderTransformStream;
 
+// node_modules/axios/lib/helpers/callbackify.js
+var callbackify = (fn, reducer) => {
+  return utils_default.isAsyncFn(fn) ? function(...args) {
+    const cb = args.pop();
+    fn.apply(this, args).then((value) => {
+      try {
+        reducer ? cb(null, ...reducer(value)) : cb(null, value);
+      } catch (err) {
+        cb(err);
+      }
+    }, cb);
+  } : fn;
+};
+var callbackify_default = callbackify;
+
 // node_modules/axios/lib/adapters/http.js
 var zlibOptions = {
   flush: import_zlib.default.constants.Z_SYNC_FLUSH,
@@ -25622,12 +27000,22 @@ var wrapAsync = (asyncExecutor) => {
 };
 var http_default = isHttpAdapterSupported && function httpAdapter(config4) {
   return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
-    let { data } = config4;
+    let { data, lookup, family } = config4;
     const { responseType, responseEncoding } = config4;
     const method = config4.method.toUpperCase();
     let isDone;
     let rejected = false;
     let req;
+    if (lookup && utils_default.isAsyncFn(lookup)) {
+      lookup = callbackify_default(lookup, (entry) => {
+        if (utils_default.isString(entry)) {
+          entry = [entry, entry.indexOf(".") < 0 ? 6 : 4];
+        } else if (!utils_default.isArray(entry)) {
+          throw new TypeError("lookup async function must return an array [ip: string, family: number]]");
+        }
+        return entry;
+      });
+    }
     const emitter = new import_events.default();
     const onFinished = () => {
       if (config4.cancelToken) {
@@ -25781,9 +27169,9 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config4) {
       auth = urlUsername + ":" + urlPassword;
     }
     auth && headers.delete("authorization");
-    let path;
+    let path3;
     try {
-      path = buildURL(
+      path3 = buildURL(
         parsed.pathname + parsed.search,
         config4.params,
         config4.paramsSerializer
@@ -25801,12 +27189,14 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config4) {
       false
     );
     const options = {
-      path,
+      path: path3,
       method,
       headers: headers.toJSON(),
       agents: { http: config4.httpAgent, https: config4.httpsAgent },
       auth,
       protocol,
+      family,
+      lookup,
       beforeRedirect: dispatchBeforeRedirect,
       beforeRedirects: {}
     };
@@ -26018,78 +27408,91 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config4) {
 };
 
 // node_modules/axios/lib/helpers/cookies.js
-var cookies_default = node_default.isStandardBrowserEnv ? function standardBrowserEnv() {
-  return {
-    write: function write(name, value, expires, path, domain, secure) {
-      const cookie = [];
-      cookie.push(name + "=" + encodeURIComponent(value));
-      if (utils_default.isNumber(expires)) {
-        cookie.push("expires=" + new Date(expires).toGMTString());
+var cookies_default = node_default.isStandardBrowserEnv ? (
+  // Standard browser envs support document.cookie
+  function standardBrowserEnv() {
+    return {
+      write: function write(name, value, expires, path3, domain, secure) {
+        const cookie = [];
+        cookie.push(name + "=" + encodeURIComponent(value));
+        if (utils_default.isNumber(expires)) {
+          cookie.push("expires=" + new Date(expires).toGMTString());
+        }
+        if (utils_default.isString(path3)) {
+          cookie.push("path=" + path3);
+        }
+        if (utils_default.isString(domain)) {
+          cookie.push("domain=" + domain);
+        }
+        if (secure === true) {
+          cookie.push("secure");
+        }
+        document.cookie = cookie.join("; ");
+      },
+      read: function read(name) {
+        const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+        return match ? decodeURIComponent(match[3]) : null;
+      },
+      remove: function remove(name) {
+        this.write(name, "", Date.now() - 864e5);
       }
-      if (utils_default.isString(path)) {
-        cookie.push("path=" + path);
+    };
+  }()
+) : (
+  // Non standard browser env (web workers, react-native) lack needed support.
+  function nonStandardBrowserEnv() {
+    return {
+      write: function write() {
+      },
+      read: function read() {
+        return null;
+      },
+      remove: function remove() {
       }
-      if (utils_default.isString(domain)) {
-        cookie.push("domain=" + domain);
-      }
-      if (secure === true) {
-        cookie.push("secure");
-      }
-      document.cookie = cookie.join("; ");
-    },
-    read: function read(name) {
-      const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-      return match ? decodeURIComponent(match[3]) : null;
-    },
-    remove: function remove(name) {
-      this.write(name, "", Date.now() - 864e5);
-    }
-  };
-}() : function nonStandardBrowserEnv() {
-  return {
-    write: function write() {
-    },
-    read: function read() {
-      return null;
-    },
-    remove: function remove() {
-    }
-  };
-}();
+    };
+  }()
+);
 
 // node_modules/axios/lib/helpers/isURLSameOrigin.js
-var isURLSameOrigin_default = node_default.isStandardBrowserEnv ? function standardBrowserEnv2() {
-  const msie = /(msie|trident)/i.test(navigator.userAgent);
-  const urlParsingNode = document.createElement("a");
-  let originURL;
-  function resolveURL(url2) {
-    let href = url2;
-    if (msie) {
+var isURLSameOrigin_default = node_default.isStandardBrowserEnv ? (
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  function standardBrowserEnv2() {
+    const msie = /(msie|trident)/i.test(navigator.userAgent);
+    const urlParsingNode = document.createElement("a");
+    let originURL;
+    function resolveURL(url3) {
+      let href = url3;
+      if (msie) {
+        urlParsingNode.setAttribute("href", href);
+        href = urlParsingNode.href;
+      }
       urlParsingNode.setAttribute("href", href);
-      href = urlParsingNode.href;
+      return {
+        href: urlParsingNode.href,
+        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
+        host: urlParsingNode.host,
+        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
+        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
+        hostname: urlParsingNode.hostname,
+        port: urlParsingNode.port,
+        pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+      };
     }
-    urlParsingNode.setAttribute("href", href);
-    return {
-      href: urlParsingNode.href,
-      protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
-      host: urlParsingNode.host,
-      search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
-      hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
-      hostname: urlParsingNode.hostname,
-      port: urlParsingNode.port,
-      pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+    originURL = resolveURL(window.location.href);
+    return function isURLSameOrigin(requestURL) {
+      const parsed = utils_default.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+      return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
     };
-  }
-  originURL = resolveURL(window.location.href);
-  return function isURLSameOrigin(requestURL) {
-    const parsed = utils_default.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-    return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-  };
-}() : function nonStandardBrowserEnv2() {
-  return function isURLSameOrigin() {
-    return true;
-  };
-}();
+  }()
+) : (
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  function nonStandardBrowserEnv2() {
+    return function isURLSameOrigin() {
+      return true;
+    };
+  }()
+);
 
 // node_modules/axios/lib/adapters/xhr.js
 function progressEventReducer(listener, isDownloadStream) {
@@ -26130,8 +27533,12 @@ var xhr_default = isXHRAdapterSupported && function(config4) {
         config4.signal.removeEventListener("abort", onCanceled);
       }
     }
-    if (utils_default.isFormData(requestData) && (node_default.isStandardBrowserEnv || node_default.isStandardBrowserWebWorkerEnv)) {
-      requestHeaders.setContentType(false);
+    if (utils_default.isFormData(requestData)) {
+      if (node_default.isStandardBrowserEnv || node_default.isStandardBrowserWebWorkerEnv) {
+        requestHeaders.setContentType(false);
+      } else {
+        requestHeaders.setContentType("multipart/form-data;", false);
+      }
     }
     let request = new XMLHttpRequest();
     if (config4.auth) {
@@ -26413,7 +27820,7 @@ function mergeConfig(config1, config22) {
     validateStatus: mergeDirectKeys,
     headers: (a2, b) => mergeDeepProperties(headersToObject(a2), headersToObject(b), true)
   };
-  utils_default.forEach(Object.keys(config1).concat(Object.keys(config22)), function computeConfigValue(prop) {
+  utils_default.forEach(Object.keys(Object.assign({}, config1, config22)), function computeConfigValue(prop) {
     const merge2 = mergeMap[prop] || mergeDeepProperties;
     const configValue = merge2(config1[prop], config22[prop], prop);
     utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config4[prop] = configValue);
@@ -26429,23 +27836,23 @@ var validators = {};
   };
 });
 var deprecatedWarnings = {};
-validators.transitional = function transitional(validator, version, message) {
+validators.transitional = function transitional(validator, version2, message) {
   function formatMessage(opt, desc) {
     return "[Axios v" + VERSION + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
   }
   return (value, opt, opts) => {
     if (validator === false) {
       throw new AxiosError_default(
-        formatMessage(opt, " has been removed" + (version ? " in " + version : "")),
+        formatMessage(opt, " has been removed" + (version2 ? " in " + version2 : "")),
         AxiosError_default.ERR_DEPRECATED
       );
     }
-    if (version && !deprecatedWarnings[opt]) {
+    if (version2 && !deprecatedWarnings[opt]) {
       deprecatedWarnings[opt] = true;
       console.warn(
         formatMessage(
           opt,
-          " has been deprecated since v" + version + " and will be removed in the near future"
+          " has been deprecated since v" + version2 + " and will be removed in the near future"
         )
       );
     }
@@ -26489,6 +27896,14 @@ var Axios = class {
       response: new InterceptorManager_default()
     };
   }
+  /**
+   * Dispatch a request
+   *
+   * @param {String|Object} configOrUrl The config specific for this request (merged with this.defaults)
+   * @param {?Object} config
+   *
+   * @returns {Promise} The Promise to be fulfilled
+   */
   request(configOrUrl, config4) {
     if (typeof configOrUrl === "string") {
       config4 = config4 || {};
@@ -26505,11 +27920,17 @@ var Axios = class {
         clarifyTimeoutError: validators2.transitional(validators2.boolean)
       }, false);
     }
-    if (paramsSerializer !== void 0) {
-      validator_default.assertOptions(paramsSerializer, {
-        encode: validators2.function,
-        serialize: validators2.function
-      }, true);
+    if (paramsSerializer != null) {
+      if (utils_default.isFunction(paramsSerializer)) {
+        config4.paramsSerializer = {
+          serialize: paramsSerializer
+        };
+      } else {
+        validator_default.assertOptions(paramsSerializer, {
+          encode: validators2.function,
+          serialize: validators2.function
+        }, true);
+      }
     }
     config4.method = (config4.method || this.defaults.method || "get").toLowerCase();
     let contextHeaders;
@@ -26583,23 +28004,23 @@ var Axios = class {
   }
 };
 utils_default.forEach(["delete", "get", "head", "options"], function forEachMethodNoData2(method) {
-  Axios.prototype[method] = function(url2, config4) {
+  Axios.prototype[method] = function(url3, config4) {
     return this.request(mergeConfig(config4 || {}, {
       method,
-      url: url2,
+      url: url3,
       data: (config4 || {}).data
     }));
   };
 });
 utils_default.forEach(["post", "put", "patch"], function forEachMethodWithData2(method) {
   function generateHTTPMethod(isForm) {
-    return function httpMethod(url2, data, config4) {
+    return function httpMethod(url3, data, config4) {
       return this.request(mergeConfig(config4 || {}, {
         method,
         headers: isForm ? {
           "Content-Type": "multipart/form-data"
         } : {},
-        url: url2,
+        url: url3,
         data
       }));
     };
@@ -26648,11 +28069,17 @@ var CancelToken = class {
       resolvePromise(token.reason);
     });
   }
+  /**
+   * Throws a `CanceledError` if cancellation has been requested.
+   */
   throwIfRequested() {
     if (this.reason) {
       throw this.reason;
     }
   }
+  /**
+   * Subscribe to the cancel signal
+   */
   subscribe(listener) {
     if (this.reason) {
       listener(this.reason);
@@ -26664,6 +28091,9 @@ var CancelToken = class {
       this._listeners = [listener];
     }
   }
+  /**
+   * Unsubscribe from the cancel signal
+   */
   unsubscribe(listener) {
     if (!this._listeners) {
       return;
@@ -26673,6 +28103,10 @@ var CancelToken = class {
       this._listeners.splice(index, 1);
     }
   }
+  /**
+   * Returns an object that contains a new `CancelToken` and a function that, when called,
+   * cancels the `CancelToken`.
+   */
   static source() {
     let cancel;
     const token = new CancelToken(function executor(c) {
@@ -26828,6 +28262,7 @@ var wrapAnsi16m = (offset = 0) => (red, green, blue) => `\x1B[${38 + offset};2;$
 var styles = {
   modifier: {
     reset: [0, 0],
+    // 21 isn't widely supported and 22 does the same thing
     bold: [1, 22],
     dim: [2, 22],
     italic: [3, 23],
@@ -26846,9 +28281,12 @@ var styles = {
     magenta: [35, 39],
     cyan: [36, 39],
     white: [37, 39],
+    // Bright color
     blackBright: [90, 39],
     gray: [90, 39],
+    // Alias of `blackBright`
     grey: [90, 39],
+    // Alias of `blackBright`
     redBright: [91, 39],
     greenBright: [92, 39],
     yellowBright: [93, 39],
@@ -26866,9 +28304,12 @@ var styles = {
     bgMagenta: [45, 49],
     bgCyan: [46, 49],
     bgWhite: [47, 49],
+    // Bright color
     bgBlackBright: [100, 49],
     bgGray: [100, 49],
+    // Alias of `bgBlackBright`
     bgGrey: [100, 49],
+    // Alias of `bgBlackBright`
     bgRedBright: [101, 49],
     bgGreenBright: [102, 49],
     bgYellowBright: [103, 49],
@@ -26938,9 +28379,11 @@ function assembleStyles() {
         }
         const integer = Number.parseInt(colorString, 16);
         return [
+          /* eslint-disable no-bitwise */
           integer >> 16 & 255,
           integer >> 8 & 255,
           integer & 255
+          /* eslint-enable no-bitwise */
         ];
       },
       enumerable: false
@@ -27089,10 +28532,10 @@ function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
     return 3;
   }
   if ("TERM_PROGRAM" in env) {
-    const version = Number.parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+    const version2 = Number.parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
     switch (env.TERM_PROGRAM) {
       case "iTerm.app": {
-        return version >= 3 ? 3 : 2;
+        return version2 >= 3 ? 3 : 2;
       }
       case "Apple_Terminal": {
         return 2;
@@ -27301,7 +28744,7 @@ var chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
 var source_default = chalk;
 
 // src/api.ts
-var import_openai = __toESM(require_dist2(), 1);
+var import_openai = __toESM(require_dist(), 1);
 
 // node_modules/type-flag/dist/index.mjs
 var { stringify: h } = JSON;
@@ -27613,8 +29056,8 @@ var I18N_CONFIG_ALIAS = {
 };
 function getI18nLocal(value) {
   for (const key in I18N_CONFIG_ALIAS) {
-    const aliases = I18N_CONFIG_ALIAS[key];
-    if (aliases.includes(value)) {
+    const aliases2 = I18N_CONFIG_ALIAS[key];
+    if (aliases2.includes(value)) {
       return key;
     }
   }
@@ -27853,7 +29296,68 @@ function tokenCount(content) {
 }
 
 // node_modules/execa/index.js
+var import_node_buffer2 = require("node:buffer");
+var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_child_process3 = __toESM(require("node:child_process"), 1);
+var import_node_process5 = __toESM(require("node:process"), 1);
 var import_cross_spawn = __toESM(require_cross_spawn(), 1);
+
+// node_modules/strip-final-newline/index.js
+function stripFinalNewline(input) {
+  const LF = typeof input === "string" ? "\n" : "\n".charCodeAt();
+  const CR = typeof input === "string" ? "\r" : "\r".charCodeAt();
+  if (input[input.length - 1] === LF) {
+    input = input.slice(0, -1);
+  }
+  if (input[input.length - 1] === CR) {
+    input = input.slice(0, -1);
+  }
+  return input;
+}
+
+// node_modules/npm-run-path/index.js
+var import_node_process3 = __toESM(require("node:process"), 1);
+var import_node_path = __toESM(require("node:path"), 1);
+var import_node_url = __toESM(require("node:url"), 1);
+
+// node_modules/npm-run-path/node_modules/path-key/index.js
+function pathKey(options = {}) {
+  const {
+    env: env2 = process.env,
+    platform = process.platform
+  } = options;
+  if (platform !== "win32") {
+    return "PATH";
+  }
+  return Object.keys(env2).reverse().find((key) => key.toUpperCase() === "PATH") || "Path";
+}
+
+// node_modules/npm-run-path/index.js
+function npmRunPath(options = {}) {
+  const {
+    cwd = import_node_process3.default.cwd(),
+    path: path_ = import_node_process3.default.env[pathKey()],
+    execPath = import_node_process3.default.execPath
+  } = options;
+  let previous;
+  const cwdString = cwd instanceof URL ? import_node_url.default.fileURLToPath(cwd) : cwd;
+  let cwdPath = import_node_path.default.resolve(cwdString);
+  const result = [];
+  while (previous !== cwdPath) {
+    result.push(import_node_path.default.join(cwdPath, "node_modules/.bin"));
+    previous = cwdPath;
+    cwdPath = import_node_path.default.resolve(cwdPath, "..");
+  }
+  result.push(import_node_path.default.resolve(cwdString, execPath, ".."));
+  return [...result, path_].join(import_node_path.default.delimiter);
+}
+function npmRunPathEnv({ env: env2 = import_node_process3.default.env, ...options } = {}) {
+  env2 = { ...env2 };
+  const path3 = pathKey({ env: env2 });
+  options.path = env2[path3];
+  env2[path3] = npmRunPath(options);
+  return env2;
+}
 
 // node_modules/mimic-fn/index.js
 var copyProperty = (to, from, property, ignoreNonConfigurable) => {
@@ -27929,14 +29433,673 @@ onetime.callCount = (function_) => {
   }
   return calledFunctions.get(function_);
 };
+var onetime_default = onetime;
+
+// node_modules/human-signals/build/src/main.js
+var import_node_os3 = require("node:os");
+
+// node_modules/human-signals/build/src/realtime.js
+var getRealtimeSignals = () => {
+  const length = SIGRTMAX - SIGRTMIN + 1;
+  return Array.from({ length }, getRealtimeSignal);
+};
+var getRealtimeSignal = (value, index) => ({
+  name: `SIGRT${index + 1}`,
+  number: SIGRTMIN + index,
+  action: "terminate",
+  description: "Application-specific signal (realtime)",
+  standard: "posix"
+});
+var SIGRTMIN = 34;
+var SIGRTMAX = 64;
+
+// node_modules/human-signals/build/src/signals.js
+var import_node_os2 = require("node:os");
+
+// node_modules/human-signals/build/src/core.js
+var SIGNALS = [
+  {
+    name: "SIGHUP",
+    number: 1,
+    action: "terminate",
+    description: "Terminal closed",
+    standard: "posix"
+  },
+  {
+    name: "SIGINT",
+    number: 2,
+    action: "terminate",
+    description: "User interruption with CTRL-C",
+    standard: "ansi"
+  },
+  {
+    name: "SIGQUIT",
+    number: 3,
+    action: "core",
+    description: "User interruption with CTRL-\\",
+    standard: "posix"
+  },
+  {
+    name: "SIGILL",
+    number: 4,
+    action: "core",
+    description: "Invalid machine instruction",
+    standard: "ansi"
+  },
+  {
+    name: "SIGTRAP",
+    number: 5,
+    action: "core",
+    description: "Debugger breakpoint",
+    standard: "posix"
+  },
+  {
+    name: "SIGABRT",
+    number: 6,
+    action: "core",
+    description: "Aborted",
+    standard: "ansi"
+  },
+  {
+    name: "SIGIOT",
+    number: 6,
+    action: "core",
+    description: "Aborted",
+    standard: "bsd"
+  },
+  {
+    name: "SIGBUS",
+    number: 7,
+    action: "core",
+    description: "Bus error due to misaligned, non-existing address or paging error",
+    standard: "bsd"
+  },
+  {
+    name: "SIGEMT",
+    number: 7,
+    action: "terminate",
+    description: "Command should be emulated but is not implemented",
+    standard: "other"
+  },
+  {
+    name: "SIGFPE",
+    number: 8,
+    action: "core",
+    description: "Floating point arithmetic error",
+    standard: "ansi"
+  },
+  {
+    name: "SIGKILL",
+    number: 9,
+    action: "terminate",
+    description: "Forced termination",
+    standard: "posix",
+    forced: true
+  },
+  {
+    name: "SIGUSR1",
+    number: 10,
+    action: "terminate",
+    description: "Application-specific signal",
+    standard: "posix"
+  },
+  {
+    name: "SIGSEGV",
+    number: 11,
+    action: "core",
+    description: "Segmentation fault",
+    standard: "ansi"
+  },
+  {
+    name: "SIGUSR2",
+    number: 12,
+    action: "terminate",
+    description: "Application-specific signal",
+    standard: "posix"
+  },
+  {
+    name: "SIGPIPE",
+    number: 13,
+    action: "terminate",
+    description: "Broken pipe or socket",
+    standard: "posix"
+  },
+  {
+    name: "SIGALRM",
+    number: 14,
+    action: "terminate",
+    description: "Timeout or timer",
+    standard: "posix"
+  },
+  {
+    name: "SIGTERM",
+    number: 15,
+    action: "terminate",
+    description: "Termination",
+    standard: "ansi"
+  },
+  {
+    name: "SIGSTKFLT",
+    number: 16,
+    action: "terminate",
+    description: "Stack is empty or overflowed",
+    standard: "other"
+  },
+  {
+    name: "SIGCHLD",
+    number: 17,
+    action: "ignore",
+    description: "Child process terminated, paused or unpaused",
+    standard: "posix"
+  },
+  {
+    name: "SIGCLD",
+    number: 17,
+    action: "ignore",
+    description: "Child process terminated, paused or unpaused",
+    standard: "other"
+  },
+  {
+    name: "SIGCONT",
+    number: 18,
+    action: "unpause",
+    description: "Unpaused",
+    standard: "posix",
+    forced: true
+  },
+  {
+    name: "SIGSTOP",
+    number: 19,
+    action: "pause",
+    description: "Paused",
+    standard: "posix",
+    forced: true
+  },
+  {
+    name: "SIGTSTP",
+    number: 20,
+    action: "pause",
+    description: 'Paused using CTRL-Z or "suspend"',
+    standard: "posix"
+  },
+  {
+    name: "SIGTTIN",
+    number: 21,
+    action: "pause",
+    description: "Background process cannot read terminal input",
+    standard: "posix"
+  },
+  {
+    name: "SIGBREAK",
+    number: 21,
+    action: "terminate",
+    description: "User interruption with CTRL-BREAK",
+    standard: "other"
+  },
+  {
+    name: "SIGTTOU",
+    number: 22,
+    action: "pause",
+    description: "Background process cannot write to terminal output",
+    standard: "posix"
+  },
+  {
+    name: "SIGURG",
+    number: 23,
+    action: "ignore",
+    description: "Socket received out-of-band data",
+    standard: "bsd"
+  },
+  {
+    name: "SIGXCPU",
+    number: 24,
+    action: "core",
+    description: "Process timed out",
+    standard: "bsd"
+  },
+  {
+    name: "SIGXFSZ",
+    number: 25,
+    action: "core",
+    description: "File too big",
+    standard: "bsd"
+  },
+  {
+    name: "SIGVTALRM",
+    number: 26,
+    action: "terminate",
+    description: "Timeout or timer",
+    standard: "bsd"
+  },
+  {
+    name: "SIGPROF",
+    number: 27,
+    action: "terminate",
+    description: "Timeout or timer",
+    standard: "bsd"
+  },
+  {
+    name: "SIGWINCH",
+    number: 28,
+    action: "ignore",
+    description: "Terminal window size changed",
+    standard: "bsd"
+  },
+  {
+    name: "SIGIO",
+    number: 29,
+    action: "terminate",
+    description: "I/O is available",
+    standard: "other"
+  },
+  {
+    name: "SIGPOLL",
+    number: 29,
+    action: "terminate",
+    description: "Watched event",
+    standard: "other"
+  },
+  {
+    name: "SIGINFO",
+    number: 29,
+    action: "ignore",
+    description: "Request for process information",
+    standard: "other"
+  },
+  {
+    name: "SIGPWR",
+    number: 30,
+    action: "terminate",
+    description: "Device running out of power",
+    standard: "systemv"
+  },
+  {
+    name: "SIGSYS",
+    number: 31,
+    action: "core",
+    description: "Invalid system call",
+    standard: "other"
+  },
+  {
+    name: "SIGUNUSED",
+    number: 31,
+    action: "terminate",
+    description: "Invalid system call",
+    standard: "other"
+  }
+];
+
+// node_modules/human-signals/build/src/signals.js
+var getSignals = () => {
+  const realtimeSignals = getRealtimeSignals();
+  const signals = [...SIGNALS, ...realtimeSignals].map(normalizeSignal);
+  return signals;
+};
+var normalizeSignal = ({
+  name,
+  number: defaultNumber,
+  description,
+  action,
+  forced = false,
+  standard
+}) => {
+  const {
+    signals: { [name]: constantSignal }
+  } = import_node_os2.constants;
+  const supported = constantSignal !== void 0;
+  const number = supported ? constantSignal : defaultNumber;
+  return { name, number, description, supported, action, forced, standard };
+};
+
+// node_modules/human-signals/build/src/main.js
+var getSignalsByName = () => {
+  const signals = getSignals();
+  return Object.fromEntries(signals.map(getSignalByName));
+};
+var getSignalByName = ({
+  name,
+  number,
+  description,
+  supported,
+  action,
+  forced,
+  standard
+}) => [name, { name, number, description, supported, action, forced, standard }];
+var signalsByName = getSignalsByName();
+var getSignalsByNumber = () => {
+  const signals = getSignals();
+  const length = SIGRTMAX + 1;
+  const signalsA = Array.from({ length }, (value, number) => getSignalByNumber(number, signals));
+  return Object.assign({}, ...signalsA);
+};
+var getSignalByNumber = (number, signals) => {
+  const signal = findSignalByNumber(number, signals);
+  if (signal === void 0) {
+    return {};
+  }
+  const { name, description, supported, action, forced, standard } = signal;
+  return {
+    [number]: {
+      name,
+      number,
+      description,
+      supported,
+      action,
+      forced,
+      standard
+    }
+  };
+};
+var findSignalByNumber = (number, signals) => {
+  const signal = signals.find(({ name }) => import_node_os3.constants.signals[name] === number);
+  if (signal !== void 0) {
+    return signal;
+  }
+  return signals.find((signalA) => signalA.number === number);
+};
+var signalsByNumber = getSignalsByNumber();
+
+// node_modules/execa/lib/error.js
+var getErrorPrefix = ({ timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled }) => {
+  if (timedOut) {
+    return `timed out after ${timeout} milliseconds`;
+  }
+  if (isCanceled) {
+    return "was canceled";
+  }
+  if (errorCode !== void 0) {
+    return `failed with ${errorCode}`;
+  }
+  if (signal !== void 0) {
+    return `was killed with ${signal} (${signalDescription})`;
+  }
+  if (exitCode !== void 0) {
+    return `failed with exit code ${exitCode}`;
+  }
+  return "failed";
+};
+var makeError = ({
+  stdout,
+  stderr,
+  all: all3,
+  error,
+  signal,
+  exitCode,
+  command: command2,
+  escapedCommand,
+  timedOut,
+  isCanceled,
+  killed,
+  parsed: { options: { timeout } }
+}) => {
+  exitCode = exitCode === null ? void 0 : exitCode;
+  signal = signal === null ? void 0 : signal;
+  const signalDescription = signal === void 0 ? void 0 : signalsByName[signal].description;
+  const errorCode = error && error.code;
+  const prefix = getErrorPrefix({ timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled });
+  const execaMessage = `Command ${prefix}: ${command2}`;
+  const isError = Object.prototype.toString.call(error) === "[object Error]";
+  const shortMessage = isError ? `${execaMessage}
+${error.message}` : execaMessage;
+  const message = [shortMessage, stderr, stdout].filter(Boolean).join("\n");
+  if (isError) {
+    error.originalMessage = error.message;
+    error.message = message;
+  } else {
+    error = new Error(message);
+  }
+  error.shortMessage = shortMessage;
+  error.command = command2;
+  error.escapedCommand = escapedCommand;
+  error.exitCode = exitCode;
+  error.signal = signal;
+  error.signalDescription = signalDescription;
+  error.stdout = stdout;
+  error.stderr = stderr;
+  if (all3 !== void 0) {
+    error.all = all3;
+  }
+  if ("bufferedData" in error) {
+    delete error.bufferedData;
+  }
+  error.failed = true;
+  error.timedOut = Boolean(timedOut);
+  error.isCanceled = isCanceled;
+  error.killed = killed && !timedOut;
+  return error;
+};
+
+// node_modules/execa/lib/stdio.js
+var aliases = ["stdin", "stdout", "stderr"];
+var hasAlias = (options) => aliases.some((alias) => options[alias] !== void 0);
+var normalizeStdio = (options) => {
+  if (!options) {
+    return;
+  }
+  const { stdio } = options;
+  if (stdio === void 0) {
+    return aliases.map((alias) => options[alias]);
+  }
+  if (hasAlias(options)) {
+    throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map((alias) => `\`${alias}\``).join(", ")}`);
+  }
+  if (typeof stdio === "string") {
+    return stdio;
+  }
+  if (!Array.isArray(stdio)) {
+    throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+  }
+  const length = Math.max(stdio.length, aliases.length);
+  return Array.from({ length }, (value, index) => stdio[index]);
+};
 
 // node_modules/execa/lib/kill.js
+var import_node_os4 = __toESM(require("node:os"), 1);
 var import_signal_exit = __toESM(require_signal_exit(), 1);
 var DEFAULT_FORCE_KILL_TIMEOUT = 1e3 * 5;
+var spawnedKill = (kill, signal = "SIGTERM", options = {}) => {
+  const killResult = kill(signal);
+  setKillTimeout(kill, signal, options, killResult);
+  return killResult;
+};
+var setKillTimeout = (kill, signal, options, killResult) => {
+  if (!shouldForceKill(signal, options, killResult)) {
+    return;
+  }
+  const timeout = getForceKillAfterTimeout(options);
+  const t = setTimeout(() => {
+    kill("SIGKILL");
+  }, timeout);
+  if (t.unref) {
+    t.unref();
+  }
+};
+var shouldForceKill = (signal, { forceKillAfterTimeout }, killResult) => isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+var isSigterm = (signal) => signal === import_node_os4.default.constants.signals.SIGTERM || typeof signal === "string" && signal.toUpperCase() === "SIGTERM";
+var getForceKillAfterTimeout = ({ forceKillAfterTimeout = true }) => {
+  if (forceKillAfterTimeout === true) {
+    return DEFAULT_FORCE_KILL_TIMEOUT;
+  }
+  if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+    throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+  }
+  return forceKillAfterTimeout;
+};
+var spawnedCancel = (spawned, context2) => {
+  const killResult = spawned.kill();
+  if (killResult) {
+    context2.isCanceled = true;
+  }
+};
+var timeoutKill = (spawned, signal, reject) => {
+  spawned.kill(signal);
+  reject(Object.assign(new Error("Timed out"), { timedOut: true, signal }));
+};
+var setupTimeout = (spawned, { timeout, killSignal = "SIGTERM" }, spawnedPromise) => {
+  if (timeout === 0 || timeout === void 0) {
+    return spawnedPromise;
+  }
+  let timeoutId;
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timeoutId = setTimeout(() => {
+      timeoutKill(spawned, killSignal, reject);
+    }, timeout);
+  });
+  const safeSpawnedPromise = spawnedPromise.finally(() => {
+    clearTimeout(timeoutId);
+  });
+  return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+var validateTimeout = ({ timeout }) => {
+  if (timeout !== void 0 && (!Number.isFinite(timeout) || timeout < 0)) {
+    throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+  }
+};
+var setExitHandler = async (spawned, { cleanup, detached }, timedPromise) => {
+  if (!cleanup || detached) {
+    return timedPromise;
+  }
+  const removeExitHandler = (0, import_signal_exit.default)(() => {
+    spawned.kill();
+  });
+  return timedPromise.finally(() => {
+    removeExitHandler();
+  });
+};
+
+// node_modules/execa/lib/pipe.js
+var import_node_fs = require("node:fs");
+var import_node_child_process = require("node:child_process");
+
+// node_modules/is-stream/index.js
+function isStream2(stream4) {
+  return stream4 !== null && typeof stream4 === "object" && typeof stream4.pipe === "function";
+}
+function isWritableStream(stream4) {
+  return isStream2(stream4) && stream4.writable !== false && typeof stream4._write === "function" && typeof stream4._writableState === "object";
+}
+
+// node_modules/execa/lib/pipe.js
+var isExecaChildProcess = (target) => target instanceof import_node_child_process.ChildProcess && typeof target.then === "function";
+var pipeToTarget = (spawned, streamName, target) => {
+  if (typeof target === "string") {
+    spawned[streamName].pipe((0, import_node_fs.createWriteStream)(target));
+    return spawned;
+  }
+  if (isWritableStream(target)) {
+    spawned[streamName].pipe(target);
+    return spawned;
+  }
+  if (!isExecaChildProcess(target)) {
+    throw new TypeError("The second argument must be a string, a stream or an Execa child process.");
+  }
+  if (!isWritableStream(target.stdin)) {
+    throw new TypeError("The target child process's stdin must be available.");
+  }
+  spawned[streamName].pipe(target.stdin);
+  return target;
+};
+var addPipeMethods = (spawned) => {
+  if (spawned.stdout !== null) {
+    spawned.pipeStdout = pipeToTarget.bind(void 0, spawned, "stdout");
+  }
+  if (spawned.stderr !== null) {
+    spawned.pipeStderr = pipeToTarget.bind(void 0, spawned, "stderr");
+  }
+  if (spawned.all !== void 0) {
+    spawned.pipeAll = pipeToTarget.bind(void 0, spawned, "all");
+  }
+};
 
 // node_modules/execa/lib/stream.js
+var import_node_fs2 = require("node:fs");
 var import_get_stream = __toESM(require_get_stream(), 1);
 var import_merge_stream = __toESM(require_merge_stream(), 1);
+var validateInputOptions = (input) => {
+  if (input !== void 0) {
+    throw new TypeError("The `input` and `inputFile` options cannot be both set.");
+  }
+};
+var getInputSync = ({ input, inputFile }) => {
+  if (typeof inputFile !== "string") {
+    return input;
+  }
+  validateInputOptions(input);
+  return (0, import_node_fs2.readFileSync)(inputFile);
+};
+var handleInputSync = (options) => {
+  const input = getInputSync(options);
+  if (isStream2(input)) {
+    throw new TypeError("The `input` option cannot be a stream in sync mode");
+  }
+  return input;
+};
+var getInput = ({ input, inputFile }) => {
+  if (typeof inputFile !== "string") {
+    return input;
+  }
+  validateInputOptions(input);
+  return (0, import_node_fs2.createReadStream)(inputFile);
+};
+var handleInput = (spawned, options) => {
+  const input = getInput(options);
+  if (input === void 0) {
+    return;
+  }
+  if (isStream2(input)) {
+    input.pipe(spawned.stdin);
+  } else {
+    spawned.stdin.end(input);
+  }
+};
+var makeAllStream = (spawned, { all: all3 }) => {
+  if (!all3 || !spawned.stdout && !spawned.stderr) {
+    return;
+  }
+  const mixed = (0, import_merge_stream.default)();
+  if (spawned.stdout) {
+    mixed.add(spawned.stdout);
+  }
+  if (spawned.stderr) {
+    mixed.add(spawned.stderr);
+  }
+  return mixed;
+};
+var getBufferedData = async (stream4, streamPromise) => {
+  if (!stream4 || streamPromise === void 0) {
+    return;
+  }
+  stream4.destroy();
+  try {
+    return await streamPromise;
+  } catch (error) {
+    return error.bufferedData;
+  }
+};
+var getStreamPromise = (stream4, { encoding, buffer, maxBuffer }) => {
+  if (!stream4 || !buffer) {
+    return;
+  }
+  if (encoding) {
+    return (0, import_get_stream.default)(stream4, { encoding, maxBuffer });
+  }
+  return import_get_stream.default.buffer(stream4, { maxBuffer });
+};
+var getSpawnedResult = async ({ stdout, stderr, all: all3 }, { encoding, buffer, maxBuffer }, processDone) => {
+  const stdoutPromise = getStreamPromise(stdout, { encoding, buffer, maxBuffer });
+  const stderrPromise = getStreamPromise(stderr, { encoding, buffer, maxBuffer });
+  const allPromise = getStreamPromise(all3, { encoding, buffer, maxBuffer: maxBuffer * 2 });
+  try {
+    return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+  } catch (error) {
+    return Promise.all([
+      { error, signal: error.signal, timedOut: error.timedOut },
+      getBufferedData(stdout, stdoutPromise),
+      getBufferedData(stderr, stderrPromise),
+      getBufferedData(all3, allPromise)
+    ]);
+  }
+};
 
 // node_modules/execa/lib/promise.js
 var nativePromisePrototype = (async () => {
@@ -27945,9 +30108,318 @@ var descriptors2 = ["then", "catch", "finally"].map((property) => [
   property,
   Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
 ]);
+var mergePromise = (spawned, promise) => {
+  for (const [property, descriptor] of descriptors2) {
+    const value = typeof promise === "function" ? (...args) => Reflect.apply(descriptor.value, promise(), args) : descriptor.value.bind(promise);
+    Reflect.defineProperty(spawned, property, { ...descriptor, value });
+  }
+};
+var getSpawnedPromise = (spawned) => new Promise((resolve, reject) => {
+  spawned.on("exit", (exitCode, signal) => {
+    resolve({ exitCode, signal });
+  });
+  spawned.on("error", (error) => {
+    reject(error);
+  });
+  if (spawned.stdin) {
+    spawned.stdin.on("error", (error) => {
+      reject(error);
+    });
+  }
+});
+
+// node_modules/execa/lib/command.js
+var import_node_buffer = require("node:buffer");
+var import_node_child_process2 = require("node:child_process");
+var normalizeArgs = (file, args = []) => {
+  if (!Array.isArray(args)) {
+    return [file];
+  }
+  return [file, ...args];
+};
+var NO_ESCAPE_REGEXP = /^[\w.-]+$/;
+var DOUBLE_QUOTES_REGEXP = /"/g;
+var escapeArg = (arg) => {
+  if (typeof arg !== "string" || NO_ESCAPE_REGEXP.test(arg)) {
+    return arg;
+  }
+  return `"${arg.replace(DOUBLE_QUOTES_REGEXP, '\\"')}"`;
+};
+var joinCommand = (file, args) => normalizeArgs(file, args).join(" ");
+var getEscapedCommand = (file, args) => normalizeArgs(file, args).map((arg) => escapeArg(arg)).join(" ");
+var SPACES_REGEXP = / +/g;
+var parseExpression = (expression) => {
+  const typeOfExpression = typeof expression;
+  if (typeOfExpression === "string") {
+    return expression;
+  }
+  if (typeOfExpression === "number") {
+    return String(expression);
+  }
+  if (typeOfExpression === "object" && expression !== null && !(expression instanceof import_node_child_process2.ChildProcess) && "stdout" in expression) {
+    const typeOfStdout = typeof expression.stdout;
+    if (typeOfStdout === "string") {
+      return expression.stdout;
+    }
+    if (import_node_buffer.Buffer.isBuffer(expression.stdout)) {
+      return expression.stdout.toString();
+    }
+    throw new TypeError(`Unexpected "${typeOfStdout}" stdout in template expression`);
+  }
+  throw new TypeError(`Unexpected "${typeOfExpression}" in template expression`);
+};
+var concatTokens = (tokens, nextTokens, isNew) => isNew || tokens.length === 0 || nextTokens.length === 0 ? [...tokens, ...nextTokens] : [
+  ...tokens.slice(0, -1),
+  `${tokens[tokens.length - 1]}${nextTokens[0]}`,
+  ...nextTokens.slice(1)
+];
+var parseTemplate = ({ templates, expressions, tokens, index, template }) => {
+  const templateString = template ?? templates.raw[index];
+  const templateTokens = templateString.split(SPACES_REGEXP).filter(Boolean);
+  const newTokens = concatTokens(
+    tokens,
+    templateTokens,
+    templateString.startsWith(" ")
+  );
+  if (index === expressions.length) {
+    return newTokens;
+  }
+  const expression = expressions[index];
+  const expressionTokens = Array.isArray(expression) ? expression.map((expression2) => parseExpression(expression2)) : [parseExpression(expression)];
+  return concatTokens(
+    newTokens,
+    expressionTokens,
+    templateString.endsWith(" ")
+  );
+};
+var parseTemplates = (templates, expressions) => {
+  let tokens = [];
+  for (const [index, template] of templates.entries()) {
+    tokens = parseTemplate({ templates, expressions, tokens, index, template });
+  }
+  return tokens;
+};
+
+// node_modules/execa/lib/verbose.js
+var import_node_util = require("node:util");
+var import_node_process4 = __toESM(require("node:process"), 1);
+var verboseDefault = (0, import_node_util.debuglog)("execa").enabled;
+var padField = (field, padding) => String(field).padStart(padding, "0");
+var getTimestamp = () => {
+  const date = /* @__PURE__ */ new Date();
+  return `${padField(date.getHours(), 2)}:${padField(date.getMinutes(), 2)}:${padField(date.getSeconds(), 2)}.${padField(date.getMilliseconds(), 3)}`;
+};
+var logCommand = (escapedCommand, { verbose }) => {
+  if (!verbose) {
+    return;
+  }
+  import_node_process4.default.stderr.write(`[${getTimestamp()}] ${escapedCommand}
+`);
+};
 
 // node_modules/execa/index.js
 var DEFAULT_MAX_BUFFER = 1e3 * 1e3 * 100;
+var getEnv = ({ env: envOption, extendEnv, preferLocal, localDir, execPath }) => {
+  const env2 = extendEnv ? { ...import_node_process5.default.env, ...envOption } : envOption;
+  if (preferLocal) {
+    return npmRunPathEnv({ env: env2, cwd: localDir, execPath });
+  }
+  return env2;
+};
+var handleArguments = (file, args, options = {}) => {
+  const parsed = import_cross_spawn.default._parse(file, args, options);
+  file = parsed.command;
+  args = parsed.args;
+  options = parsed.options;
+  options = {
+    maxBuffer: DEFAULT_MAX_BUFFER,
+    buffer: true,
+    stripFinalNewline: true,
+    extendEnv: true,
+    preferLocal: false,
+    localDir: options.cwd || import_node_process5.default.cwd(),
+    execPath: import_node_process5.default.execPath,
+    encoding: "utf8",
+    reject: true,
+    cleanup: true,
+    all: false,
+    windowsHide: true,
+    verbose: verboseDefault,
+    ...options
+  };
+  options.env = getEnv(options);
+  options.stdio = normalizeStdio(options);
+  if (import_node_process5.default.platform === "win32" && import_node_path2.default.basename(file, ".exe") === "cmd") {
+    args.unshift("/q");
+  }
+  return { file, args, options, parsed };
+};
+var handleOutput = (options, value, error) => {
+  if (typeof value !== "string" && !import_node_buffer2.Buffer.isBuffer(value)) {
+    return error === void 0 ? void 0 : "";
+  }
+  if (options.stripFinalNewline) {
+    return stripFinalNewline(value);
+  }
+  return value;
+};
+function execa(file, args, options) {
+  const parsed = handleArguments(file, args, options);
+  const command2 = joinCommand(file, args);
+  const escapedCommand = getEscapedCommand(file, args);
+  logCommand(escapedCommand, parsed.options);
+  validateTimeout(parsed.options);
+  let spawned;
+  try {
+    spawned = import_node_child_process3.default.spawn(parsed.file, parsed.args, parsed.options);
+  } catch (error) {
+    const dummySpawned = new import_node_child_process3.default.ChildProcess();
+    const errorPromise = Promise.reject(makeError({
+      error,
+      stdout: "",
+      stderr: "",
+      all: "",
+      command: command2,
+      escapedCommand,
+      parsed,
+      timedOut: false,
+      isCanceled: false,
+      killed: false
+    }));
+    mergePromise(dummySpawned, errorPromise);
+    return dummySpawned;
+  }
+  const spawnedPromise = getSpawnedPromise(spawned);
+  const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
+  const processDone = setExitHandler(spawned, parsed.options, timedPromise);
+  const context2 = { isCanceled: false };
+  spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
+  spawned.cancel = spawnedCancel.bind(null, spawned, context2);
+  const handlePromise = async () => {
+    const [{ error, exitCode, signal, timedOut }, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
+    const stdout = handleOutput(parsed.options, stdoutResult);
+    const stderr = handleOutput(parsed.options, stderrResult);
+    const all3 = handleOutput(parsed.options, allResult);
+    if (error || exitCode !== 0 || signal !== null) {
+      const returnedError = makeError({
+        error,
+        exitCode,
+        signal,
+        stdout,
+        stderr,
+        all: all3,
+        command: command2,
+        escapedCommand,
+        parsed,
+        timedOut,
+        isCanceled: context2.isCanceled || (parsed.options.signal ? parsed.options.signal.aborted : false),
+        killed: spawned.killed
+      });
+      if (!parsed.options.reject) {
+        return returnedError;
+      }
+      throw returnedError;
+    }
+    return {
+      command: command2,
+      escapedCommand,
+      exitCode: 0,
+      stdout,
+      stderr,
+      all: all3,
+      failed: false,
+      timedOut: false,
+      isCanceled: false,
+      killed: false
+    };
+  };
+  const handlePromiseOnce = onetime_default(handlePromise);
+  handleInput(spawned, parsed.options);
+  spawned.all = makeAllStream(spawned, parsed.options);
+  addPipeMethods(spawned);
+  mergePromise(spawned, handlePromiseOnce);
+  return spawned;
+}
+function execaSync(file, args, options) {
+  const parsed = handleArguments(file, args, options);
+  const command2 = joinCommand(file, args);
+  const escapedCommand = getEscapedCommand(file, args);
+  logCommand(escapedCommand, parsed.options);
+  const input = handleInputSync(parsed.options);
+  let result;
+  try {
+    result = import_node_child_process3.default.spawnSync(parsed.file, parsed.args, { ...parsed.options, input });
+  } catch (error) {
+    throw makeError({
+      error,
+      stdout: "",
+      stderr: "",
+      all: "",
+      command: command2,
+      escapedCommand,
+      parsed,
+      timedOut: false,
+      isCanceled: false,
+      killed: false
+    });
+  }
+  const stdout = handleOutput(parsed.options, result.stdout, result.error);
+  const stderr = handleOutput(parsed.options, result.stderr, result.error);
+  if (result.error || result.status !== 0 || result.signal !== null) {
+    const error = makeError({
+      stdout,
+      stderr,
+      error: result.error,
+      signal: result.signal,
+      exitCode: result.status,
+      command: command2,
+      escapedCommand,
+      parsed,
+      timedOut: result.error && result.error.code === "ETIMEDOUT",
+      isCanceled: false,
+      killed: result.signal !== null
+    });
+    if (!parsed.options.reject) {
+      return error;
+    }
+    throw error;
+  }
+  return {
+    command: command2,
+    escapedCommand,
+    exitCode: 0,
+    stdout,
+    stderr,
+    failed: false,
+    timedOut: false,
+    isCanceled: false,
+    killed: false
+  };
+}
+var normalizeScriptStdin = ({ input, inputFile, stdio }) => input === void 0 && inputFile === void 0 && stdio === void 0 ? { stdin: "inherit" } : {};
+var normalizeScriptOptions = (options = {}) => ({
+  preferLocal: true,
+  ...normalizeScriptStdin(options),
+  ...options
+});
+function create$(options) {
+  function $3(templatesOrOptions, ...expressions) {
+    if (!Array.isArray(templatesOrOptions)) {
+      return create$({ ...options, ...templatesOrOptions });
+    }
+    const [file, ...args] = parseTemplates(templatesOrOptions, expressions);
+    return execa(file, args, normalizeScriptOptions(options));
+  }
+  $3.sync = (templates, ...expressions) => {
+    if (!Array.isArray(templates)) {
+      throw new TypeError("Please use $(options).sync`command` instead of $.sync(options)`command`.");
+    }
+    const [file, ...args] = parseTemplates(templates, expressions);
+    return execaSync(file, args, normalizeScriptOptions(options));
+  };
+  return $3;
+}
+var $2 = create$();
 
 // src/api.ts
 var config2 = getConfig();
@@ -28054,10 +30526,11 @@ var translation = i18n[config3?.OCO_LANGUAGE || "en"];
 var INIT_MESSAGES_PROMPT = [
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.System,
+    // prettier-ignore
     content: `You are to act as the author of a commit message in git. Your mission is to create clean and comprehensive commit messages in the conventional commit convention and explain WHAT were the changes and WHY the changes were done. I'll send you an output of 'git diff --staged' command, and you convert it into a commit message.
 ${config3?.OCO_EMOJI ? "Use GitMoji convention to preface the commit." : "Do not preface the commit with anything."}
 ${config3?.OCO_DESCRIPTION ? `Add a short description of WHY the changes are done after the commit message. Don't start it with "This commit", just describe the changes.` : "Don't add any descriptions to the commit, only commit message."}
-Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And add its translation by ${translation.localLanguage}.`
+Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And insert its translation by ${translation.localLanguage}.`
   },
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.User,
@@ -28088,12 +30561,11 @@ app.use((_, res, next) => {
   },
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
-${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}` + (translation === i18n["en"] ? "" : `
-${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
+    content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
 ${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
-${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription : ""}`)
+${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
+${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
   }
 ];
 var generateCommitMessageChatCompletionPrompt = (diff) => {
@@ -28220,7 +30692,7 @@ function randomIntFromInterval(min, max) {
 
 // src/github-action.ts
 var import_fs2 = require("fs");
-var GITHUB_TOKEN = import_core3.default.getInput("GITHUB_TOKEN");
+var GITHUB_TOKEN = import_core4.default.getInput("GITHUB_TOKEN");
 var octokit = import_github.default.getOctokit(GITHUB_TOKEN);
 var context = import_github.default.context;
 var owner = context.repo.owner;
@@ -28244,6 +30716,7 @@ async function improveMessagesInChunks(diffsAndSHAs) {
   ce(`Improving commit messages in chunks of ${chunkSize}.`);
   const improvePromises = diffsAndSHAs.map(
     (commit) => generateCommitMessageByDiff(commit.diff, "")
+    //TODO: support prefix
   );
   let improvedMessagesAndSHAs = [];
   for (let step = 0; step < improvePromises.length; step += chunkSize) {
@@ -28345,31 +30818,39 @@ async function run() {
       await improveCommitMessages(commits);
     } else {
       ce("Wrong action.");
-      import_core3.default.error(
+      import_core4.default.error(
         `OpenCommit was called on ${import_github.default.context.payload.action}. OpenCommit is supposed to be used on "push" action.`
       );
     }
   } catch (error) {
     const err = error?.message || error;
-    import_core3.default.setFailed(err);
+    import_core4.default.setFailed(err);
   }
 }
 run();
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-/*!
- * mime-db
- * Copyright(c) 2014 Jonathan Ong
- * Copyright(c) 2015-2022 Douglas Christopher Wilson
- * MIT Licensed
- */
-/*!
- * mime-types
- * Copyright(c) 2014 Jonathan Ong
- * Copyright(c) 2015 Douglas Christopher Wilson
- * MIT Licensed
- */
+/*! Bundled license information:
+
+is-plain-object/dist/is-plain-object.js:
+  (*!
+   * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+   *
+   * Copyright (c) 2014-2017, Jon Schlinkert.
+   * Released under the MIT License.
+   *)
+
+mime-db/index.js:
+  (*!
+   * mime-db
+   * Copyright(c) 2014 Jonathan Ong
+   * Copyright(c) 2015-2022 Douglas Christopher Wilson
+   * MIT Licensed
+   *)
+
+mime-types/index.js:
+  (*!
+   * mime-types
+   * Copyright(c) 2014 Jonathan Ong
+   * Copyright(c) 2015 Douglas Christopher Wilson
+   * MIT Licensed
+   *)
+*/

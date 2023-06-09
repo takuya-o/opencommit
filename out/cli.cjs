@@ -18,6 +18,10 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
@@ -26,42 +30,49 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var require_ini = __commonJS({
   "node_modules/ini/lib/ini.js"(exports, module2) {
     var { hasOwnProperty: hasOwnProperty2 } = Object.prototype;
-    var eol = typeof process !== "undefined" && process.platform === "win32" ? "\r\n" : "\n";
-    var encode3 = (obj, opt) => {
-      const children = [];
-      let out = "";
+    var encode3 = (obj, opt = {}) => {
       if (typeof opt === "string") {
-        opt = {
-          section: opt,
-          whitespace: false
-        };
-      } else {
-        opt = opt || /* @__PURE__ */ Object.create(null);
-        opt.whitespace = opt.whitespace === true;
+        opt = { section: opt };
       }
+      opt.align = opt.align === true;
+      opt.newline = opt.newline === true;
+      opt.sort = opt.sort === true;
+      opt.whitespace = opt.whitespace === true || opt.align === true;
+      opt.platform = opt.platform || typeof process !== "undefined" && process.platform;
+      opt.bracketedArray = opt.bracketedArray !== false;
+      const eol = opt.platform === "win32" ? "\r\n" : "\n";
       const separator = opt.whitespace ? " = " : "=";
-      for (const k6 of Object.keys(obj)) {
+      const children = [];
+      const keys = opt.sort ? Object.keys(obj).sort() : Object.keys(obj);
+      let padToChars = 0;
+      if (opt.align) {
+        padToChars = safe(
+          keys.filter((k6) => obj[k6] === null || Array.isArray(obj[k6]) || typeof obj[k6] !== "object").map((k6) => Array.isArray(obj[k6]) ? `${k6}[]` : k6).concat([""]).reduce((a2, b5) => safe(a2).length >= safe(b5).length ? a2 : b5)
+        ).length;
+      }
+      let out = "";
+      const arraySuffix = opt.bracketedArray ? "[]" : "";
+      for (const k6 of keys) {
         const val = obj[k6];
         if (val && Array.isArray(val)) {
           for (const item of val) {
-            out += safe(k6 + "[]") + separator + safe(item) + eol;
+            out += safe(`${k6}${arraySuffix}`).padEnd(padToChars, " ") + separator + safe(item) + eol;
           }
         } else if (val && typeof val === "object") {
           children.push(k6);
         } else {
-          out += safe(k6) + separator + safe(val) + eol;
+          out += safe(k6).padEnd(padToChars, " ") + separator + safe(val) + eol;
         }
       }
       if (opt.section && out.length) {
-        out = "[" + safe(opt.section) + "]" + eol + out;
+        out = "[" + safe(opt.section) + "]" + (opt.newline ? eol + eol : eol) + out;
       }
       for (const k6 of children) {
-        const nk = dotSplit(k6).join("\\.");
+        const nk = splitSections(k6, ".").join("\\.");
         const section = (opt.section ? opt.section + "." : "") + nk;
-        const { whitespace } = opt;
         const child = encode3(obj[k6], {
-          section,
-          whitespace
+          ...opt,
+          section
         });
         if (out.length && child.length) {
           out += eol;
@@ -70,15 +81,35 @@ var require_ini = __commonJS({
       }
       return out;
     };
-    var dotSplit = (str) => str.replace(/\1/g, "LITERAL\\1LITERAL").replace(/\\\./g, "").split(/\./).map((part) => part.replace(/\1/g, "\\.").replace(/\2LITERAL\\1LITERAL\2/g, ""));
-    var decode = (str) => {
+    function splitSections(str, separator) {
+      var lastMatchIndex = 0;
+      var lastSeparatorIndex = 0;
+      var nextIndex = 0;
+      var sections = [];
+      do {
+        nextIndex = str.indexOf(separator, lastMatchIndex);
+        if (nextIndex !== -1) {
+          lastMatchIndex = nextIndex + separator.length;
+          if (nextIndex > 0 && str[nextIndex - 1] === "\\") {
+            continue;
+          }
+          sections.push(str.slice(lastSeparatorIndex, nextIndex));
+          lastSeparatorIndex = nextIndex + separator.length;
+        }
+      } while (nextIndex !== -1);
+      sections.push(str.slice(lastSeparatorIndex));
+      return sections;
+    }
+    var decode = (str, opt = {}) => {
+      opt.bracketedArray = opt.bracketedArray !== false;
       const out = /* @__PURE__ */ Object.create(null);
       let p4 = out;
       let section = null;
-      const re2 = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i;
+      const re2 = /^\[([^\]]*)\]\s*$|^([^=]+)(=(.*))?$/i;
       const lines = str.split(/[\r\n]+/g);
+      const duplicates = {};
       for (const line of lines) {
-        if (!line || line.match(/^\s*[;#]/)) {
+        if (!line || line.match(/^\s*[;#]/) || line.match(/^\s*$/)) {
           continue;
         }
         const match = line.match(re2);
@@ -95,7 +126,13 @@ var require_ini = __commonJS({
           continue;
         }
         const keyRaw = unsafe(match[2]);
-        const isArray2 = keyRaw.length > 2 && keyRaw.slice(-2) === "[]";
+        let isArray2;
+        if (opt.bracketedArray) {
+          isArray2 = keyRaw.length > 2 && keyRaw.slice(-2) === "[]";
+        } else {
+          duplicates[keyRaw] = (duplicates?.[keyRaw] || 0) + 1;
+          isArray2 = duplicates[keyRaw] > 1;
+        }
         const key = isArray2 ? keyRaw.slice(0, -2) : keyRaw;
         if (key === "__proto__") {
           continue;
@@ -120,7 +157,7 @@ var require_ini = __commonJS({
         if (!hasOwnProperty2.call(out, k6) || typeof out[k6] !== "object" || Array.isArray(out[k6])) {
           continue;
         }
-        const parts = dotSplit(k6);
+        const parts = splitSections(k6, ".");
         p4 = out;
         const l = parts.pop();
         const nl = l.replace(/\\\./g, ".");
@@ -316,14 +353,14 @@ var require_package = __commonJS({
   "node_modules/dotenv/package.json"(exports, module2) {
     module2.exports = {
       name: "dotenv",
-      version: "16.0.3",
+      version: "16.1.4",
       description: "Loads environment variables from .env file",
       main: "lib/main.js",
       types: "lib/main.d.ts",
       exports: {
         ".": {
-          require: "./lib/main.js",
           types: "./lib/main.d.ts",
+          require: "./lib/main.js",
           default: "./lib/main.js"
         },
         "./config": "./config.js",
@@ -347,6 +384,7 @@ var require_package = __commonJS({
         type: "git",
         url: "git://github.com/motdotla/dotenv.git"
       },
+      funding: "https://github.com/motdotla/dotenv?sponsor=1",
       keywords: [
         "dotenv",
         "env",
@@ -359,19 +397,22 @@ var require_package = __commonJS({
       readmeFilename: "README.md",
       license: "BSD-2-Clause",
       devDependencies: {
-        "@types/node": "^17.0.9",
+        "@definitelytyped/dtslint": "^0.0.133",
+        "@types/node": "^18.11.3",
         decache: "^4.6.1",
-        dtslint: "^3.7.0",
-        sinon: "^12.0.1",
-        standard: "^16.0.4",
+        sinon: "^14.0.1",
+        standard: "^17.0.0",
         "standard-markdown": "^7.1.0",
-        "standard-version": "^9.3.2",
-        tap: "^15.1.6",
+        "standard-version": "^9.5.0",
+        tap: "^16.3.0",
         tar: "^6.1.11",
-        typescript: "^4.5.4"
+        typescript: "^4.8.4"
       },
       engines: {
         node: ">=12"
+      },
+      browser: {
+        fs: false
       }
     };
   }
@@ -383,6 +424,7 @@ var require_main = __commonJS({
     var fs3 = require("fs");
     var path4 = require("path");
     var os3 = require("os");
+    var crypto = require("crypto");
     var packageJson = require_package();
     var version = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -405,17 +447,89 @@ var require_main = __commonJS({
       }
       return obj;
     }
+    function _parseVault(options) {
+      const vaultPath = _vaultPath(options);
+      const result = DotenvModule.configDotenv({ path: vaultPath });
+      if (!result.parsed) {
+        throw new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
+      }
+      const keys = _dotenvKey().split(",");
+      const length = keys.length;
+      let decrypted;
+      for (let i2 = 0; i2 < length; i2++) {
+        try {
+          const key = keys[i2].trim();
+          const attrs = _instructions(result, key);
+          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
+          break;
+        } catch (error) {
+          if (i2 + 1 >= length) {
+            throw error;
+          }
+        }
+      }
+      return DotenvModule.parse(decrypted);
+    }
     function _log(message) {
+      console.log(`[dotenv@${version}][INFO] ${message}`);
+    }
+    function _warn(message) {
+      console.log(`[dotenv@${version}][WARN] ${message}`);
+    }
+    function _debug(message) {
       console.log(`[dotenv@${version}][DEBUG] ${message}`);
+    }
+    function _dotenvKey() {
+      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+        return process.env.DOTENV_KEY;
+      }
+      return "";
+    }
+    function _instructions(result, dotenvKey) {
+      let uri;
+      try {
+        uri = new URL(dotenvKey);
+      } catch (error) {
+        if (error.code === "ERR_INVALID_URL") {
+          throw new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenv.org/vault/.env.vault?environment=development");
+        }
+        throw error;
+      }
+      const key = uri.password;
+      if (!key) {
+        throw new Error("INVALID_DOTENV_KEY: Missing key part");
+      }
+      const environment = uri.searchParams.get("environment");
+      if (!environment) {
+        throw new Error("INVALID_DOTENV_KEY: Missing environment part");
+      }
+      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
+      const ciphertext = result.parsed[environmentKey];
+      if (!ciphertext) {
+        throw new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
+      }
+      return { ciphertext, key };
+    }
+    function _vaultPath(options) {
+      let dotenvPath = path4.resolve(process.cwd(), ".env");
+      if (options && options.path && options.path.length > 0) {
+        dotenvPath = options.path;
+      }
+      return dotenvPath.endsWith(".vault") ? dotenvPath : `${dotenvPath}.vault`;
     }
     function _resolveHome(envPath) {
       return envPath[0] === "~" ? path4.join(os3.homedir(), envPath.slice(1)) : envPath;
     }
-    function config5(options) {
+    function _configVault(options) {
+      _log("Loading env from encrypted .env.vault");
+      const parsed = DotenvModule._parseVault(options);
+      DotenvModule.populate(process.env, parsed, options);
+      return { parsed };
+    }
+    function configDotenv(options) {
       let dotenvPath = path4.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       const debug = Boolean(options && options.debug);
-      const override = Boolean(options && options.override);
       if (options) {
         if (options.path != null) {
           dotenvPath = _resolveHome(options.path);
@@ -426,36 +540,92 @@ var require_main = __commonJS({
       }
       try {
         const parsed = DotenvModule.parse(fs3.readFileSync(dotenvPath, { encoding }));
-        Object.keys(parsed).forEach(function(key) {
-          if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
-            process.env[key] = parsed[key];
-          } else {
-            if (override === true) {
-              process.env[key] = parsed[key];
-            }
-            if (debug) {
-              if (override === true) {
-                _log(`"${key}" is already defined in \`process.env\` and WAS overwritten`);
-              } else {
-                _log(`"${key}" is already defined in \`process.env\` and was NOT overwritten`);
-              }
-            }
-          }
-        });
+        DotenvModule.populate(process.env, parsed, options);
         return { parsed };
       } catch (e2) {
         if (debug) {
-          _log(`Failed to load ${dotenvPath} ${e2.message}`);
+          _debug(`Failed to load ${dotenvPath} ${e2.message}`);
         }
         return { error: e2 };
       }
     }
+    function config5(options) {
+      const vaultPath = _vaultPath(options);
+      if (_dotenvKey().length === 0) {
+        return DotenvModule.configDotenv(options);
+      }
+      if (!fs3.existsSync(vaultPath)) {
+        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        return DotenvModule.configDotenv(options);
+      }
+      return DotenvModule._configVault(options);
+    }
+    function decrypt(encrypted, keyStr) {
+      const key = Buffer.from(keyStr.slice(-64), "hex");
+      let ciphertext = Buffer.from(encrypted, "base64");
+      const nonce = ciphertext.slice(0, 12);
+      const authTag = ciphertext.slice(-16);
+      ciphertext = ciphertext.slice(12, -16);
+      try {
+        const aesgcm = crypto.createDecipheriv("aes-256-gcm", key, nonce);
+        aesgcm.setAuthTag(authTag);
+        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
+      } catch (error) {
+        const isRange = error instanceof RangeError;
+        const invalidKeyLength = error.message === "Invalid key length";
+        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
+        if (isRange || invalidKeyLength) {
+          const msg = "INVALID_DOTENV_KEY: It must be 64 characters long (or more)";
+          throw new Error(msg);
+        } else if (decryptionFailed) {
+          const msg = "DECRYPTION_FAILED: Please check your DOTENV_KEY";
+          throw new Error(msg);
+        } else {
+          console.error("Error: ", error.code);
+          console.error("Error: ", error.message);
+          throw error;
+        }
+      }
+    }
+    function populate(processEnv, parsed, options = {}) {
+      const debug = Boolean(options && options.debug);
+      const override = Boolean(options && options.override);
+      if (typeof parsed !== "object") {
+        throw new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
+      }
+      for (const key of Object.keys(parsed)) {
+        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+          if (override === true) {
+            processEnv[key] = parsed[key];
+          }
+          if (debug) {
+            if (override === true) {
+              _debug(`"${key}" is already defined and WAS overwritten`);
+            } else {
+              _debug(`"${key}" is already defined and was NOT overwritten`);
+            }
+          }
+        } else {
+          processEnv[key] = parsed[key];
+        }
+      }
+    }
     var DotenvModule = {
+      configDotenv,
+      _configVault,
+      _parseVault,
       config: config5,
-      parse
+      decrypt,
+      parse,
+      populate
     };
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
     module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
     module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
     module2.exports = DotenvModule;
   }
 });
@@ -599,8 +769,10 @@ var require_which = __commonJS({
     var getPathInfo = (cmd, opt) => {
       const colon = opt.colon || COLON;
       const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? [""] : [
+        // windows always checks the cwd first
         ...isWindows ? [process.cwd()] : [],
-        ...(opt.path || process.env.PATH || "").split(colon)
+        ...(opt.path || process.env.PATH || /* istanbul ignore next: very unusual */
+        "").split(colon)
       ];
       const pathExtExe = isWindows ? opt.pathExt || process.env.PATHEXT || ".EXE;.CMD;.BAT;.COM" : "";
       const pathExt = isWindows ? pathExtExe.split(colon) : [""];
@@ -975,6 +1147,9 @@ var require_signals = __commonJS({
         "SIGSYS",
         "SIGQUIT",
         "SIGIOT"
+        // should detect profiler and enable/disable accordingly.
+        // see #21
+        // 'SIGPROF'
       );
     }
     if (process.platform === "linux") {
@@ -992,11 +1167,11 @@ var require_signals = __commonJS({
 // node_modules/signal-exit/index.js
 var require_signal_exit = __commonJS({
   "node_modules/signal-exit/index.js"(exports, module2) {
-    var process5 = global.process;
-    var processOk = function(process6) {
-      return process6 && typeof process6 === "object" && typeof process6.removeListener === "function" && typeof process6.emit === "function" && typeof process6.reallyExit === "function" && typeof process6.listeners === "function" && typeof process6.kill === "function" && typeof process6.pid === "number" && typeof process6.on === "function";
+    var process6 = global.process;
+    var processOk = function(process7) {
+      return process7 && typeof process7 === "object" && typeof process7.removeListener === "function" && typeof process7.emit === "function" && typeof process7.reallyExit === "function" && typeof process7.listeners === "function" && typeof process7.kill === "function" && typeof process7.pid === "number" && typeof process7.on === "function";
     };
-    if (!processOk(process5)) {
+    if (!processOk(process6)) {
       module2.exports = function() {
         return function() {
         };
@@ -1004,15 +1179,15 @@ var require_signal_exit = __commonJS({
     } else {
       assert = require("assert");
       signals = require_signals();
-      isWin = /^win/i.test(process5.platform);
+      isWin = /^win/i.test(process6.platform);
       EE = require("events");
       if (typeof EE !== "function") {
         EE = EE.EventEmitter;
       }
-      if (process5.__signal_exit_emitter__) {
-        emitter = process5.__signal_exit_emitter__;
+      if (process6.__signal_exit_emitter__) {
+        emitter = process6.__signal_exit_emitter__;
       } else {
-        emitter = process5.__signal_exit_emitter__ = new EE();
+        emitter = process6.__signal_exit_emitter__ = new EE();
         emitter.count = 0;
         emitter.emitted = {};
       }
@@ -1049,12 +1224,12 @@ var require_signal_exit = __commonJS({
         loaded = false;
         signals.forEach(function(sig) {
           try {
-            process5.removeListener(sig, sigListeners[sig]);
+            process6.removeListener(sig, sigListeners[sig]);
           } catch (er) {
           }
         });
-        process5.emit = originalProcessEmit;
-        process5.reallyExit = originalProcessReallyExit;
+        process6.emit = originalProcessEmit;
+        process6.reallyExit = originalProcessReallyExit;
         emitter.count -= 1;
       };
       module2.exports.unload = unload;
@@ -1071,7 +1246,7 @@ var require_signal_exit = __commonJS({
           if (!processOk(global.process)) {
             return;
           }
-          var listeners = process5.listeners(sig);
+          var listeners = process6.listeners(sig);
           if (listeners.length === emitter.count) {
             unload();
             emit("exit", null, sig);
@@ -1079,7 +1254,7 @@ var require_signal_exit = __commonJS({
             if (isWin && sig === "SIGHUP") {
               sig = "SIGINT";
             }
-            process5.kill(process5.pid, sig);
+            process6.kill(process6.pid, sig);
           }
         };
       });
@@ -1095,35 +1270,36 @@ var require_signal_exit = __commonJS({
         emitter.count += 1;
         signals = signals.filter(function(sig) {
           try {
-            process5.on(sig, sigListeners[sig]);
+            process6.on(sig, sigListeners[sig]);
             return true;
           } catch (er) {
             return false;
           }
         });
-        process5.emit = processEmit;
-        process5.reallyExit = processReallyExit;
+        process6.emit = processEmit;
+        process6.reallyExit = processReallyExit;
       };
       module2.exports.load = load;
-      originalProcessReallyExit = process5.reallyExit;
+      originalProcessReallyExit = process6.reallyExit;
       processReallyExit = function processReallyExit2(code) {
         if (!processOk(global.process)) {
           return;
         }
-        process5.exitCode = code || 0;
-        emit("exit", process5.exitCode, null);
-        emit("afterexit", process5.exitCode, null);
-        originalProcessReallyExit.call(process5, process5.exitCode);
+        process6.exitCode = code || /* istanbul ignore next */
+        0;
+        emit("exit", process6.exitCode, null);
+        emit("afterexit", process6.exitCode, null);
+        originalProcessReallyExit.call(process6, process6.exitCode);
       };
-      originalProcessEmit = process5.emit;
+      originalProcessEmit = process6.emit;
       processEmit = function processEmit2(ev, arg) {
         if (ev === "exit" && processOk(global.process)) {
           if (arg !== void 0) {
-            process5.exitCode = arg;
+            process6.exitCode = arg;
           }
           var ret = originalProcessEmit.apply(this, arguments);
-          emit("exit", process5.exitCode, null);
-          emit("afterexit", process5.exitCode, null);
+          emit("exit", process6.exitCode, null);
+          emit("afterexit", process6.exitCode, null);
           return ret;
         } else {
           return originalProcessEmit.apply(this, arguments);
@@ -1320,67 +1496,139 @@ var require_ignore = __commonJS({
       return slashes.slice(0, length - length % 2);
     };
     var REPLACERS = [
+      // > Trailing spaces are ignored unless they are quoted with backslash ("\")
       [
+        // (a\ ) -> (a )
+        // (a  ) -> (a)
+        // (a \ ) -> (a  )
         /\\?\s+$/,
         (match) => match.indexOf("\\") === 0 ? SPACE : EMPTY
       ],
+      // replace (\ ) with ' '
       [
         /\\\s/g,
         () => SPACE
       ],
+      // Escape metacharacters
+      // which is written down by users but means special for regular expressions.
+      // > There are 12 characters with special meanings:
+      // > - the backslash \,
+      // > - the caret ^,
+      // > - the dollar sign $,
+      // > - the period or dot .,
+      // > - the vertical bar or pipe symbol |,
+      // > - the question mark ?,
+      // > - the asterisk or star *,
+      // > - the plus sign +,
+      // > - the opening parenthesis (,
+      // > - the closing parenthesis ),
+      // > - and the opening square bracket [,
+      // > - the opening curly brace {,
+      // > These special characters are often called "metacharacters".
       [
         /[\\$.|*+(){^]/g,
         (match) => `\\${match}`
       ],
       [
+        // > a question mark (?) matches a single character
         /(?!\\)\?/g,
         () => "[^/]"
       ],
+      // leading slash
       [
+        // > A leading slash matches the beginning of the pathname.
+        // > For example, "/*.c" matches "cat-file.c" but not "mozilla-sha1/sha1.c".
+        // A leading slash matches the beginning of the pathname
         /^\//,
         () => "^"
       ],
+      // replace special metacharacter slash after the leading slash
       [
         /\//g,
         () => "\\/"
       ],
       [
+        // > A leading "**" followed by a slash means match in all directories.
+        // > For example, "**/foo" matches file or directory "foo" anywhere,
+        // > the same as pattern "foo".
+        // > "**/foo/bar" matches file or directory "bar" anywhere that is directly
+        // >   under directory "foo".
+        // Notice that the '*'s have been replaced as '\\*'
         /^\^*\\\*\\\*\\\//,
+        // '**/foo' <-> 'foo'
         () => "^(?:.*\\/)?"
       ],
+      // starting
       [
+        // there will be no leading '/'
+        //   (which has been replaced by section "leading slash")
+        // If starts with '**', adding a '^' to the regular expression also works
         /^(?=[^^])/,
         function startingReplacer() {
           return !/\/(?!$)/.test(this) ? "(?:^|\\/)" : "^";
         }
       ],
+      // two globstars
       [
+        // Use lookahead assertions so that we could match more than one `'/**'`
         /\\\/\\\*\\\*(?=\\\/|$)/g,
+        // Zero, one or several directories
+        // should not use '*', or it will be replaced by the next replacer
+        // Check if it is not the last `'/**'`
         (_6, index, str) => index + 6 < str.length ? "(?:\\/[^\\/]+)*" : "\\/.+"
       ],
+      // normal intermediate wildcards
       [
+        // Never replace escaped '*'
+        // ignore rule '\*' will match the path '*'
+        // 'abc.*/' -> go
+        // 'abc.*'  -> skip this rule,
+        //    coz trailing single wildcard will be handed by [trailing wildcard]
         /(^|[^\\]+)(\\\*)+(?=.+)/g,
+        // '*.js' matches '.js'
+        // '*.js' doesn't match 'abc'
         (_6, p1, p22) => {
           const unescaped = p22.replace(/\\\*/g, "[^\\/]*");
           return p1 + unescaped;
         }
       ],
       [
+        // unescape, revert step 3 except for back slash
+        // For example, if a user escape a '\\*',
+        // after step 3, the result will be '\\\\\\*'
         /\\\\\\(?=[$.|*+(){^])/g,
         () => ESCAPE
       ],
       [
+        // '\\\\' -> '\\'
         /\\\\/g,
         () => ESCAPE
       ],
       [
+        // > The range notation, e.g. [a-zA-Z],
+        // > can be used to match one of the characters in a range.
+        // `\` is escaped by step 3
         /(\\)?\[([^\]/]*?)(\\*)($|\])/g,
         (match, leadEscape, range, endEscape, close) => leadEscape === ESCAPE ? `\\[${range}${cleanRangeBackSlash(endEscape)}${close}` : close === "]" ? endEscape.length % 2 === 0 ? `[${sanitizeRange(range)}${endEscape}]` : "[]" : "[]"
       ],
+      // ending
       [
+        // 'js' will not match 'js.'
+        // 'ab' will not match 'abc'
         /(?:[^*])$/,
+        // WTF!
+        // https://git-scm.com/docs/gitignore
+        // changes in [2.22.1](https://git-scm.com/docs/gitignore/2.22.1)
+        // which re-fixes #24, #38
+        // > If there is a separator at the end of the pattern then the pattern
+        // > will only match directories, otherwise the pattern can match both
+        // > files and directories.
+        // 'js*' will not match 'a.js'
+        // 'js/' will not match 'a.js'
+        // 'js' will match 'a.js' and 'a.js/'
         (match) => /\/$/.test(match) ? `${match}$` : `${match}(?=$|\\/$)`
       ],
+      // trailing wildcard
       [
         /(\^|\\\/)?\\\*$/,
         (_6, p1) => {
@@ -1481,6 +1729,7 @@ var require_ignore = __commonJS({
           this._rules.push(rule);
         }
       }
+      // @param {Array<string> | string | Ignore} pattern
       add(pattern) {
         this._added = false;
         makeArray(
@@ -1491,9 +1740,23 @@ var require_ignore = __commonJS({
         }
         return this;
       }
+      // legacy
       addPattern(pattern) {
         return this.add(pattern);
       }
+      //          |           ignored : unignored
+      // negative |   0:0   |   0:1   |   1:0   |   1:1
+      // -------- | ------- | ------- | ------- | --------
+      //     0    |  TEST   |  TEST   |  SKIP   |    X
+      //     1    |  TESTIF |  SKIP   |  TEST   |    X
+      // - SKIP: always skip
+      // - TEST: always test
+      // - TESTIF: only test if checkUnignored
+      // - X: that never happen
+      // @param {boolean} whether should check if the path is unignored,
+      //   setting `checkUnignored` to `false` could reduce additional
+      //   path matching.
+      // @returns {TestResult} true if a file is ignored
       _testOne(path4, checkUnignored) {
         let ignored = false;
         let unignored = false;
@@ -1513,6 +1776,7 @@ var require_ignore = __commonJS({
           unignored
         };
       }
+      // @returns {TestResult}
       _test(originalPath, cache, checkUnignored, slices) {
         const path4 = originalPath && checkPath.convert(originalPath);
         checkPath(
@@ -1550,6 +1814,7 @@ var require_ignore = __commonJS({
       filter(paths) {
         return makeArray(paths).filter(this.createFilter());
       }
+      // @returns {TestResult}
       test(path4) {
         return this._test(path4, this._testCache, true);
       }
@@ -1559,7 +1824,10 @@ var require_ignore = __commonJS({
     factory.isPathValid = isPathValid;
     factory.default = factory;
     module2.exports = factory;
-    if (typeof process !== "undefined" && (process.env && process.env.IGNORE_TEST_WIN32 || process.platform === "win32")) {
+    if (
+      // Detect `process` so that it can run in browsers.
+      typeof process !== "undefined" && (process.env && process.env.IGNORE_TEST_WIN32 || process.platform === "win32")
+    ) {
       const makePosix = (str) => /^\\\\\?\\/.test(str) || /["<>|\u0000-\u001F]+/u.test(str) ? str : str.replace(/\\/g, "/");
       checkPath.convert = makePosix;
       const REGIX_IS_WINDOWS_PATH_ABSOLUTE = /^[a-z]:\//i;
@@ -1851,14 +2119,18 @@ var require_enhanceError = __commonJS({
       error.isAxiosError = true;
       error.toJSON = function toJSON2() {
         return {
+          // Standard
           message: this.message,
           name: this.name,
+          // Microsoft
           description: this.description,
           number: this.number,
+          // Mozilla
           fileName: this.fileName,
           lineNumber: this.lineNumber,
           columnNumber: this.columnNumber,
           stack: this.stack,
+          // Axios
           config: this.config,
           code: this.code,
           status: this.response && this.response.status ? this.response.status : null
@@ -1920,44 +2192,50 @@ var require_cookies = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/cookies.js"(exports, module2) {
     "use strict";
     var utils = require_utils();
-    module2.exports = utils.isStandardBrowserEnv() ? function standardBrowserEnv3() {
-      return {
-        write: function write(name, value, expires, path4, domain, secure) {
-          var cookie = [];
-          cookie.push(name + "=" + encodeURIComponent(value));
-          if (utils.isNumber(expires)) {
-            cookie.push("expires=" + new Date(expires).toGMTString());
+    module2.exports = utils.isStandardBrowserEnv() ? (
+      // Standard browser envs support document.cookie
+      function standardBrowserEnv3() {
+        return {
+          write: function write(name, value, expires, path4, domain, secure) {
+            var cookie = [];
+            cookie.push(name + "=" + encodeURIComponent(value));
+            if (utils.isNumber(expires)) {
+              cookie.push("expires=" + new Date(expires).toGMTString());
+            }
+            if (utils.isString(path4)) {
+              cookie.push("path=" + path4);
+            }
+            if (utils.isString(domain)) {
+              cookie.push("domain=" + domain);
+            }
+            if (secure === true) {
+              cookie.push("secure");
+            }
+            document.cookie = cookie.join("; ");
+          },
+          read: function read(name) {
+            var match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+            return match ? decodeURIComponent(match[3]) : null;
+          },
+          remove: function remove(name) {
+            this.write(name, "", Date.now() - 864e5);
           }
-          if (utils.isString(path4)) {
-            cookie.push("path=" + path4);
+        };
+      }()
+    ) : (
+      // Non standard browser env (web workers, react-native) lack needed support.
+      function nonStandardBrowserEnv3() {
+        return {
+          write: function write() {
+          },
+          read: function read() {
+            return null;
+          },
+          remove: function remove() {
           }
-          if (utils.isString(domain)) {
-            cookie.push("domain=" + domain);
-          }
-          if (secure === true) {
-            cookie.push("secure");
-          }
-          document.cookie = cookie.join("; ");
-        },
-        read: function read(name) {
-          var match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-          return match ? decodeURIComponent(match[3]) : null;
-        },
-        remove: function remove(name) {
-          this.write(name, "", Date.now() - 864e5);
-        }
-      };
-    }() : function nonStandardBrowserEnv3() {
-      return {
-        write: function write() {
-        },
-        read: function read() {
-          return null;
-        },
-        remove: function remove() {
-        }
-      };
-    }();
+        };
+      }()
+    );
   }
 });
 
@@ -2053,38 +2331,45 @@ var require_isURLSameOrigin = __commonJS({
   "node_modules/openai/node_modules/axios/lib/helpers/isURLSameOrigin.js"(exports, module2) {
     "use strict";
     var utils = require_utils();
-    module2.exports = utils.isStandardBrowserEnv() ? function standardBrowserEnv3() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement("a");
-      var originURL;
-      function resolveURL(url3) {
-        var href = url3;
-        if (msie) {
+    module2.exports = utils.isStandardBrowserEnv() ? (
+      // Standard browser envs have full support of the APIs needed to test
+      // whether the request URL is of the same origin as current location.
+      function standardBrowserEnv3() {
+        var msie = /(msie|trident)/i.test(navigator.userAgent);
+        var urlParsingNode = document.createElement("a");
+        var originURL;
+        function resolveURL(url3) {
+          var href = url3;
+          if (msie) {
+            urlParsingNode.setAttribute("href", href);
+            href = urlParsingNode.href;
+          }
           urlParsingNode.setAttribute("href", href);
-          href = urlParsingNode.href;
+          return {
+            href: urlParsingNode.href,
+            protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
+            host: urlParsingNode.host,
+            search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
+            hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
+            hostname: urlParsingNode.hostname,
+            port: urlParsingNode.port,
+            pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+          };
         }
-        urlParsingNode.setAttribute("href", href);
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
-          host: urlParsingNode.host,
-          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
-          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
-          hostname: urlParsingNode.hostname,
-          port: urlParsingNode.port,
-          pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+        originURL = resolveURL(window.location.href);
+        return function isURLSameOrigin(requestURL) {
+          var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+          return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
         };
-      }
-      originURL = resolveURL(window.location.href);
-      return function isURLSameOrigin(requestURL) {
-        var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-        return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-      };
-    }() : function nonStandardBrowserEnv3() {
-      return function isURLSameOrigin() {
-        return true;
-      };
-    }();
+      }()
+    ) : (
+      // Non standard browser envs (web workers, react-native) lack needed support.
+      function nonStandardBrowserEnv3() {
+        return function isURLSameOrigin() {
+          return true;
+        };
+      }()
+    );
   }
 });
 
@@ -2407,7 +2692,7 @@ var require_common = __commonJS({
             return;
           }
           const self2 = debug;
-          const curr = Number(new Date());
+          const curr = Number(/* @__PURE__ */ new Date());
           const ms = curr - (prevTime || curr);
           self2.diff = ms;
           self2.prev = prevTime;
@@ -2635,7 +2920,11 @@ var require_browser = __commonJS({
       if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
         return false;
       }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
     function formatArgs(args) {
       args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
@@ -2952,7 +3241,7 @@ var require_node = __commonJS({
       if (exports.inspectOpts.hideDate) {
         return "";
       }
-      return new Date().toISOString() + " ";
+      return (/* @__PURE__ */ new Date()).toISOString() + " ";
     }
     function log(...args) {
       return process.stderr.write(util2.format(...args) + "\n");
@@ -3234,7 +3523,11 @@ var require_follow_redirects = __commonJS({
       for (var event of events) {
         request.on(event, eventHandlers[event]);
       }
-      this._currentUrl = /^\//.test(this._options.path) ? url3.format(this._options) : this._options.path;
+      this._currentUrl = /^\//.test(this._options.path) ? url3.format(this._options) : (
+        // When making a request to a proxy, […]
+        // a client MUST send the target URI in absolute-form […].
+        this._options.path
+      );
       if (this._isRedirect) {
         var i2 = 0;
         var self2 = this;
@@ -3282,11 +3575,16 @@ var require_follow_redirects = __commonJS({
       var beforeRedirect = this._options.beforeRedirect;
       if (beforeRedirect) {
         requestHeaders = Object.assign({
+          // The Host header was set by nativeProtocol.request
           Host: response.req.getHeader("host")
         }, this._options.headers);
       }
       var method = this._options.method;
-      if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" || statusCode === 303 && !/^(?:GET|HEAD)$/.test(this._options.method)) {
+      if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" || // RFC7231§6.4.4: The 303 (See Other) status code indicates that
+      // the server is redirecting the user agent to a different resource […]
+      // A user agent can perform a retrieval request targeting that URI
+      // (a GET or HEAD request if using HTTP) […]
+      statusCode === 303 && !/^(?:GET|HEAD)$/.test(this._options.method)) {
         this._options.method = "GET";
         this._requestBodyBuffers = [];
         removeMatchingHeaders(/^content-/i, this._options.headers);
@@ -3395,7 +3693,10 @@ var require_follow_redirects = __commonJS({
     function urlToOptions(urlObject) {
       var options = {
         protocol: urlObject.protocol,
-        hostname: urlObject.hostname.startsWith("[") ? urlObject.hostname.slice(1, -1) : urlObject.hostname,
+        hostname: urlObject.hostname.startsWith("[") ? (
+          /* istanbul ignore next */
+          urlObject.hostname.slice(1, -1)
+        ) : urlObject.hostname,
         hash: urlObject.hash,
         search: urlObject.search,
         pathname: urlObject.pathname,
@@ -3867,6 +4168,10 @@ var require_defaults = __commonJS({
         }
         return data;
       }],
+      /**
+       * A timeout in milliseconds to abort a request. If set to 0 (default) a
+       * timeout is not created.
+       */
       timeout: 0,
       xsrfCookieName: "XSRF-TOKEN",
       xsrfHeaderName: "X-XSRF-TOKEN",
@@ -4585,6 +4890,13 @@ var require_api = __commonJS({
     };
     exports.OpenAIApiAxiosParamCreator = function(configuration) {
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune: (fineTuneId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("cancelFineTune", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}/cancel`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -4604,6 +4916,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer: (createAnswerRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createAnswer", "createAnswerRequest", createAnswerRequest);
           const localVarPath = `/answers`;
@@ -4625,6 +4945,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion: (createChatCompletionRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createChatCompletion", "createChatCompletionRequest", createChatCompletionRequest);
           const localVarPath = `/chat/completions`;
@@ -4646,6 +4973,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification: (createClassificationRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createClassification", "createClassificationRequest", createClassificationRequest);
           const localVarPath = `/classifications`;
@@ -4667,6 +5002,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion: (createCompletionRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createCompletion", "createCompletionRequest", createCompletionRequest);
           const localVarPath = `/completions`;
@@ -4688,6 +5030,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit: (createEditRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createEdit", "createEditRequest", createEditRequest);
           const localVarPath = `/edits`;
@@ -4709,6 +5058,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding: (createEmbeddingRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createEmbedding", "createEmbeddingRequest", createEmbeddingRequest);
           const localVarPath = `/embeddings`;
@@ -4730,6 +5086,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile: (file, purpose, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createFile", "file", file);
           common_1.assertParamExists("createFile", "purpose", purpose);
@@ -4759,6 +5123,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune: (createFineTuneRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createFineTune", "createFineTuneRequest", createFineTuneRequest);
           const localVarPath = `/fine-tunes`;
@@ -4780,6 +5151,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage: (createImageRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImage", "createImageRequest", createImageRequest);
           const localVarPath = `/images/generations`;
@@ -4801,6 +5179,19 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit: (image, prompt, mask, n, size, responseFormat, user, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImageEdit", "image", image);
           common_1.assertParamExists("createImageEdit", "prompt", prompt);
@@ -4845,6 +5236,17 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation: (image, n, size, responseFormat, user, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createImageVariation", "image", image);
           const localVarPath = `/images/variations`;
@@ -4882,6 +5284,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration: (createModerationRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createModeration", "createModerationRequest", createModerationRequest);
           const localVarPath = `/moderations`;
@@ -4903,6 +5312,15 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch: (engineId, createSearchRequest, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createSearch", "engineId", engineId);
           common_1.assertParamExists("createSearch", "createSearchRequest", createSearchRequest);
@@ -4925,6 +5343,18 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription: (file, model, prompt, responseFormat, temperature, language, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createTranscription", "file", file);
           common_1.assertParamExists("createTranscription", "model", model);
@@ -4966,6 +5396,17 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation: (file, model, prompt, responseFormat, temperature, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("createTranslation", "file", file);
           common_1.assertParamExists("createTranslation", "model", model);
@@ -5004,6 +5445,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("deleteFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -5023,6 +5471,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel: (model, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("deleteModel", "model", model);
           const localVarPath = `/models/{model}`.replace(`{${"model"}}`, encodeURIComponent(String(model)));
@@ -5042,6 +5497,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("downloadFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}/content`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -5061,6 +5523,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/engines`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -5079,6 +5548,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/files`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -5097,6 +5572,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents: (fineTuneId, stream4, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("listFineTuneEvents", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}/events`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -5119,6 +5602,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/fine-tunes`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -5137,6 +5626,12 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels: (options = {}) => __awaiter(this, void 0, void 0, function* () {
           const localVarPath = `/models`;
           const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
@@ -5155,6 +5650,14 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine: (engineId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveEngine", "engineId", engineId);
           const localVarPath = `/engines/{engine_id}`.replace(`{${"engine_id"}}`, encodeURIComponent(String(engineId)));
@@ -5174,6 +5677,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile: (fileId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveFile", "fileId", fileId);
           const localVarPath = `/files/{file_id}`.replace(`{${"file_id"}}`, encodeURIComponent(String(fileId)));
@@ -5193,6 +5703,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune: (fineTuneId, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveFineTune", "fineTuneId", fineTuneId);
           const localVarPath = `/fine-tunes/{fine_tune_id}`.replace(`{${"fine_tune_id"}}`, encodeURIComponent(String(fineTuneId)));
@@ -5212,6 +5729,13 @@ var require_api = __commonJS({
             options: localVarRequestOptions
           };
         }),
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel: (model, options = {}) => __awaiter(this, void 0, void 0, function* () {
           common_1.assertParamExists("retrieveModel", "model", model);
           const localVarPath = `/models/{model}`.replace(`{${"model"}}`, encodeURIComponent(String(model)));
@@ -5236,168 +5760,387 @@ var require_api = __commonJS({
     exports.OpenAIApiFp = function(configuration) {
       const localVarAxiosParamCreator = exports.OpenAIApiAxiosParamCreator(configuration);
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune(fineTuneId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.cancelFineTune(fineTuneId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer(createAnswerRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createAnswer(createAnswerRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion(createChatCompletionRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createChatCompletion(createChatCompletionRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification(createClassificationRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createClassification(createClassificationRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion(createCompletionRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createCompletion(createCompletionRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit(createEditRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createEdit(createEditRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding(createEmbeddingRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createEmbedding(createEmbeddingRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile(file, purpose, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createFile(file, purpose, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune(createFineTuneRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createFineTune(createFineTuneRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage(createImageRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImage(createImageRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImageEdit(image, prompt, mask, n, size, responseFormat, user, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation(image, n, size, responseFormat, user, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createImageVariation(image, n, size, responseFormat, user, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration(createModerationRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createModeration(createModerationRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch(engineId, createSearchRequest, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createSearch(engineId, createSearchRequest, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createTranscription(file, model, prompt, responseFormat, temperature, language, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation(file, model, prompt, responseFormat, temperature, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.createTranslation(file, model, prompt, responseFormat, temperature, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.deleteFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel(model, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.deleteModel(model, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.downloadFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listEngines(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFiles(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents(fineTuneId, stream4, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFineTuneEvents(fineTuneId, stream4, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listFineTunes(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels(options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.listModels(options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine(engineId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveEngine(engineId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile(fileId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveFile(fileId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune(fineTuneId, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveFineTune(fineTuneId, options);
             return common_1.createRequestFunction(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration);
           });
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel(model, options) {
           return __awaiter(this, void 0, void 0, function* () {
             const localVarAxiosArgs = yield localVarAxiosParamCreator.retrieveModel(model, options);
@@ -5409,174 +6152,640 @@ var require_api = __commonJS({
     exports.OpenAIApiFactory = function(configuration, basePath2, axios2) {
       const localVarFp = exports.OpenAIApiFp(configuration);
       return {
+        /**
+         *
+         * @summary Immediately cancel a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to cancel
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         cancelFineTune(fineTuneId, options) {
           return localVarFp.cancelFineTune(fineTuneId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+         * @param {CreateAnswerRequest} createAnswerRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createAnswer(createAnswerRequest, options) {
           return localVarFp.createAnswer(createAnswerRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a completion for the chat message
+         * @param {CreateChatCompletionRequest} createChatCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createChatCompletion(createChatCompletionRequest, options) {
           return localVarFp.createChatCompletion(createChatCompletionRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+         * @param {CreateClassificationRequest} createClassificationRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createClassification(createClassificationRequest, options) {
           return localVarFp.createClassification(createClassificationRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a completion for the provided prompt and parameters
+         * @param {CreateCompletionRequest} createCompletionRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createCompletion(createCompletionRequest, options) {
           return localVarFp.createCompletion(createCompletionRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a new edit for the provided input, instruction, and parameters.
+         * @param {CreateEditRequest} createEditRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEdit(createEditRequest, options) {
           return localVarFp.createEdit(createEditRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an embedding vector representing the input text.
+         * @param {CreateEmbeddingRequest} createEmbeddingRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createEmbedding(createEmbeddingRequest, options) {
           return localVarFp.createEmbedding(createEmbeddingRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+         * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+         * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFile(file, purpose, options) {
           return localVarFp.createFile(file, purpose, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {CreateFineTuneRequest} createFineTuneRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createFineTune(createFineTuneRequest, options) {
           return localVarFp.createFineTune(createFineTuneRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an image given a prompt.
+         * @param {CreateImageRequest} createImageRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImage(createImageRequest, options) {
           return localVarFp.createImage(createImageRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates an edited or extended image given an original image and a prompt.
+         * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+         * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+         * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
           return localVarFp.createImageEdit(image, prompt, mask, n, size, responseFormat, user, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Creates a variation of a given image.
+         * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+         * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+         * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+         * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+         * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createImageVariation(image, n, size, responseFormat, user, options) {
           return localVarFp.createImageVariation(image, n, size, responseFormat, user, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Classifies if text violates OpenAI\'s Content Policy
+         * @param {CreateModerationRequest} createModerationRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createModeration(createModerationRequest, options) {
           return localVarFp.createModeration(createModerationRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+         * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+         * @param {CreateSearchRequest} createSearchRequest
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         createSearch(engineId, createSearchRequest, options) {
           return localVarFp.createSearch(engineId, createSearchRequest, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Transcribes audio into the input language.
+         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
           return localVarFp.createTranscription(file, model, prompt, responseFormat, temperature, language, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Translates audio into into English.
+         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+         * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+         * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+         * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         createTranslation(file, model, prompt, responseFormat, temperature, options) {
           return localVarFp.createTranslation(file, model, prompt, responseFormat, temperature, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Delete a file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteFile(fileId, options) {
           return localVarFp.deleteFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+         * @param {string} model The model to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         deleteModel(model, options) {
           return localVarFp.deleteModel(model, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns the contents of the specified file
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         downloadFile(fileId, options) {
           return localVarFp.downloadFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         listEngines(options) {
           return localVarFp.listEngines(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns a list of files that belong to the user\'s organization.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFiles(options) {
           return localVarFp.listFiles(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Get fine-grained status updates for a fine-tune job.
+         * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+         * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTuneEvents(fineTuneId, stream4, options) {
           return localVarFp.listFineTuneEvents(fineTuneId, stream4, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary List your organization\'s fine-tuning jobs
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listFineTunes(options) {
           return localVarFp.listFineTunes(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         listModels(options) {
           return localVarFp.listModels(options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+         * @param {string} engineId The ID of the engine to use for this request
+         * @param {*} [options] Override http request option.
+         * @deprecated
+         * @throws {RequiredError}
+         */
         retrieveEngine(engineId, options) {
           return localVarFp.retrieveEngine(engineId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Returns information about a specific file.
+         * @param {string} fileId The ID of the file to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFile(fileId, options) {
           return localVarFp.retrieveFile(fileId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+         * @param {string} fineTuneId The ID of the fine-tune job
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveFineTune(fineTuneId, options) {
           return localVarFp.retrieveFineTune(fineTuneId, options).then((request) => request(axios2, basePath2));
         },
+        /**
+         *
+         * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+         * @param {string} model The ID of the model to use for this request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         retrieveModel(model, options) {
           return localVarFp.retrieveModel(model, options).then((request) => request(axios2, basePath2));
         }
       };
     };
     var OpenAIApi2 = class extends base_1.BaseAPI {
+      /**
+       *
+       * @summary Immediately cancel a fine-tune job.
+       * @param {string} fineTuneId The ID of the fine-tune job to cancel
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       cancelFineTune(fineTuneId, options) {
         return exports.OpenAIApiFp(this.configuration).cancelFineTune(fineTuneId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Answers the specified question using the provided documents and examples.  The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
+       * @param {CreateAnswerRequest} createAnswerRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createAnswer(createAnswerRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createAnswer(createAnswerRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a completion for the chat message
+       * @param {CreateChatCompletionRequest} createChatCompletionRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createChatCompletion(createChatCompletionRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createChatCompletion(createChatCompletionRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Classifies the specified `query` using provided examples.  The endpoint first [searches](/docs/api-reference/searches) over the labeled examples to select the ones most relevant for the particular query. Then, the relevant examples are combined with the query to construct a prompt to produce the final label via the [completions](/docs/api-reference/completions) endpoint.  Labeled examples can be provided via an uploaded `file`, or explicitly listed in the request using the `examples` parameter for quick tests and small scale use cases.
+       * @param {CreateClassificationRequest} createClassificationRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createClassification(createClassificationRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createClassification(createClassificationRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a completion for the provided prompt and parameters
+       * @param {CreateCompletionRequest} createCompletionRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createCompletion(createCompletionRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createCompletion(createCompletionRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a new edit for the provided input, instruction, and parameters.
+       * @param {CreateEditRequest} createEditRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createEdit(createEditRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createEdit(createEditRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an embedding vector representing the input text.
+       * @param {CreateEmbeddingRequest} createEmbeddingRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createEmbedding(createEmbeddingRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createEmbedding(createEmbeddingRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+       * @param {File} file Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.  If the &#x60;purpose&#x60; is set to \\\&quot;fine-tune\\\&quot;, each line is a JSON record with \\\&quot;prompt\\\&quot; and \\\&quot;completion\\\&quot; fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).
+       * @param {string} purpose The intended purpose of the uploaded documents.  Use \\\&quot;fine-tune\\\&quot; for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createFile(file, purpose, options) {
         return exports.OpenAIApiFp(this.configuration).createFile(file, purpose, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a job that fine-tunes a specified model from a given dataset.  Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+       * @param {CreateFineTuneRequest} createFineTuneRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createFineTune(createFineTuneRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createFineTune(createFineTuneRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an image given a prompt.
+       * @param {CreateImageRequest} createImageRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImage(createImageRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createImage(createImageRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates an edited or extended image given an original image and a prompt.
+       * @param {File} image The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.
+       * @param {string} prompt A text description of the desired image(s). The maximum length is 1000 characters.
+       * @param {File} [mask] An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where &#x60;image&#x60; should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as &#x60;image&#x60;.
+       * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+       * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+       * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+       * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImageEdit(image, prompt, mask, n, size, responseFormat, user, options) {
         return exports.OpenAIApiFp(this.configuration).createImageEdit(image, prompt, mask, n, size, responseFormat, user, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Creates a variation of a given image.
+       * @param {File} image The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+       * @param {number} [n] The number of images to generate. Must be between 1 and 10.
+       * @param {string} [size] The size of the generated images. Must be one of &#x60;256x256&#x60;, &#x60;512x512&#x60;, or &#x60;1024x1024&#x60;.
+       * @param {string} [responseFormat] The format in which the generated images are returned. Must be one of &#x60;url&#x60; or &#x60;b64_json&#x60;.
+       * @param {string} [user] A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createImageVariation(image, n, size, responseFormat, user, options) {
         return exports.OpenAIApiFp(this.configuration).createImageVariation(image, n, size, responseFormat, user, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Classifies if text violates OpenAI\'s Content Policy
+       * @param {CreateModerationRequest} createModerationRequest
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createModeration(createModerationRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createModeration(createModerationRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.  To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.  The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
+       * @param {string} engineId The ID of the engine to use for this request.  You can select one of &#x60;ada&#x60;, &#x60;babbage&#x60;, &#x60;curie&#x60;, or &#x60;davinci&#x60;.
+       * @param {CreateSearchRequest} createSearchRequest
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createSearch(engineId, createSearchRequest, options) {
         return exports.OpenAIApiFp(this.configuration).createSearch(engineId, createSearchRequest, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Transcribes audio into the input language.
+       * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+       * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
+       * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+       * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+       * @param {string} [language] The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createTranscription(file, model, prompt, responseFormat, temperature, language, options) {
         return exports.OpenAIApiFp(this.configuration).createTranscription(file, model, prompt, responseFormat, temperature, language, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Translates audio into into English.
+       * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
+       * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
+       * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
+       * @param {number} [temperature] The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       createTranslation(file, model, prompt, responseFormat, temperature, options) {
         return exports.OpenAIApiFp(this.configuration).createTranslation(file, model, prompt, responseFormat, temperature, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Delete a file.
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       deleteFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).deleteFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Delete a fine-tuned model. You must have the Owner role in your organization.
+       * @param {string} model The model to delete
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       deleteModel(model, options) {
         return exports.OpenAIApiFp(this.configuration).deleteModel(model, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns the contents of the specified file
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       downloadFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).downloadFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listEngines(options) {
         return exports.OpenAIApiFp(this.configuration).listEngines(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns a list of files that belong to the user\'s organization.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFiles(options) {
         return exports.OpenAIApiFp(this.configuration).listFiles(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Get fine-grained status updates for a fine-tune job.
+       * @param {string} fineTuneId The ID of the fine-tune job to get events for.
+       * @param {boolean} [stream] Whether to stream events for the fine-tune job. If set to true, events will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available. The stream will terminate with a &#x60;data: [DONE]&#x60; message when the job is finished (succeeded, cancelled, or failed).  If set to false, only events generated so far will be returned.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFineTuneEvents(fineTuneId, stream4, options) {
         return exports.OpenAIApiFp(this.configuration).listFineTuneEvents(fineTuneId, stream4, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary List your organization\'s fine-tuning jobs
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listFineTunes(options) {
         return exports.OpenAIApiFp(this.configuration).listFineTunes(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Lists the currently available models, and provides basic information about each one such as the owner and availability.
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       listModels(options) {
         return exports.OpenAIApiFp(this.configuration).listModels(options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Retrieves a model instance, providing basic information about it such as the owner and availability.
+       * @param {string} engineId The ID of the engine to use for this request
+       * @param {*} [options] Override http request option.
+       * @deprecated
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveEngine(engineId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveEngine(engineId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Returns information about a specific file.
+       * @param {string} fileId The ID of the file to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveFile(fileId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveFile(fileId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Gets info about the fine-tune job.  [Learn more about Fine-tuning](/docs/guides/fine-tuning)
+       * @param {string} fineTuneId The ID of the fine-tune job
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveFineTune(fineTuneId, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveFineTune(fineTuneId, options).then((request) => request(this.axios, this.basePath));
       }
+      /**
+       *
+       * @summary Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
+       * @param {string} model The ID of the model to use for this request
+       * @param {*} [options] Override http request option.
+       * @throws {RequiredError}
+       * @memberof OpenAIApi
+       */
       retrieveModel(model, options) {
         return exports.OpenAIApiFp(this.configuration).retrieveModel(model, options).then((request) => request(this.axios, this.basePath));
       }
@@ -14832,7 +16041,9 @@ var require_form_data = __commonJS({
       var contentType = this._getContentType(value, options);
       var contents = "";
       var headers = {
+        // add custom disposition as third element or keep it two elements if not
         "Content-Disposition": ["form-data", 'name="' + field + '"'].concat(contentDisposition || []),
+        // if no content type. allow it to be empty array
         "Content-Type": [].concat(contentType || [])
       };
       if (typeof options.header == "object") {
@@ -15069,6 +16280,16 @@ var require_configuration = __commonJS({
           this.formDataCtor = require_form_data();
         }
       }
+      /**
+       * Check if the given MIME is a JSON MIME.
+       * JSON MIME examples:
+       *   application/json
+       *   application/json; charset=UTF8
+       *   APPLICATION/JSON
+       *   application/vnd.company+json
+       * @param mime - MIME (Multipurpose Internet Mail Extensions)
+       * @return True if the given MIME is JSON, false otherwise.
+       */
       isJsonMime(mime) {
         const jsonMime = new RegExp("^(application/json|[^;/ 	]+/[^;/ 	]+[+]json)[ 	]*(;.*)?$", "i");
         return mime !== null && (jsonMime.test(mime) || mime.toLowerCase() === "application/json-patch+json");
@@ -15305,6 +16526,11 @@ var require_tiktoken_bg = __commonJS({
       }
     }
     var Tiktoken2 = class {
+      /**
+       * @param {string} tiktoken_bfe
+       * @param {any} special_tokens
+       * @param {string} pat_str
+       */
       constructor(tiktoken_bfe, special_tokens, pat_str) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15315,6 +16541,7 @@ var require_tiktoken_bg = __commonJS({
         const ret = wasm.tiktoken_new(ptr0, len0, addHeapObject(special_tokens), ptr1, len1);
         return Tiktoken2.__wrap(ret);
       }
+      /** @returns {string | undefined} */
       get name() {
         try {
           const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -15347,6 +16574,12 @@ var require_tiktoken_bg = __commonJS({
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_tiktoken_free(ptr);
       }
+      /**
+       * @param {string} text
+       * @param {any} allowed_special
+       * @param {any} disallowed_special
+       * @returns {Uint32Array}
+       */
       encode(text, allowed_special, disallowed_special) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15369,6 +16602,10 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {string} text
+       * @returns {Uint32Array}
+       */
       encode_ordinary(text) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15386,6 +16623,12 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {string} text
+       * @param {any} allowed_special
+       * @param {any} disallowed_special
+       * @returns {any}
+       */
       encode_with_unstable(text, allowed_special, disallowed_special) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15405,6 +16648,10 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {Uint8Array} bytes
+       * @returns {number}
+       */
       encode_single_token(bytes) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15413,6 +16660,10 @@ var require_tiktoken_bg = __commonJS({
         const ret = wasm.tiktoken_encode_single_token(this.ptr, ptr0, len0);
         return ret >>> 0;
       }
+      /**
+       * @param {Uint32Array} tokens
+       * @returns {Uint8Array}
+       */
       decode(tokens) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15430,6 +16681,10 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /**
+       * @param {number} token
+       * @returns {Uint8Array}
+       */
       decode_single_token_bytes(token) {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -15445,6 +16700,7 @@ var require_tiktoken_bg = __commonJS({
           wasm.__wbindgen_add_to_stack_pointer(16);
         }
       }
+      /** @returns {any} */
       token_byte_values() {
         if (wasm == null)
           throw new Error("@dqbd/tiktoken: WASM binary has not been propery initialized.");
@@ -16229,8 +17485,8 @@ function x2(t, e2, r2, n) {
       b3(h4, w3(c3), m4, u2);
     Object.assign(l._, h4);
   }
-  const $4 = { ...l, showVersion: f3, showHelp: u2 };
-  return typeof r2 == "function" && r2($4), { command: t, ...$4 };
+  const $5 = { ...l, showVersion: f3, showHelp: u2 };
+  return typeof r2 == "function" && r2($5), { command: t, ...$5 };
 }
 function z2(t, e2) {
   const r2 = /* @__PURE__ */ new Map();
@@ -16322,15 +17578,15 @@ var package_default = {
   devDependencies: {
     "@types/ini": "^1.3.31",
     "@types/inquirer": "^9.0.3",
-    "@types/node": "^20.1.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.5",
-    "@typescript-eslint/parser": "^5.59.5",
-    dotenv: "^16.0.3",
-    esbuild: "^0.17.18",
-    eslint: "^8.40.0",
+    "@types/node": "^20.2.5",
+    "@typescript-eslint/eslint-plugin": "^5.59.9",
+    "@typescript-eslint/parser": "^5.59.9",
+    dotenv: "^16.1.4",
+    esbuild: "^0.17.19",
+    eslint: "^8.42.0",
     prettier: "^2.8.8",
     "ts-node": "^10.9.1",
-    typescript: "^5.0.4"
+    typescript: "^5.1.3"
   },
   dependencies: {
     "@actions/core": "^1.10.0",
@@ -16338,15 +17594,15 @@ var package_default = {
     "@actions/github": "^5.1.1",
     "@clack/prompts": "^0.6.3",
     "@dqbd/tiktoken": "^1.0.7",
-    "@octokit/webhooks-schemas": "^6.11.0",
-    "@octokit/webhooks-types": "^6.11.0",
+    "@octokit/webhooks-schemas": "^7.0.3",
+    "@octokit/webhooks-types": "^7.0.3",
     axios: "^1.4.0",
     chalk: "^5.2.0",
     cleye: "^1.3.2",
     execa: "^7.1.1",
     ignore: "^5.2.4",
-    ini: "^4.1.0",
-    inquirer: "^9.2.2",
+    ini: "^4.1.1",
+    inquirer: "^9.2.7",
     openai: "^3.2.1"
   }
 };
@@ -16865,8 +18121,8 @@ ${import_picocolors.default.gray(a)}` : ""}`;
 `).map((i2, c3) => c3 === 0 ? `${import_picocolors.default.yellow(o)}  ${import_picocolors.default.yellow(i2)}` : `   ${i2}`).join(`
 `);
         return s + import_picocolors.default.yellow(a) + "  " + this.options.map((i2, c3) => {
-          const l = this.value.includes(i2.value), $4 = c3 === this.cursor;
-          return $4 && l ? n(i2, "active-selected") : l ? n(i2, "selected") : n(i2, $4 ? "active" : "inactive");
+          const l = this.value.includes(i2.value), $5 = c3 === this.cursor;
+          return $5 && l ? n(i2, "active-selected") : l ? n(i2, "selected") : n(i2, $5 ? "active" : "inactive");
         }).join(`
 ${import_picocolors.default.yellow(a)}  `) + `
 ` + t + `
@@ -16922,6 +18178,7 @@ var wrapAnsi16m = (offset = 0) => (red, green, blue) => `\x1B[${38 + offset};2;$
 var styles = {
   modifier: {
     reset: [0, 0],
+    // 21 isn't widely supported and 22 does the same thing
     bold: [1, 22],
     dim: [2, 22],
     italic: [3, 23],
@@ -16940,9 +18197,12 @@ var styles = {
     magenta: [35, 39],
     cyan: [36, 39],
     white: [37, 39],
+    // Bright color
     blackBright: [90, 39],
     gray: [90, 39],
+    // Alias of `blackBright`
     grey: [90, 39],
+    // Alias of `blackBright`
     redBright: [91, 39],
     greenBright: [92, 39],
     yellowBright: [93, 39],
@@ -16960,9 +18220,12 @@ var styles = {
     bgMagenta: [45, 49],
     bgCyan: [46, 49],
     bgWhite: [47, 49],
+    // Bright color
     bgBlackBright: [100, 49],
     bgGray: [100, 49],
+    // Alias of `bgBlackBright`
     bgGrey: [100, 49],
+    // Alias of `bgBlackBright`
     bgRedBright: [101, 49],
     bgGreenBright: [102, 49],
     bgYellowBright: [103, 49],
@@ -17032,9 +18295,11 @@ function assembleStyles() {
         }
         const integer = Number.parseInt(colorString, 16);
         return [
+          /* eslint-disable no-bitwise */
           integer >> 16 & 255,
           integer >> 8 & 255,
           integer & 255
+          /* eslint-enable no-bitwise */
         ];
       },
       enumerable: false
@@ -17817,10 +19082,10 @@ var import_promises = __toESM(require("fs/promises"), 1);
 var import_path2 = __toESM(require("path"), 1);
 
 // node_modules/execa/index.js
-var import_node_buffer = require("node:buffer");
+var import_node_buffer2 = require("node:buffer");
 var import_node_path2 = __toESM(require("node:path"), 1);
-var import_node_child_process = __toESM(require("node:child_process"), 1);
-var import_node_process5 = __toESM(require("node:process"), 1);
+var import_node_child_process3 = __toESM(require("node:child_process"), 1);
+var import_node_process6 = __toESM(require("node:process"), 1);
 var import_cross_spawn = __toESM(require_cross_spawn(), 1);
 
 // node_modules/strip-final-newline/index.js
@@ -17960,19 +19225,17 @@ var onetime_default = onetime;
 var import_node_os3 = require("node:os");
 
 // node_modules/human-signals/build/src/realtime.js
-var getRealtimeSignals = function() {
+var getRealtimeSignals = () => {
   const length = SIGRTMAX - SIGRTMIN + 1;
   return Array.from({ length }, getRealtimeSignal);
 };
-var getRealtimeSignal = function(value, index) {
-  return {
-    name: `SIGRT${index + 1}`,
-    number: SIGRTMIN + index,
-    action: "terminate",
-    description: "Application-specific signal (realtime)",
-    standard: "posix"
-  };
-};
+var getRealtimeSignal = (value, index) => ({
+  name: `SIGRT${index + 1}`,
+  number: SIGRTMIN + index,
+  action: "terminate",
+  description: "Application-specific signal (realtime)",
+  standard: "posix"
+});
 var SIGRTMIN = 34;
 var SIGRTMAX = 64;
 
@@ -18253,19 +19516,19 @@ var SIGNALS = [
 ];
 
 // node_modules/human-signals/build/src/signals.js
-var getSignals = function() {
+var getSignals = () => {
   const realtimeSignals = getRealtimeSignals();
   const signals = [...SIGNALS, ...realtimeSignals].map(normalizeSignal);
   return signals;
 };
-var normalizeSignal = function({
+var normalizeSignal = ({
   name,
   number: defaultNumber,
   description,
   action,
   forced = false,
   standard
-}) {
+}) => {
   const {
     signals: { [name]: constantSignal }
   } = import_node_os2.constants;
@@ -18275,11 +19538,11 @@ var normalizeSignal = function({
 };
 
 // node_modules/human-signals/build/src/main.js
-var getSignalsByName = function() {
+var getSignalsByName = () => {
   const signals = getSignals();
   return Object.fromEntries(signals.map(getSignalByName));
 };
-var getSignalByName = function({
+var getSignalByName = ({
   name,
   number,
   description,
@@ -18287,20 +19550,15 @@ var getSignalByName = function({
   action,
   forced,
   standard
-}) {
-  return [
-    name,
-    { name, number, description, supported, action, forced, standard }
-  ];
-};
+}) => [name, { name, number, description, supported, action, forced, standard }];
 var signalsByName = getSignalsByName();
-var getSignalsByNumber = function() {
+var getSignalsByNumber = () => {
   const signals = getSignals();
   const length = SIGRTMAX + 1;
   const signalsA = Array.from({ length }, (value, number) => getSignalByNumber(number, signals));
   return Object.assign({}, ...signalsA);
 };
-var getSignalByNumber = function(number, signals) {
+var getSignalByNumber = (number, signals) => {
   const signal = findSignalByNumber(number, signals);
   if (signal === void 0) {
     return {};
@@ -18318,7 +19576,7 @@ var getSignalByNumber = function(number, signals) {
     }
   };
 };
-var findSignalByNumber = function(number, signals) {
+var findSignalByNumber = (number, signals) => {
   const signal = signals.find(({ name }) => import_node_os3.constants.signals[name] === number);
   if (signal !== void 0) {
     return signal;
@@ -18495,15 +19753,82 @@ var setExitHandler = async (spawned, { cleanup, detached }, timedPromise) => {
   });
 };
 
+// node_modules/execa/lib/pipe.js
+var import_node_fs = require("node:fs");
+var import_node_child_process = require("node:child_process");
+
 // node_modules/is-stream/index.js
 function isStream(stream4) {
   return stream4 !== null && typeof stream4 === "object" && typeof stream4.pipe === "function";
 }
+function isWritableStream(stream4) {
+  return isStream(stream4) && stream4.writable !== false && typeof stream4._write === "function" && typeof stream4._writableState === "object";
+}
+
+// node_modules/execa/lib/pipe.js
+var isExecaChildProcess = (target) => target instanceof import_node_child_process.ChildProcess && typeof target.then === "function";
+var pipeToTarget = (spawned, streamName, target) => {
+  if (typeof target === "string") {
+    spawned[streamName].pipe((0, import_node_fs.createWriteStream)(target));
+    return spawned;
+  }
+  if (isWritableStream(target)) {
+    spawned[streamName].pipe(target);
+    return spawned;
+  }
+  if (!isExecaChildProcess(target)) {
+    throw new TypeError("The second argument must be a string, a stream or an Execa child process.");
+  }
+  if (!isWritableStream(target.stdin)) {
+    throw new TypeError("The target child process's stdin must be available.");
+  }
+  spawned[streamName].pipe(target.stdin);
+  return target;
+};
+var addPipeMethods = (spawned) => {
+  if (spawned.stdout !== null) {
+    spawned.pipeStdout = pipeToTarget.bind(void 0, spawned, "stdout");
+  }
+  if (spawned.stderr !== null) {
+    spawned.pipeStderr = pipeToTarget.bind(void 0, spawned, "stderr");
+  }
+  if (spawned.all !== void 0) {
+    spawned.pipeAll = pipeToTarget.bind(void 0, spawned, "all");
+  }
+};
 
 // node_modules/execa/lib/stream.js
+var import_node_fs2 = require("node:fs");
 var import_get_stream = __toESM(require_get_stream(), 1);
 var import_merge_stream = __toESM(require_merge_stream(), 1);
-var handleInput = (spawned, input) => {
+var validateInputOptions = (input) => {
+  if (input !== void 0) {
+    throw new TypeError("The `input` and `inputFile` options cannot be both set.");
+  }
+};
+var getInputSync = ({ input, inputFile }) => {
+  if (typeof inputFile !== "string") {
+    return input;
+  }
+  validateInputOptions(input);
+  return (0, import_node_fs2.readFileSync)(inputFile);
+};
+var handleInputSync = (options) => {
+  const input = getInputSync(options);
+  if (isStream(input)) {
+    throw new TypeError("The `input` option cannot be a stream in sync mode");
+  }
+  return input;
+};
+var getInput = ({ input, inputFile }) => {
+  if (typeof inputFile !== "string") {
+    return input;
+  }
+  validateInputOptions(input);
+  return (0, import_node_fs2.createReadStream)(inputFile);
+};
+var handleInput = (spawned, options) => {
+  const input = getInput(options);
   if (input === void 0) {
     return;
   }
@@ -18574,7 +19899,6 @@ var mergePromise = (spawned, promise) => {
     const value = typeof promise === "function" ? (...args) => Reflect.apply(descriptor.value, promise(), args) : descriptor.value.bind(promise);
     Reflect.defineProperty(spawned, property, { ...descriptor, value });
   }
-  return spawned;
 };
 var getSpawnedPromise = (spawned) => new Promise((resolve, reject) => {
   spawned.on("exit", (exitCode, signal) => {
@@ -18591,6 +19915,8 @@ var getSpawnedPromise = (spawned) => new Promise((resolve, reject) => {
 });
 
 // node_modules/execa/lib/command.js
+var import_node_buffer = require("node:buffer");
+var import_node_child_process2 = require("node:child_process");
 var normalizeArgs = (file, args = []) => {
   if (!Array.isArray(args)) {
     return [file];
@@ -18607,11 +19933,80 @@ var escapeArg = (arg) => {
 };
 var joinCommand = (file, args) => normalizeArgs(file, args).join(" ");
 var getEscapedCommand = (file, args) => normalizeArgs(file, args).map((arg) => escapeArg(arg)).join(" ");
+var SPACES_REGEXP = / +/g;
+var parseExpression = (expression) => {
+  const typeOfExpression = typeof expression;
+  if (typeOfExpression === "string") {
+    return expression;
+  }
+  if (typeOfExpression === "number") {
+    return String(expression);
+  }
+  if (typeOfExpression === "object" && expression !== null && !(expression instanceof import_node_child_process2.ChildProcess) && "stdout" in expression) {
+    const typeOfStdout = typeof expression.stdout;
+    if (typeOfStdout === "string") {
+      return expression.stdout;
+    }
+    if (import_node_buffer.Buffer.isBuffer(expression.stdout)) {
+      return expression.stdout.toString();
+    }
+    throw new TypeError(`Unexpected "${typeOfStdout}" stdout in template expression`);
+  }
+  throw new TypeError(`Unexpected "${typeOfExpression}" in template expression`);
+};
+var concatTokens = (tokens, nextTokens, isNew) => isNew || tokens.length === 0 || nextTokens.length === 0 ? [...tokens, ...nextTokens] : [
+  ...tokens.slice(0, -1),
+  `${tokens[tokens.length - 1]}${nextTokens[0]}`,
+  ...nextTokens.slice(1)
+];
+var parseTemplate = ({ templates, expressions, tokens, index, template }) => {
+  const templateString = template ?? templates.raw[index];
+  const templateTokens = templateString.split(SPACES_REGEXP).filter(Boolean);
+  const newTokens = concatTokens(
+    tokens,
+    templateTokens,
+    templateString.startsWith(" ")
+  );
+  if (index === expressions.length) {
+    return newTokens;
+  }
+  const expression = expressions[index];
+  const expressionTokens = Array.isArray(expression) ? expression.map((expression2) => parseExpression(expression2)) : [parseExpression(expression)];
+  return concatTokens(
+    newTokens,
+    expressionTokens,
+    templateString.endsWith(" ")
+  );
+};
+var parseTemplates = (templates, expressions) => {
+  let tokens = [];
+  for (const [index, template] of templates.entries()) {
+    tokens = parseTemplate({ templates, expressions, tokens, index, template });
+  }
+  return tokens;
+};
+
+// node_modules/execa/lib/verbose.js
+var import_node_util = require("node:util");
+var import_node_process5 = __toESM(require("node:process"), 1);
+var verboseDefault = (0, import_node_util.debuglog)("execa").enabled;
+var padField = (field, padding) => String(field).padStart(padding, "0");
+var getTimestamp = () => {
+  const date = /* @__PURE__ */ new Date();
+  return `${padField(date.getHours(), 2)}:${padField(date.getMinutes(), 2)}:${padField(date.getSeconds(), 2)}.${padField(date.getMilliseconds(), 3)}`;
+};
+var logCommand = (escapedCommand, { verbose }) => {
+  if (!verbose) {
+    return;
+  }
+  import_node_process5.default.stderr.write(`[${getTimestamp()}] ${escapedCommand}
+`);
+};
 
 // node_modules/execa/index.js
 var DEFAULT_MAX_BUFFER = 1e3 * 1e3 * 100;
 var getEnv = ({ env: envOption, extendEnv, preferLocal, localDir, execPath }) => {
-  const env2 = extendEnv ? { ...import_node_process5.default.env, ...envOption } : envOption;
+  const env2 = extendEnv ? { ...import_node_process6.default.env, ...envOption } : envOption;
   if (preferLocal) {
     return npmRunPathEnv({ env: env2, cwd: localDir, execPath });
   }
@@ -18628,24 +20023,25 @@ var handleArguments = (file, args, options = {}) => {
     stripFinalNewline: true,
     extendEnv: true,
     preferLocal: false,
-    localDir: options.cwd || import_node_process5.default.cwd(),
-    execPath: import_node_process5.default.execPath,
+    localDir: options.cwd || import_node_process6.default.cwd(),
+    execPath: import_node_process6.default.execPath,
     encoding: "utf8",
     reject: true,
     cleanup: true,
     all: false,
     windowsHide: true,
+    verbose: verboseDefault,
     ...options
   };
   options.env = getEnv(options);
   options.stdio = normalizeStdio(options);
-  if (import_node_process5.default.platform === "win32" && import_node_path2.default.basename(file, ".exe") === "cmd") {
+  if (import_node_process6.default.platform === "win32" && import_node_path2.default.basename(file, ".exe") === "cmd") {
     args.unshift("/q");
   }
   return { file, args, options, parsed };
 };
 var handleOutput = (options, value, error) => {
-  if (typeof value !== "string" && !import_node_buffer.Buffer.isBuffer(value)) {
+  if (typeof value !== "string" && !import_node_buffer2.Buffer.isBuffer(value)) {
     return error === void 0 ? void 0 : "";
   }
   if (options.stripFinalNewline) {
@@ -18657,12 +20053,13 @@ function execa(file, args, options) {
   const parsed = handleArguments(file, args, options);
   const command2 = joinCommand(file, args);
   const escapedCommand = getEscapedCommand(file, args);
+  logCommand(escapedCommand, parsed.options);
   validateTimeout(parsed.options);
   let spawned;
   try {
-    spawned = import_node_child_process.default.spawn(parsed.file, parsed.args, parsed.options);
+    spawned = import_node_child_process3.default.spawn(parsed.file, parsed.args, parsed.options);
   } catch (error) {
-    const dummySpawned = new import_node_child_process.default.ChildProcess();
+    const dummySpawned = new import_node_child_process3.default.ChildProcess();
     const errorPromise = Promise.reject(makeError({
       error,
       stdout: "",
@@ -18675,7 +20072,8 @@ function execa(file, args, options) {
       isCanceled: false,
       killed: false
     }));
-    return mergePromise(dummySpawned, errorPromise);
+    mergePromise(dummySpawned, errorPromise);
+    return dummySpawned;
   }
   const spawnedPromise = getSpawnedPromise(spawned);
   const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
@@ -18722,10 +20120,92 @@ function execa(file, args, options) {
     };
   };
   const handlePromiseOnce = onetime_default(handlePromise);
-  handleInput(spawned, parsed.options.input);
+  handleInput(spawned, parsed.options);
   spawned.all = makeAllStream(spawned, parsed.options);
-  return mergePromise(spawned, handlePromiseOnce);
+  addPipeMethods(spawned);
+  mergePromise(spawned, handlePromiseOnce);
+  return spawned;
 }
+function execaSync(file, args, options) {
+  const parsed = handleArguments(file, args, options);
+  const command2 = joinCommand(file, args);
+  const escapedCommand = getEscapedCommand(file, args);
+  logCommand(escapedCommand, parsed.options);
+  const input = handleInputSync(parsed.options);
+  let result;
+  try {
+    result = import_node_child_process3.default.spawnSync(parsed.file, parsed.args, { ...parsed.options, input });
+  } catch (error) {
+    throw makeError({
+      error,
+      stdout: "",
+      stderr: "",
+      all: "",
+      command: command2,
+      escapedCommand,
+      parsed,
+      timedOut: false,
+      isCanceled: false,
+      killed: false
+    });
+  }
+  const stdout = handleOutput(parsed.options, result.stdout, result.error);
+  const stderr = handleOutput(parsed.options, result.stderr, result.error);
+  if (result.error || result.status !== 0 || result.signal !== null) {
+    const error = makeError({
+      stdout,
+      stderr,
+      error: result.error,
+      signal: result.signal,
+      exitCode: result.status,
+      command: command2,
+      escapedCommand,
+      parsed,
+      timedOut: result.error && result.error.code === "ETIMEDOUT",
+      isCanceled: false,
+      killed: result.signal !== null
+    });
+    if (!parsed.options.reject) {
+      return error;
+    }
+    throw error;
+  }
+  return {
+    command: command2,
+    escapedCommand,
+    exitCode: 0,
+    stdout,
+    stderr,
+    failed: false,
+    timedOut: false,
+    isCanceled: false,
+    killed: false
+  };
+}
+var normalizeScriptStdin = ({ input, inputFile, stdio }) => input === void 0 && inputFile === void 0 && stdio === void 0 ? { stdin: "inherit" } : {};
+var normalizeScriptOptions = (options = {}) => ({
+  preferLocal: true,
+  ...normalizeScriptStdin(options),
+  ...options
+});
+function create$(options) {
+  function $5(templatesOrOptions, ...expressions) {
+    if (!Array.isArray(templatesOrOptions)) {
+      return create$({ ...options, ...templatesOrOptions });
+    }
+    const [file, ...args] = parseTemplates(templatesOrOptions, expressions);
+    return execa(file, args, normalizeScriptOptions(options));
+  }
+  $5.sync = (templates, ...expressions) => {
+    if (!Array.isArray(templates)) {
+      throw new TypeError("Please use $(options).sync`command` instead of $.sync(options)`command`.");
+    }
+    const [file, ...args] = parseTemplates(templates, expressions);
+    return execaSync(file, args, normalizeScriptOptions(options));
+  };
+  return $5;
+}
+var $4 = create$();
 
 // src/utils/git.ts
 var import_fs2 = require("fs");
@@ -18962,8 +20442,9 @@ var isBlob = kindOfTest("Blob");
 var isFileList = kindOfTest("FileList");
 var isStream2 = (val) => isObject(val) && isFunction(val.pipe);
 var isFormData = (thing) => {
-  const pattern = "[object FormData]";
-  return thing && (typeof FormData === "function" && thing instanceof FormData || toString.call(thing) === pattern || isFunction(thing.toString) && thing.toString() === pattern);
+  let kind;
+  return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
+  kind === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
 };
 var isURLSearchParams = kindOfTest("URLSearchParams");
 var trim = (str) => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
@@ -19217,6 +20698,8 @@ var toJSONObject = (obj) => {
   };
   return visit(obj, 0);
 };
+var isAsyncFn = kindOfTest("AsyncFunction");
+var isThenable = (thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
 var utils_default = {
   isArray,
   isArrayBuffer,
@@ -19254,6 +20737,7 @@ var utils_default = {
   isHTMLForm,
   hasOwnProperty,
   hasOwnProp: hasOwnProperty,
+  // an alias to avoid ESLint no-prototype-builtins detection
   reduceDescriptors,
   freezeMethods,
   toObjectSet,
@@ -19266,7 +20750,9 @@ var utils_default = {
   ALPHABET,
   generateString,
   isSpecCompliantForm,
-  toJSONObject
+  toJSONObject,
+  isAsyncFn,
+  isThenable
 };
 
 // node_modules/axios/lib/core/AxiosError.js
@@ -19287,14 +20773,18 @@ function AxiosError(message, code, config5, request, response) {
 utils_default.inherits(AxiosError, Error, {
   toJSON: function toJSON() {
     return {
+      // Standard
       message: this.message,
       name: this.name,
+      // Microsoft
       description: this.description,
       number: this.number,
+      // Mozilla
       fileName: this.fileName,
       lineNumber: this.lineNumber,
       columnNumber: this.columnNumber,
       stack: this.stack,
+      // Axios
       config: utils_default.toJSONObject(this.config),
       code: this.code,
       status: this.response && this.response.status ? this.response.status : null
@@ -19316,6 +20806,7 @@ var descriptors2 = {};
   "ERR_CANCELED",
   "ERR_NOT_SUPPORT",
   "ERR_INVALID_URL"
+  // eslint-disable-next-line func-names
 ].forEach((code) => {
   descriptors2[code] = { value: code };
 });
@@ -19406,6 +20897,7 @@ function toFormData(obj, formData, options) {
         key = removeBrackets(key);
         arr.forEach(function each(el, index) {
           !(utils_default.isUndefined(el) || el === null) && formData.append(
+            // eslint-disable-next-line no-nested-ternary
             indexes === true ? renderKey([key], index, dots) : indexes === null ? key : key + "[]",
             convertValue(el)
           );
@@ -19518,6 +21010,14 @@ var InterceptorManager = class {
   constructor() {
     this.handlers = [];
   }
+  /**
+   * Add a new interceptor to the stack
+   *
+   * @param {Function} fulfilled The function to handle `then` for a `Promise`
+   * @param {Function} rejected The function to handle `reject` for a `Promise`
+   *
+   * @return {Number} An ID used to remove interceptor later
+   */
   use(fulfilled, rejected, options) {
     this.handlers.push({
       fulfilled,
@@ -19527,16 +21027,38 @@ var InterceptorManager = class {
     });
     return this.handlers.length - 1;
   }
+  /**
+   * Remove an interceptor from the stack
+   *
+   * @param {Number} id The ID that was returned by `use`
+   *
+   * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+   */
   eject(id) {
     if (this.handlers[id]) {
       this.handlers[id] = null;
     }
   }
+  /**
+   * Clear all interceptors from the stack
+   *
+   * @returns {void}
+   */
   clear() {
     if (this.handlers) {
       this.handlers = [];
     }
   }
+  /**
+   * Iterate over all the registered interceptors
+   *
+   * This method is particularly useful for skipping over any
+   * interceptors that may have become `null` calling `eject`.
+   *
+   * @param {Function} fn The function to call for each interceptor
+   *
+   * @returns {void}
+   */
   forEach(fn) {
     utils_default.forEach(this.handlers, function forEachHandler(h4) {
       if (h4 !== null) {
@@ -19718,6 +21240,10 @@ var defaults = {
     }
     return data;
   }],
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
   timeout: 0,
   xsrfCookieName: "XSRF-TOKEN",
   xsrfHeaderName: "X-XSRF-TOKEN",
@@ -19809,9 +21335,7 @@ function parseTokens(str) {
   }
   return tokens;
 }
-function isValidHeaderName(str) {
-  return /^[-_a-zA-Z]+$/.test(str.trim());
-}
+var isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
 function matchHeaderValue(context, value, header, filter2, isHeaderNameFilter) {
   if (utils_default.isFunction(filter2)) {
     return filter2.call(this, value, header);
@@ -20072,7 +21596,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.3.4";
+var VERSION = "1.4.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url3) {
@@ -20450,6 +21974,21 @@ var ZlibHeaderTransformStream = class extends import_stream4.default.Transform {
 };
 var ZlibHeaderTransformStream_default = ZlibHeaderTransformStream;
 
+// node_modules/axios/lib/helpers/callbackify.js
+var callbackify = (fn, reducer) => {
+  return utils_default.isAsyncFn(fn) ? function(...args) {
+    const cb = args.pop();
+    fn.apply(this, args).then((value) => {
+      try {
+        reducer ? cb(null, ...reducer(value)) : cb(null, value);
+      } catch (err) {
+        cb(err);
+      }
+    }, cb);
+  } : fn;
+};
+var callbackify_default = callbackify;
+
 // node_modules/axios/lib/adapters/http.js
 var zlibOptions = {
   flush: import_zlib.default.constants.Z_SYNC_FLUSH,
@@ -20530,12 +22069,22 @@ var wrapAsync = (asyncExecutor) => {
 };
 var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
   return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
-    let { data } = config5;
+    let { data, lookup, family } = config5;
     const { responseType, responseEncoding } = config5;
     const method = config5.method.toUpperCase();
     let isDone;
     let rejected = false;
     let req;
+    if (lookup && utils_default.isAsyncFn(lookup)) {
+      lookup = callbackify_default(lookup, (entry) => {
+        if (utils_default.isString(entry)) {
+          entry = [entry, entry.indexOf(".") < 0 ? 6 : 4];
+        } else if (!utils_default.isArray(entry)) {
+          throw new TypeError("lookup async function must return an array [ip: string, family: number]]");
+        }
+        return entry;
+      });
+    }
     const emitter = new import_events.default();
     const onFinished = () => {
       if (config5.cancelToken) {
@@ -20715,6 +22264,8 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
       agents: { http: config5.httpAgent, https: config5.httpsAgent },
       auth,
       protocol,
+      family,
+      lookup,
       beforeRedirect: dispatchBeforeRedirect,
       beforeRedirects: {}
     };
@@ -20926,78 +22477,91 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config5) {
 };
 
 // node_modules/axios/lib/helpers/cookies.js
-var cookies_default = node_default.isStandardBrowserEnv ? function standardBrowserEnv() {
-  return {
-    write: function write(name, value, expires, path4, domain, secure) {
-      const cookie = [];
-      cookie.push(name + "=" + encodeURIComponent(value));
-      if (utils_default.isNumber(expires)) {
-        cookie.push("expires=" + new Date(expires).toGMTString());
+var cookies_default = node_default.isStandardBrowserEnv ? (
+  // Standard browser envs support document.cookie
+  function standardBrowserEnv() {
+    return {
+      write: function write(name, value, expires, path4, domain, secure) {
+        const cookie = [];
+        cookie.push(name + "=" + encodeURIComponent(value));
+        if (utils_default.isNumber(expires)) {
+          cookie.push("expires=" + new Date(expires).toGMTString());
+        }
+        if (utils_default.isString(path4)) {
+          cookie.push("path=" + path4);
+        }
+        if (utils_default.isString(domain)) {
+          cookie.push("domain=" + domain);
+        }
+        if (secure === true) {
+          cookie.push("secure");
+        }
+        document.cookie = cookie.join("; ");
+      },
+      read: function read(name) {
+        const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+        return match ? decodeURIComponent(match[3]) : null;
+      },
+      remove: function remove(name) {
+        this.write(name, "", Date.now() - 864e5);
       }
-      if (utils_default.isString(path4)) {
-        cookie.push("path=" + path4);
+    };
+  }()
+) : (
+  // Non standard browser env (web workers, react-native) lack needed support.
+  function nonStandardBrowserEnv() {
+    return {
+      write: function write() {
+      },
+      read: function read() {
+        return null;
+      },
+      remove: function remove() {
       }
-      if (utils_default.isString(domain)) {
-        cookie.push("domain=" + domain);
-      }
-      if (secure === true) {
-        cookie.push("secure");
-      }
-      document.cookie = cookie.join("; ");
-    },
-    read: function read(name) {
-      const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-      return match ? decodeURIComponent(match[3]) : null;
-    },
-    remove: function remove(name) {
-      this.write(name, "", Date.now() - 864e5);
-    }
-  };
-}() : function nonStandardBrowserEnv() {
-  return {
-    write: function write() {
-    },
-    read: function read() {
-      return null;
-    },
-    remove: function remove() {
-    }
-  };
-}();
+    };
+  }()
+);
 
 // node_modules/axios/lib/helpers/isURLSameOrigin.js
-var isURLSameOrigin_default = node_default.isStandardBrowserEnv ? function standardBrowserEnv2() {
-  const msie = /(msie|trident)/i.test(navigator.userAgent);
-  const urlParsingNode = document.createElement("a");
-  let originURL;
-  function resolveURL(url3) {
-    let href = url3;
-    if (msie) {
+var isURLSameOrigin_default = node_default.isStandardBrowserEnv ? (
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  function standardBrowserEnv2() {
+    const msie = /(msie|trident)/i.test(navigator.userAgent);
+    const urlParsingNode = document.createElement("a");
+    let originURL;
+    function resolveURL(url3) {
+      let href = url3;
+      if (msie) {
+        urlParsingNode.setAttribute("href", href);
+        href = urlParsingNode.href;
+      }
       urlParsingNode.setAttribute("href", href);
-      href = urlParsingNode.href;
+      return {
+        href: urlParsingNode.href,
+        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
+        host: urlParsingNode.host,
+        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
+        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
+        hostname: urlParsingNode.hostname,
+        port: urlParsingNode.port,
+        pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+      };
     }
-    urlParsingNode.setAttribute("href", href);
-    return {
-      href: urlParsingNode.href,
-      protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, "") : "",
-      host: urlParsingNode.host,
-      search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, "") : "",
-      hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, "") : "",
-      hostname: urlParsingNode.hostname,
-      port: urlParsingNode.port,
-      pathname: urlParsingNode.pathname.charAt(0) === "/" ? urlParsingNode.pathname : "/" + urlParsingNode.pathname
+    originURL = resolveURL(window.location.href);
+    return function isURLSameOrigin(requestURL) {
+      const parsed = utils_default.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+      return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
     };
-  }
-  originURL = resolveURL(window.location.href);
-  return function isURLSameOrigin(requestURL) {
-    const parsed = utils_default.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-    return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-  };
-}() : function nonStandardBrowserEnv2() {
-  return function isURLSameOrigin() {
-    return true;
-  };
-}();
+  }()
+) : (
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  function nonStandardBrowserEnv2() {
+    return function isURLSameOrigin() {
+      return true;
+    };
+  }()
+);
 
 // node_modules/axios/lib/adapters/xhr.js
 function progressEventReducer(listener, isDownloadStream) {
@@ -21038,8 +22602,12 @@ var xhr_default = isXHRAdapterSupported && function(config5) {
         config5.signal.removeEventListener("abort", onCanceled);
       }
     }
-    if (utils_default.isFormData(requestData) && (node_default.isStandardBrowserEnv || node_default.isStandardBrowserWebWorkerEnv)) {
-      requestHeaders.setContentType(false);
+    if (utils_default.isFormData(requestData)) {
+      if (node_default.isStandardBrowserEnv || node_default.isStandardBrowserWebWorkerEnv) {
+        requestHeaders.setContentType(false);
+      } else {
+        requestHeaders.setContentType("multipart/form-data;", false);
+      }
     }
     let request = new XMLHttpRequest();
     if (config5.auth) {
@@ -21321,7 +22889,7 @@ function mergeConfig(config1, config22) {
     validateStatus: mergeDirectKeys,
     headers: (a2, b5) => mergeDeepProperties(headersToObject(a2), headersToObject(b5), true)
   };
-  utils_default.forEach(Object.keys(config1).concat(Object.keys(config22)), function computeConfigValue(prop) {
+  utils_default.forEach(Object.keys(Object.assign({}, config1, config22)), function computeConfigValue(prop) {
     const merge2 = mergeMap[prop] || mergeDeepProperties;
     const configValue = merge2(config1[prop], config22[prop], prop);
     utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config5[prop] = configValue);
@@ -21397,6 +22965,14 @@ var Axios = class {
       response: new InterceptorManager_default()
     };
   }
+  /**
+   * Dispatch a request
+   *
+   * @param {String|Object} configOrUrl The config specific for this request (merged with this.defaults)
+   * @param {?Object} config
+   *
+   * @returns {Promise} The Promise to be fulfilled
+   */
   request(configOrUrl, config5) {
     if (typeof configOrUrl === "string") {
       config5 = config5 || {};
@@ -21413,11 +22989,17 @@ var Axios = class {
         clarifyTimeoutError: validators2.transitional(validators2.boolean)
       }, false);
     }
-    if (paramsSerializer !== void 0) {
-      validator_default.assertOptions(paramsSerializer, {
-        encode: validators2.function,
-        serialize: validators2.function
-      }, true);
+    if (paramsSerializer != null) {
+      if (utils_default.isFunction(paramsSerializer)) {
+        config5.paramsSerializer = {
+          serialize: paramsSerializer
+        };
+      } else {
+        validator_default.assertOptions(paramsSerializer, {
+          encode: validators2.function,
+          serialize: validators2.function
+        }, true);
+      }
     }
     config5.method = (config5.method || this.defaults.method || "get").toLowerCase();
     let contextHeaders;
@@ -21556,11 +23138,17 @@ var CancelToken = class {
       resolvePromise(token.reason);
     });
   }
+  /**
+   * Throws a `CanceledError` if cancellation has been requested.
+   */
   throwIfRequested() {
     if (this.reason) {
       throw this.reason;
     }
   }
+  /**
+   * Subscribe to the cancel signal
+   */
   subscribe(listener) {
     if (this.reason) {
       listener(this.reason);
@@ -21572,6 +23160,9 @@ var CancelToken = class {
       this._listeners = [listener];
     }
   }
+  /**
+   * Unsubscribe from the cancel signal
+   */
   unsubscribe(listener) {
     if (!this._listeners) {
       return;
@@ -21581,6 +23172,10 @@ var CancelToken = class {
       this._listeners.splice(index, 1);
     }
   }
+  /**
+   * Returns an object that contains a new `CancelToken` and a function that, when called,
+   * cancels the `CancelToken`.
+   */
   static source() {
     let cancel;
     const token = new CancelToken(function executor(c3) {
@@ -21863,10 +23458,11 @@ var translation = i18n[config3?.OCO_LANGUAGE || "en"];
 var INIT_MESSAGES_PROMPT = [
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.System,
+    // prettier-ignore
     content: `You are to act as the author of a commit message in git. Your mission is to create clean and comprehensive commit messages in the conventional commit convention and explain WHAT were the changes and WHY the changes were done. I'll send you an output of 'git diff --staged' command, and you convert it into a commit message.
 ${config3?.OCO_EMOJI ? "Use GitMoji convention to preface the commit." : "Do not preface the commit with anything."}
 ${config3?.OCO_DESCRIPTION ? `Add a short description of WHY the changes are done after the commit message. Don't start it with "This commit", just describe the changes.` : "Don't add any descriptions to the commit, only commit message."}
-Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And add its translation by ${translation.localLanguage}.`
+Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And insert its translation by ${translation.localLanguage}.`
   },
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.User,
@@ -21897,12 +23493,11 @@ app.use((_, res, next) => {
   },
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
-${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}` + (translation === i18n["en"] ? "" : `
-${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
+    content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
 ${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
-${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription : ""}`)
+${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
+${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
   }
 ];
 var generateCommitMessageChatCompletionPrompt = (diff) => {
@@ -22052,6 +23647,7 @@ var prepareCommitMessageHook = async (isStageAllFlag = false) => {
     const commitMessage = await generateCommitMessageByDiff(
       await getDiff({ files: staged }),
       ""
+      //TODO: Support prefix
     );
     spin.stop("Done");
     const fileContent = await import_promises2.default.readFile(messageFilePath);
@@ -22298,15 +23894,21 @@ Z2(
   },
   extraArgs
 );
-/*!
- * mime-db
- * Copyright(c) 2014 Jonathan Ong
- * Copyright(c) 2015-2022 Douglas Christopher Wilson
- * MIT Licensed
- */
-/*!
- * mime-types
- * Copyright(c) 2014 Jonathan Ong
- * Copyright(c) 2015 Douglas Christopher Wilson
- * MIT Licensed
- */
+/*! Bundled license information:
+
+mime-db/index.js:
+  (*!
+   * mime-db
+   * Copyright(c) 2014 Jonathan Ong
+   * Copyright(c) 2015-2022 Douglas Christopher Wilson
+   * MIT Licensed
+   *)
+
+mime-types/index.js:
+  (*!
+   * mime-types
+   * Copyright(c) 2014 Jonathan Ong
+   * Copyright(c) 2015 Douglas Christopher Wilson
+   * MIT Licensed
+   *)
+*/
