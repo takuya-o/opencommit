@@ -19,6 +19,24 @@
 
 All the commits in this repo are authored by OpenCommit — look at [the commits](https://github.com/di-sukharev/opencommit/commit/eae7618d575ee8d2e9fff5de56da79d40c4bc5fc) to see how OpenCommit works. Emojis and long commit descriptions are configurable.
 
+## Enhanced from the original upstream [di-sukharev/opencommit](https://github.com/di-sukharev/opencommit)
+
+This repository is forked from the original [di-sukharev/opencommit](https://github.com/di-sukharev/opencommit).
+Enhancing functionality adopting early some pull requests I need.
+
+Added features
+* Support [Azure OpenAI Service #167](https://github.com/di-sukharev/opencommit/pull/167)
+* Support [push config #220](https://github.com/di-sukharev/opencommit/pull/220)
+* Add translations to English commit messages
+* ~~Add [prefix on commit messages #160](https://github.com/di-sukharev/opencommit/pull/160)~~
+* The fixed token limit of 4096 can now be changed with OCO_TOKEN_LIMIT to support gtp-3.5-turbo-16k.
+and etc..
+
+You can install it with the following command.
+``` shell
+$ npm install github:takuya-o/opencommit
+```
+
 ## Setup OpenCommit as a CLI tool
 
 You can use OpenCommit by simply running it via the CLI like this `oco`. 2 seconds and your staged changes are committed with a meaningful message.
@@ -172,12 +190,14 @@ You may switch to GPT-4 which performs better, but costs ~x15 times more 🤠
 
 ```sh
 oco config set OCO_MODEL=gpt-4
+oco config set OCO_TOKEN_LIMIT=32768
 ```
 
 or for as a cheaper option:
 
 ```sh
 oco config set OCO_MODEL=gpt-3.5-turbo
+oco config set OCO_TOKEN_LIMIT=16384
 ```
 
 Make sure that you spell it `gpt-4` (lowercase) and that you have API access to the 4th model. Even if you have ChatGPT+, that doesn't necessarily mean that you have API access to GPT-4.

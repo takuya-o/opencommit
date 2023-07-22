@@ -22,6 +22,7 @@ export enum CONFIG_KEYS {
   OCO_DESCRIPTION = 'OCO_DESCRIPTION',
   OCO_EMOJI = 'OCO_EMOJI',
   OCO_MODEL = 'OCO_MODEL',
+  OCO_TOKEN_LIMIT = 'OCO_TOKEN_LIMIT',
   OCO_LANGUAGE = 'OCO_LANGUAGE',
   OCO_DISABLE_GIT_PUSH = 'OCO_DISABLE_GIT_PUSH',
   OCO_MESSAGE_TEMPLATE_PLACEHOLDER = 'OCO_MESSAGE_TEMPLATE_PLACEHOLDER'
@@ -111,6 +112,23 @@ export const configValidators = {
     );
     return value;
   },
+  [CONFIG_KEYS.OCO_TOKEN_LIMIT](value: any) {
+    // If the value is a string, convert it to a number.
+    if (typeof value === 'string') {
+      value = parseInt(value);
+      validateConfig(
+        CONFIG_KEYS.OCO_TOKEN_LIMIT,
+        !isNaN(value),
+        'Must be a number'
+      );
+    }
+    validateConfig(
+      CONFIG_KEYS.OCO_TOKEN_LIMIT,
+      value ? typeof value === 'number' : undefined,
+      'Must be a number'
+    );
+    return value;
+  },
   [CONFIG_KEYS.OCO_LANGUAGE](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_LANGUAGE,
@@ -197,6 +215,7 @@ export const getConfig = (): ConfigType | null => {
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === 'true' ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo-16k',
+    OCO_TOKEN_LIMIT:4096,
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || 'en',
     OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
     OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER

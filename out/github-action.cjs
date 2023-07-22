@@ -29081,7 +29081,6 @@ function getI18nLocal(value) {
 var dotenv = __toESM(require_main(), 1);
 dotenv.config();
 var configCache = null;
-var DEFAULT_MODEL_TOKEN_LIMIT = 4096;
 var validateConfig = (key, condition, validationMessage) => {
   if (!condition) {
     ce(
@@ -29137,6 +29136,22 @@ var configValidators = {
       "OCO_DISABLE_GIT_PUSH" /* OCO_DISABLE_GIT_PUSH */,
       typeof value === "boolean",
       "Must be true or false"
+    );
+    return value;
+  },
+  ["OCO_TOKEN_LIMIT" /* OCO_TOKEN_LIMIT */](value) {
+    if (typeof value === "string") {
+      value = parseInt(value);
+      validateConfig(
+        "OCO_TOKEN_LIMIT" /* OCO_TOKEN_LIMIT */,
+        !isNaN(value),
+        "Must be a number"
+      );
+    }
+    validateConfig(
+      "OCO_TOKEN_LIMIT" /* OCO_TOKEN_LIMIT */,
+      value ? typeof value === "number" : void 0,
+      "Must be a number"
     );
     return value;
   },
@@ -29212,6 +29227,7 @@ var getConfig = () => {
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === "true" ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
     OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo-16k",
+    OCO_TOKEN_LIMIT: 4096,
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || "en",
     OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
     OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
@@ -30445,6 +30461,7 @@ var maxTokens = config2?.OCO_OPENAI_MAX_TOKENS;
 var basePath = config2?.OCO_OPENAI_BASE_PATH;
 var apiKey = config2?.OCO_OPENAI_API_KEY;
 var apiType = config2?.OCO_OPENAI_API_TYPE || "openai";
+var tokenLimit = config2?.OCO_TOKEN_LIMIT || 4096;
 var [command, mode] = process.argv.slice(2);
 if (!apiKey && command !== "config" && mode !== "set" /* set */) {
   ae("opencommit");
@@ -30497,7 +30514,7 @@ var OpenAi = class {
     };
     try {
       const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content || "") + 4).reduce((a2, b) => a2 + b, 0);
-      if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - maxTokens) {
+      if (REQUEST_TOKENS > tokenLimit - maxTokens) {
         throw new Error("TOO_MUCH_TOKENS" /* tooMuchTokens */);
       }
       const { data } = await this.openAI.createChatCompletion(params);
@@ -30603,7 +30620,7 @@ var INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
 var ADJUSTMENT_FACTOR = 20;
 var generateCommitMessageByDiff = async (diff) => {
   try {
-    const MAX_REQUEST_TOKENS = DEFAULT_MODEL_TOKEN_LIMIT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH - config3?.OCO_OPENAI_MAX_TOKENS;
+    const MAX_REQUEST_TOKENS = (config3?.OCO_TOKEN_LIMIT || 4096) - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH - config3?.OCO_OPENAI_MAX_TOKENS;
     if (tokenCount(diff) >= MAX_REQUEST_TOKENS) {
       const commitMessagePromises = getCommitMsgsPromisesFromFileDiffs(
         diff,

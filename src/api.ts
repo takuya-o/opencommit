@@ -9,7 +9,6 @@ import {
 
 import {
   CONFIG_MODES,
-  DEFAULT_MODEL_TOKEN_LIMIT,
   getConfig
 } from './commands/config';
 import { tokenCount } from './utils/tokenCount';
@@ -22,6 +21,7 @@ let maxTokens = config?.OCO_OPENAI_MAX_TOKENS;
 let basePath = config?.OCO_OPENAI_BASE_PATH;
 let apiKey = config?.OCO_OPENAI_API_KEY;
 let apiType = config?.OCO_OPENAI_API_TYPE || 'openai';
+let tokenLimit = config?.OCO_TOKEN_LIMIT  || 4096;
 
 const [command, mode] = process.argv.slice(2);
 
@@ -87,7 +87,7 @@ class OpenAi {
         .map((msg) => tokenCount(msg.content || '') + 4)
         .reduce((a, b) => a + b, 0);
 
-      if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - maxTokens) {
+      if (REQUEST_TOKENS > tokenLimit - maxTokens) {
         throw new Error(GenerateCommitMessageErrorEnum.tooMuchTokens);
       }
 
