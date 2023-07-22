@@ -26,6 +26,116 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
+// node_modules/sisteransi/src/index.js
+var require_src = __commonJS({
+  "node_modules/sisteransi/src/index.js"(exports, module2) {
+    "use strict";
+    var ESC = "\x1B";
+    var CSI = `${ESC}[`;
+    var beep = "\x07";
+    var cursor = {
+      to(x4, y5) {
+        if (!y5)
+          return `${CSI}${x4 + 1}G`;
+        return `${CSI}${y5 + 1};${x4 + 1}H`;
+      },
+      move(x4, y5) {
+        let ret = "";
+        if (x4 < 0)
+          ret += `${CSI}${-x4}D`;
+        else if (x4 > 0)
+          ret += `${CSI}${x4}C`;
+        if (y5 < 0)
+          ret += `${CSI}${-y5}A`;
+        else if (y5 > 0)
+          ret += `${CSI}${y5}B`;
+        return ret;
+      },
+      up: (count = 1) => `${CSI}${count}A`,
+      down: (count = 1) => `${CSI}${count}B`,
+      forward: (count = 1) => `${CSI}${count}C`,
+      backward: (count = 1) => `${CSI}${count}D`,
+      nextLine: (count = 1) => `${CSI}E`.repeat(count),
+      prevLine: (count = 1) => `${CSI}F`.repeat(count),
+      left: `${CSI}G`,
+      hide: `${CSI}?25l`,
+      show: `${CSI}?25h`,
+      save: `${ESC}7`,
+      restore: `${ESC}8`
+    };
+    var scroll = {
+      up: (count = 1) => `${CSI}S`.repeat(count),
+      down: (count = 1) => `${CSI}T`.repeat(count)
+    };
+    var erase = {
+      screen: `${CSI}2J`,
+      up: (count = 1) => `${CSI}1J`.repeat(count),
+      down: (count = 1) => `${CSI}J`.repeat(count),
+      line: `${CSI}2K`,
+      lineEnd: `${CSI}K`,
+      lineStart: `${CSI}1K`,
+      lines(count) {
+        let clear = "";
+        for (let i2 = 0; i2 < count; i2++)
+          clear += this.line + (i2 < count - 1 ? cursor.up() : "");
+        if (count)
+          clear += cursor.left;
+        return clear;
+      }
+    };
+    module2.exports = { cursor, scroll, erase, beep };
+  }
+});
+
+// node_modules/picocolors/picocolors.js
+var require_picocolors = __commonJS({
+  "node_modules/picocolors/picocolors.js"(exports, module2) {
+    var tty2 = require("tty");
+    var isColorSupported = !("NO_COLOR" in process.env || process.argv.includes("--no-color")) && ("FORCE_COLOR" in process.env || process.argv.includes("--color") || process.platform === "win32" || tty2.isatty(1) && process.env.TERM !== "dumb" || "CI" in process.env);
+    var formatter = (open, close, replace = open) => (input) => {
+      let string = "" + input;
+      let index = string.indexOf(close, open.length);
+      return ~index ? open + replaceClose(string, close, replace, index) + close : open + string + close;
+    };
+    var replaceClose = (string, close, replace, index) => {
+      let start = string.substring(0, index) + replace;
+      let end = string.substring(index + close.length);
+      let nextIndex = end.indexOf(close);
+      return ~nextIndex ? start + replaceClose(end, close, replace, nextIndex) : start + end;
+    };
+    var createColors = (enabled = isColorSupported) => ({
+      isColorSupported: enabled,
+      reset: enabled ? (s) => `\x1B[0m${s}\x1B[0m` : String,
+      bold: enabled ? formatter("\x1B[1m", "\x1B[22m", "\x1B[22m\x1B[1m") : String,
+      dim: enabled ? formatter("\x1B[2m", "\x1B[22m", "\x1B[22m\x1B[2m") : String,
+      italic: enabled ? formatter("\x1B[3m", "\x1B[23m") : String,
+      underline: enabled ? formatter("\x1B[4m", "\x1B[24m") : String,
+      inverse: enabled ? formatter("\x1B[7m", "\x1B[27m") : String,
+      hidden: enabled ? formatter("\x1B[8m", "\x1B[28m") : String,
+      strikethrough: enabled ? formatter("\x1B[9m", "\x1B[29m") : String,
+      black: enabled ? formatter("\x1B[30m", "\x1B[39m") : String,
+      red: enabled ? formatter("\x1B[31m", "\x1B[39m") : String,
+      green: enabled ? formatter("\x1B[32m", "\x1B[39m") : String,
+      yellow: enabled ? formatter("\x1B[33m", "\x1B[39m") : String,
+      blue: enabled ? formatter("\x1B[34m", "\x1B[39m") : String,
+      magenta: enabled ? formatter("\x1B[35m", "\x1B[39m") : String,
+      cyan: enabled ? formatter("\x1B[36m", "\x1B[39m") : String,
+      white: enabled ? formatter("\x1B[37m", "\x1B[39m") : String,
+      gray: enabled ? formatter("\x1B[90m", "\x1B[39m") : String,
+      bgBlack: enabled ? formatter("\x1B[40m", "\x1B[49m") : String,
+      bgRed: enabled ? formatter("\x1B[41m", "\x1B[49m") : String,
+      bgGreen: enabled ? formatter("\x1B[42m", "\x1B[49m") : String,
+      bgYellow: enabled ? formatter("\x1B[43m", "\x1B[49m") : String,
+      bgBlue: enabled ? formatter("\x1B[44m", "\x1B[49m") : String,
+      bgMagenta: enabled ? formatter("\x1B[45m", "\x1B[49m") : String,
+      bgCyan: enabled ? formatter("\x1B[46m", "\x1B[49m") : String,
+      bgWhite: enabled ? formatter("\x1B[47m", "\x1B[49m") : String
+    });
+    module2.exports = createColors();
+    module2.exports.createColors = createColors;
+  }
+});
+
 // node_modules/ini/lib/ini.js
 var require_ini = __commonJS({
   "node_modules/ini/lib/ini.js"(exports, module2) {
@@ -238,122 +348,12 @@ var require_ini = __commonJS({
   }
 });
 
-// node_modules/sisteransi/src/index.js
-var require_src = __commonJS({
-  "node_modules/sisteransi/src/index.js"(exports, module2) {
-    "use strict";
-    var ESC = "\x1B";
-    var CSI = `${ESC}[`;
-    var beep = "\x07";
-    var cursor = {
-      to(x4, y5) {
-        if (!y5)
-          return `${CSI}${x4 + 1}G`;
-        return `${CSI}${y5 + 1};${x4 + 1}H`;
-      },
-      move(x4, y5) {
-        let ret = "";
-        if (x4 < 0)
-          ret += `${CSI}${-x4}D`;
-        else if (x4 > 0)
-          ret += `${CSI}${x4}C`;
-        if (y5 < 0)
-          ret += `${CSI}${-y5}A`;
-        else if (y5 > 0)
-          ret += `${CSI}${y5}B`;
-        return ret;
-      },
-      up: (count = 1) => `${CSI}${count}A`,
-      down: (count = 1) => `${CSI}${count}B`,
-      forward: (count = 1) => `${CSI}${count}C`,
-      backward: (count = 1) => `${CSI}${count}D`,
-      nextLine: (count = 1) => `${CSI}E`.repeat(count),
-      prevLine: (count = 1) => `${CSI}F`.repeat(count),
-      left: `${CSI}G`,
-      hide: `${CSI}?25l`,
-      show: `${CSI}?25h`,
-      save: `${ESC}7`,
-      restore: `${ESC}8`
-    };
-    var scroll = {
-      up: (count = 1) => `${CSI}S`.repeat(count),
-      down: (count = 1) => `${CSI}T`.repeat(count)
-    };
-    var erase = {
-      screen: `${CSI}2J`,
-      up: (count = 1) => `${CSI}1J`.repeat(count),
-      down: (count = 1) => `${CSI}J`.repeat(count),
-      line: `${CSI}2K`,
-      lineEnd: `${CSI}K`,
-      lineStart: `${CSI}1K`,
-      lines(count) {
-        let clear = "";
-        for (let i2 = 0; i2 < count; i2++)
-          clear += this.line + (i2 < count - 1 ? cursor.up() : "");
-        if (count)
-          clear += cursor.left;
-        return clear;
-      }
-    };
-    module2.exports = { cursor, scroll, erase, beep };
-  }
-});
-
-// node_modules/picocolors/picocolors.js
-var require_picocolors = __commonJS({
-  "node_modules/picocolors/picocolors.js"(exports, module2) {
-    var tty2 = require("tty");
-    var isColorSupported = !("NO_COLOR" in process.env || process.argv.includes("--no-color")) && ("FORCE_COLOR" in process.env || process.argv.includes("--color") || process.platform === "win32" || tty2.isatty(1) && process.env.TERM !== "dumb" || "CI" in process.env);
-    var formatter = (open, close, replace = open) => (input) => {
-      let string = "" + input;
-      let index = string.indexOf(close, open.length);
-      return ~index ? open + replaceClose(string, close, replace, index) + close : open + string + close;
-    };
-    var replaceClose = (string, close, replace, index) => {
-      let start = string.substring(0, index) + replace;
-      let end = string.substring(index + close.length);
-      let nextIndex = end.indexOf(close);
-      return ~nextIndex ? start + replaceClose(end, close, replace, nextIndex) : start + end;
-    };
-    var createColors = (enabled = isColorSupported) => ({
-      isColorSupported: enabled,
-      reset: enabled ? (s) => `\x1B[0m${s}\x1B[0m` : String,
-      bold: enabled ? formatter("\x1B[1m", "\x1B[22m", "\x1B[22m\x1B[1m") : String,
-      dim: enabled ? formatter("\x1B[2m", "\x1B[22m", "\x1B[22m\x1B[2m") : String,
-      italic: enabled ? formatter("\x1B[3m", "\x1B[23m") : String,
-      underline: enabled ? formatter("\x1B[4m", "\x1B[24m") : String,
-      inverse: enabled ? formatter("\x1B[7m", "\x1B[27m") : String,
-      hidden: enabled ? formatter("\x1B[8m", "\x1B[28m") : String,
-      strikethrough: enabled ? formatter("\x1B[9m", "\x1B[29m") : String,
-      black: enabled ? formatter("\x1B[30m", "\x1B[39m") : String,
-      red: enabled ? formatter("\x1B[31m", "\x1B[39m") : String,
-      green: enabled ? formatter("\x1B[32m", "\x1B[39m") : String,
-      yellow: enabled ? formatter("\x1B[33m", "\x1B[39m") : String,
-      blue: enabled ? formatter("\x1B[34m", "\x1B[39m") : String,
-      magenta: enabled ? formatter("\x1B[35m", "\x1B[39m") : String,
-      cyan: enabled ? formatter("\x1B[36m", "\x1B[39m") : String,
-      white: enabled ? formatter("\x1B[37m", "\x1B[39m") : String,
-      gray: enabled ? formatter("\x1B[90m", "\x1B[39m") : String,
-      bgBlack: enabled ? formatter("\x1B[40m", "\x1B[49m") : String,
-      bgRed: enabled ? formatter("\x1B[41m", "\x1B[49m") : String,
-      bgGreen: enabled ? formatter("\x1B[42m", "\x1B[49m") : String,
-      bgYellow: enabled ? formatter("\x1B[43m", "\x1B[49m") : String,
-      bgBlue: enabled ? formatter("\x1B[44m", "\x1B[49m") : String,
-      bgMagenta: enabled ? formatter("\x1B[45m", "\x1B[49m") : String,
-      bgCyan: enabled ? formatter("\x1B[46m", "\x1B[49m") : String,
-      bgWhite: enabled ? formatter("\x1B[47m", "\x1B[49m") : String
-    });
-    module2.exports = createColors();
-    module2.exports.createColors = createColors;
-  }
-});
-
 // node_modules/dotenv/package.json
 var require_package = __commonJS({
   "node_modules/dotenv/package.json"(exports, module2) {
     module2.exports = {
       name: "dotenv",
-      version: "16.1.4",
+      version: "16.3.1",
       description: "Loads environment variables from .env file",
       main: "lib/main.js",
       types: "lib/main.d.ts",
@@ -453,7 +453,7 @@ var require_main = __commonJS({
       if (!result.parsed) {
         throw new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
       }
-      const keys = _dotenvKey().split(",");
+      const keys = _dotenvKey(options).split(",");
       const length = keys.length;
       let decrypted;
       for (let i2 = 0; i2 < length; i2++) {
@@ -479,7 +479,10 @@ var require_main = __commonJS({
     function _debug(message) {
       console.log(`[dotenv@${version}][DEBUG] ${message}`);
     }
-    function _dotenvKey() {
+    function _dotenvKey(options) {
+      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+        return options.DOTENV_KEY;
+      }
       if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
         return process.env.DOTENV_KEY;
       }
@@ -523,7 +526,11 @@ var require_main = __commonJS({
     function _configVault(options) {
       _log("Loading env from encrypted .env.vault");
       const parsed = DotenvModule._parseVault(options);
-      DotenvModule.populate(process.env, parsed, options);
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsed, options);
       return { parsed };
     }
     function configDotenv(options) {
@@ -540,7 +547,11 @@ var require_main = __commonJS({
       }
       try {
         const parsed = DotenvModule.parse(fs3.readFileSync(dotenvPath, { encoding }));
-        DotenvModule.populate(process.env, parsed, options);
+        let processEnv = process.env;
+        if (options && options.processEnv != null) {
+          processEnv = options.processEnv;
+        }
+        DotenvModule.populate(processEnv, parsed, options);
         return { parsed };
       } catch (e2) {
         if (debug) {
@@ -551,7 +562,7 @@ var require_main = __commonJS({
     }
     function config5(options) {
       const vaultPath = _vaultPath(options);
-      if (_dotenvKey().length === 0) {
+      if (_dotenvKey(options).length === 0) {
         return DotenvModule.configDotenv(options);
       }
       if (!fs3.existsSync(vaultPath)) {
@@ -4872,12 +4883,14 @@ var require_api = __commonJS({
     exports.ChatCompletionRequestMessageRoleEnum = {
       System: "system",
       User: "user",
-      Assistant: "assistant"
+      Assistant: "assistant",
+      Function: "function"
     };
     exports.ChatCompletionResponseMessageRoleEnum = {
       System: "system",
       User: "user",
-      Assistant: "assistant"
+      Assistant: "assistant",
+      Function: "function"
     };
     exports.CreateImageRequestSizeEnum = {
       _256x256: "256x256",
@@ -4947,7 +4960,7 @@ var require_api = __commonJS({
         }),
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5004,7 +5017,7 @@ var require_api = __commonJS({
         }),
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5346,7 +5359,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -5399,7 +5412,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -5789,7 +5802,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5816,7 +5829,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5960,7 +5973,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -5978,7 +5991,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -6175,7 +6188,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6196,7 +6209,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6310,7 +6323,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -6325,7 +6338,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -6483,7 +6496,7 @@ var require_api = __commonJS({
       }
       /**
        *
-       * @summary Creates a completion for the chat message
+       * @summary Creates a model response for the given chat conversation.
        * @param {CreateChatCompletionRequest} createChatCompletionRequest
        * @param {*} [options] Override http request option.
        * @throws {RequiredError}
@@ -6506,7 +6519,7 @@ var require_api = __commonJS({
       }
       /**
        *
-       * @summary Creates a completion for the provided prompt and parameters
+       * @summary Creates a completion for the provided prompt and parameters.
        * @param {CreateCompletionRequest} createCompletionRequest
        * @param {*} [options] Override http request option.
        * @throws {RequiredError}
@@ -6630,7 +6643,7 @@ var require_api = __commonJS({
       /**
        *
        * @summary Transcribes audio into the input language.
-       * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
        * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
        * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
        * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -6646,7 +6659,7 @@ var require_api = __commonJS({
       /**
        *
        * @summary Translates audio into into English.
-       * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
        * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
        * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
        * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -6799,7 +6812,7 @@ var require_package2 = __commonJS({
   "node_modules/openai/package.json"(exports, module2) {
     module2.exports = {
       name: "openai",
-      version: "3.2.1",
+      version: "3.3.0",
       description: "Node.js library for the OpenAI API",
       repository: {
         type: "git",
@@ -16525,7 +16538,7 @@ var require_tiktoken_bg = __commonJS({
         wasm.__wbindgen_export_3(addHeapObject(e2));
       }
     }
-    var Tiktoken2 = class {
+    var Tiktoken2 = class _Tiktoken {
       /**
        * @param {string} tiktoken_bfe
        * @param {any} special_tokens
@@ -16539,7 +16552,7 @@ var require_tiktoken_bg = __commonJS({
         const ptr1 = passStringToWasm0(pat_str, wasm.__wbindgen_export_0, wasm.__wbindgen_export_1);
         const len1 = WASM_VECTOR_LEN;
         const ret = wasm.tiktoken_new(ptr0, len0, addHeapObject(special_tokens), ptr1, len1);
-        return Tiktoken2.__wrap(ret);
+        return _Tiktoken.__wrap(ret);
       }
       /** @returns {string | undefined} */
       get name() {
@@ -16559,7 +16572,7 @@ var require_tiktoken_bg = __commonJS({
         }
       }
       static __wrap(ptr) {
-        const obj = Object.create(Tiktoken2.prototype);
+        const obj = Object.create(_Tiktoken.prototype);
         obj.ptr = ptr;
         return obj;
       }
@@ -17528,7 +17541,7 @@ function G3(t, e2) {
 // package.json
 var package_default = {
   name: "opencommit",
-  version: "2.2.10",
+  version: "2.4.2",
   description: "Auto-generate impressive commits in 1 second. Killing lame commits with AI \u{1F92F}\u{1F52B}",
   keywords: [
     "git",
@@ -17568,9 +17581,10 @@ var package_default = {
     watch: "npm run -S build -- --sourcemap --watch",
     start: "node ./out/cli.cjs",
     dev: "ts-node ./src/cli.ts",
+    upgrade: "npx --yes npm-check-updates -u && npm update && npm dedup",
     clean: "rm -rf .npm/ node_modules/ out/*; npm ci",
     build: "rimraf out && node esbuild.config.js",
-    deploy: "npm run build:push && git push --tags && npm publish --tag latest",
+    deploy: "npm run build:push && npm version patch && git push --tags && git push && npm publish --tag latest",
     "build:push": "npm run build && git add . && git commit -m 'build' && git push",
     lint: "eslint src --ext ts && tsc --noEmit",
     format: "prettier --write src"
@@ -17578,15 +17592,15 @@ var package_default = {
   devDependencies: {
     "@types/ini": "^1.3.31",
     "@types/inquirer": "^9.0.3",
-    "@types/node": "^20.2.5",
-    "@typescript-eslint/eslint-plugin": "^5.59.9",
-    "@typescript-eslint/parser": "^5.59.9",
-    dotenv: "^16.1.4",
-    esbuild: "^0.17.19",
-    eslint: "^8.42.0",
-    prettier: "^2.8.8",
+    "@types/node": "^20.4.3",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.1.0",
+    dotenv: "^16.3.1",
+    esbuild: "^0.18.15",
+    eslint: "^8.45.0",
+    prettier: "^3.0.0",
     "ts-node": "^10.9.1",
-    typescript: "^5.1.3"
+    typescript: "^5.1.6"
   },
   dependencies: {
     "@actions/core": "^1.10.0",
@@ -17594,24 +17608,18 @@ var package_default = {
     "@actions/github": "^5.1.1",
     "@clack/prompts": "^0.6.3",
     "@dqbd/tiktoken": "^1.0.7",
-    "@octokit/webhooks-schemas": "^7.0.3",
-    "@octokit/webhooks-types": "^7.0.3",
+    "@octokit/webhooks-schemas": "^7.1.0",
+    "@octokit/webhooks-types": "^7.1.0",
     axios: "^1.4.0",
-    chalk: "^5.2.0",
+    chalk: "^5.3.0",
     cleye: "^1.3.2",
     execa: "^7.1.1",
     ignore: "^5.2.4",
     ini: "^4.1.1",
-    inquirer: "^9.2.7",
-    openai: "^3.2.1"
+    inquirer: "^9.2.8",
+    openai: "^3.3.0"
   }
 };
-
-// src/commands/config.ts
-var import_path = require("path");
-var import_ini = __toESM(require_ini(), 1);
-var import_fs = require("fs");
-var import_os = require("os");
 
 // node_modules/@clack/core/dist/index.mjs
 var import_sisteransi = __toESM(require_src(), 1);
@@ -18430,7 +18438,7 @@ function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
     return 1;
   }
   if ("CI" in env) {
-    if ("GITHUB_ACTIONS" in env) {
+    if ("GITHUB_ACTIONS" in env || "GITEA_ACTIONS" in env) {
       return 3;
     }
     if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "BUILDKITE", "DRONE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
@@ -18658,6 +18666,12 @@ Object.defineProperties(createChalk.prototype, styles2);
 var chalk = createChalk();
 var chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
 var source_default = chalk;
+
+// src/commands/config.ts
+var import_fs = require("fs");
+var import_ini = __toESM(require_ini(), 1);
+var import_os = require("os");
+var import_path = require("path");
 
 // src/i18n/en.json
 var en_default = {
@@ -18967,16 +18981,21 @@ var configValidators = {
   ["OCO_MODEL" /* OCO_MODEL */](value) {
     validateConfig(
       "OCO_MODEL" /* OCO_MODEL */,
-      ["gpt-3.5-turbo", "gpt-4"].includes(value) || typeof value === "string" && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/),
-      `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default) or model deployed name.`
+      [
+        "gpt-3.5-turbo",
+        "gpt-4",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-0613"
+      ].includes(value) || typeof value === "string" && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/),
+      `${value} is not supported yet, use 'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0613' or 'gpt-3.5-turbo-16k' (default) or model deployed name.`
     );
     return value;
   },
-  ["OCO_PREFIX" /* OCO_PREFIX */](value) {
+  ["OCO_MESSAGE_TEMPLATE_PLACEHOLDER" /* OCO_MESSAGE_TEMPLATE_PLACEHOLDER */](value) {
     validateConfig(
-      "OCO_PREFIX" /* OCO_PREFIX */,
-      true,
-      "Cannot be empty"
+      "OCO_MESSAGE_TEMPLATE_PLACEHOLDER" /* OCO_MESSAGE_TEMPLATE_PLACEHOLDER */,
+      value.startsWith("$"),
+      `${value} must start with $, for example: '$msg'`
     );
     return value;
   }
@@ -18990,13 +19009,13 @@ var getConfig = () => {
     OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : void 0,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
-    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-05-15",
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-06-01-preview",
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === "true" ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
-    OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo",
+    OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo-16k",
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || "en",
-    OCO_DISABLE_GIT_PUSH: process.env.OCO_DISABLE_GITPUSH === "true" ? true : false,
-    OCO_PREFIX: process.env.OCO_PREFIX || ""
+    OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
+    OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
   };
   const configExists = (0, import_fs.existsSync)(configPath);
   if (!configExists) {
@@ -19888,8 +19907,8 @@ var getSpawnedResult = async ({ stdout, stderr, all: all3 }, { encoding, buffer,
 };
 
 // node_modules/execa/lib/promise.js
-var nativePromisePrototype = (async () => {
-})().constructor.prototype;
+var nativePromisePrototype = (/* @__PURE__ */ (async () => {
+})()).constructor.prototype;
 var descriptors = ["then", "catch", "finally"].map((property) => [
   property,
   Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
@@ -20226,10 +20245,7 @@ var getOpenCommitIgnore = () => {
   return ig;
 };
 var getCoreHooksPath = async () => {
-  const { stdout } = await execa("git", [
-    "config",
-    "core.hooksPath"
-  ]);
+  const { stdout } = await execa("git", ["config", "core.hooksPath"]);
   return stdout;
 };
 var getStagedFiles = async () => {
@@ -20273,11 +20289,11 @@ var gitAdd = async ({ files }) => {
 };
 var getDiff = async ({ files }) => {
   const lockFiles = files.filter(
-    (file) => file.includes(".lock") || file.includes("-lock.")
+    (file) => file.includes(".lock") || file.includes("-lock.") || file.includes(".svg") || file.includes(".png") || file.includes(".jpg") || file.includes(".jpeg") || file.includes(".webp") || file.includes(".gif")
   );
   if (lockFiles.length) {
     ce(
-      `Some files are '.lock' files which are excluded by default from 'git diff'. No commit messages are generated for this files:
+      `Some files are excluded by default from 'git diff'. No commit messages are generated for this files:
 ${lockFiles.join(
         "\n"
       )}`
@@ -20295,14 +20311,6 @@ ${lockFiles.join(
   ]);
   return diff;
 };
-async function getCurrentGitBranch() {
-  try {
-    const { stdout: branchName } = await execa("git", ["symbolic-ref", "--short", "HEAD"]);
-    return branchName;
-  } catch (error) {
-    throw new Error(`Failed to get current git branch: ${error}`);
-  }
-}
 
 // src/commands/githook.ts
 var import_fs3 = require("fs");
@@ -23100,7 +23108,7 @@ utils_default.forEach(["post", "put", "patch"], function forEachMethodWithData2(
 var Axios_default = Axios;
 
 // node_modules/axios/lib/cancel/CancelToken.js
-var CancelToken = class {
+var CancelToken = class _CancelToken {
   constructor(executor) {
     if (typeof executor !== "function") {
       throw new TypeError("executor must be a function.");
@@ -23178,7 +23186,7 @@ var CancelToken = class {
    */
   static source() {
     let cancel;
-    const token = new CancelToken(function executor(c3) {
+    const token = new _CancelToken(function executor(c3) {
       cancel = c3;
     });
     return {
@@ -23392,7 +23400,7 @@ var OpenAi = class {
     }
     this.openAI = new import_openai.OpenAIApi(this.openAiApiConfiguration);
   }
-  generateCommitMessage = async (messages, prefix) => {
+  generateCommitMessage = async (messages) => {
     const params = {
       model: MODEL,
       messages,
@@ -23401,14 +23409,13 @@ var OpenAi = class {
       max_tokens: maxTokens || 500
     };
     try {
-      const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content) + 4).reduce((a2, b5) => a2 + b5, 0);
+      const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content || "") + 4).reduce((a2, b5) => a2 + b5, 0);
       if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - maxTokens) {
         throw new Error("TOO_MUCH_TOKENS" /* tooMuchTokens */);
       }
       const { data } = await this.openAI.createChatCompletion(params);
       const message = data.choices[0].message;
-      const finalMessage = (prefix ? prefix + " " : "") + (message?.content || "");
-      return finalMessage;
+      return message?.content || "";
     } catch (error) {
       ce(`${source_default.red("\u2716")} ${JSON.stringify(params)}`);
       const err = error;
@@ -23427,7 +23434,7 @@ var OpenAi = class {
 };
 var getOpenCommitLatestVersion = async () => {
   try {
-    const { stdout } = await execa("npm", ["view", "opencommit", "version"]);
+    const { stdout } = await execa("npm", ["view", "github:takuya-o/opencommit", "version"]);
     return stdout;
   } catch (_6) {
     ce("Error while getting the latest version of opencommit");
@@ -23494,9 +23501,13 @@ app.use((_, res, next) => {
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
     content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
 ${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
+  },
+  {
+    role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
+    content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
 ${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
   }
 ];
@@ -23509,17 +23520,16 @@ var generateCommitMessageChatCompletionPrompt = (diff) => {
   return chatContextAsCompletionRequest;
 };
 var INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
-  (msg) => tokenCount(msg.content) + 4
+  (msg) => tokenCount(msg.content || "") + 4
 ).reduce((a2, b5) => a2 + b5, 0);
 var ADJUSTMENT_FACTOR = 20;
-var generateCommitMessageByDiff = async (diff, prefix) => {
+var generateCommitMessageByDiff = async (diff) => {
   try {
     const MAX_REQUEST_TOKENS = DEFAULT_MODEL_TOKEN_LIMIT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH - config3?.OCO_OPENAI_MAX_TOKENS;
     if (tokenCount(diff) >= MAX_REQUEST_TOKENS) {
       const commitMessagePromises = getCommitMsgsPromisesFromFileDiffs(
         diff,
-        MAX_REQUEST_TOKENS,
-        prefix
+        MAX_REQUEST_TOKENS
       );
       const commitMessages = [];
       for (const promise of commitMessagePromises) {
@@ -23529,7 +23539,7 @@ var generateCommitMessageByDiff = async (diff, prefix) => {
       return commitMessages.join("\n\n");
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(diff);
-      const commitMessage = await api.generateCommitMessage(messages, prefix);
+      const commitMessage = await api.generateCommitMessage(messages);
       if (!commitMessage)
         throw new Error("EMPTY_MESSAGE" /* emptyMessage */);
       return commitMessage;
@@ -23538,7 +23548,7 @@ var generateCommitMessageByDiff = async (diff, prefix) => {
     throw error;
   }
 };
-function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, prefix) {
+function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength) {
   const hunkHeaderSeparator = "@@ ";
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
   const mergedChanges = mergeDiffs(
@@ -23559,7 +23569,7 @@ function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength
     const messages = generateCommitMessageChatCompletionPrompt(
       separator + lineDiff
     );
-    return api.generateCommitMessage(messages, prefix);
+    return api.generateCommitMessage(messages);
   });
   return commitMsgsFromFileLineDiffs;
 }
@@ -23585,7 +23595,7 @@ function splitDiff(diff, maxChangeLength) {
   }
   return splitDiffs;
 }
-function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, prefix) {
+function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength) {
   const separator = "diff --git ";
   const diffByFiles = diff.split(separator).slice(1);
   const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
@@ -23595,15 +23605,14 @@ function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, prefix) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
-        maxDiffLength,
-        prefix
+        maxDiffLength
       );
       commitMessagePromises.push(...messagesPromises);
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(
         separator + fileDiff
       );
-      commitMessagePromises.push(api.generateCommitMessage(messages, prefix));
+      commitMessagePromises.push(api.generateCommitMessage(messages));
     }
   }
   return commitMessagePromises;
@@ -23645,9 +23654,7 @@ var prepareCommitMessageHook = async (isStageAllFlag = false) => {
     const spin = le();
     spin.start("Generating commit message");
     const commitMessage = await generateCommitMessageByDiff(
-      await getDiff({ files: staged }),
-      ""
-      //TODO: Support prefix
+      await getDiff({ files: staged })
     );
     spin.stop("Done");
     const fileContent = await import_promises2.default.readFile(messageFilePath);
@@ -23674,17 +23681,31 @@ var trytm = async (promise) => {
 };
 
 // src/commands/commit.ts
+var config4 = getConfig();
 var getGitRemotes = async () => {
   const { stdout } = await execa("git", ["remote"]);
   return stdout.split("\n").filter((remote) => Boolean(remote.trim()));
 };
-var config4 = getConfig();
+var checkMessageTemplate = (extraArgs2) => {
+  for (const key in extraArgs2) {
+    if (extraArgs2[key].includes(config4?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER))
+      return extraArgs2[key];
+  }
+  return false;
+};
 var generateCommitMessageFromGitDiff = async (diff, extraArgs2) => {
+  const messageTemplate = checkMessageTemplate(extraArgs2);
   await assertGitRepo();
   const commitSpinner = le();
   commitSpinner.start("Generating the commit message");
   try {
-    const commitMessage = await generateCommitMessageByDiff(diff, await generatePrefix());
+    let commitMessage = await generateCommitMessageByDiff(diff);
+    if (typeof messageTemplate === "string") {
+      commitMessage = messageTemplate.replace(
+        config4?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
+        commitMessage
+      );
+    }
     commitSpinner.stop("\u{1F4DD} Commit message generated");
     ce(
       `Commit message:
@@ -23824,35 +23845,6 @@ ${stagedFiles.map((file) => `  ${file}`).join("\n")}`
   }
   process.exit(0);
 }
-async function generatePrefix() {
-  const prefix = config4?.OCO_PREFIX;
-  if (prefix === void 0) {
-    return void 0;
-  }
-  const prefixIsRegexString = prefix.startsWith("/") && prefix.endsWith("/");
-  if (prefixIsRegexString) {
-    try {
-      return await generatePrefixFromRegex(prefix);
-    } catch (error) {
-      ce(`${source_default.red("\u2716")} Prefix Regex is invalid : ${error}`);
-      process.exit(1);
-    }
-  }
-  return prefix;
-}
-async function generatePrefixFromRegex(regex) {
-  const branch = await getCurrentGitBranch();
-  if (branch === void 0) {
-    return void 0;
-  }
-  const regexWithoutSlashes = regex.slice(1, -1);
-  const regexObject = new RegExp(regexWithoutSlashes);
-  const match = branch.match(regexObject);
-  if (match === null) {
-    return void 0;
-  }
-  return match.length > 1 ? match[1] : match[0];
-}
 
 // src/utils/checkIsLatestVersion.ts
 var checkIsLatestVersion = async () => {
@@ -23865,7 +23857,7 @@ var checkIsLatestVersion = async () => {
           `
 You are not using the latest stable version of OpenCommit with new features and bug fixes.
 Current version: ${currentVersion}. Latest version: ${latestVersion}.
-\u{1F680} To update run: npm i -g opencommit@latest.
+\u{1F680} To update run: npm i github:takuya-o/opencommit@latest.
         `
         )
       );

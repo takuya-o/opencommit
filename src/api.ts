@@ -73,8 +73,7 @@ class OpenAi {
   }
 
   public generateCommitMessage = async (
-    messages: Array<ChatCompletionRequestMessage>,
-    prefix: string | undefined
+    messages: Array<ChatCompletionRequestMessage>
   ): Promise<string | undefined> => {
     const params = {
       model: MODEL,
@@ -85,7 +84,7 @@ class OpenAi {
     };
     try {
       const REQUEST_TOKENS = messages
-        .map((msg) => tokenCount(msg.content) + 4)
+        .map((msg) => tokenCount(msg.content || '') + 4)
         .reduce((a, b) => a + b, 0);
 
       if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - maxTokens) {
@@ -96,9 +95,7 @@ class OpenAi {
 
       const message = data.choices[0].message;
 
-      const finalMessage = ( prefix ? prefix + ' ' : '') + (message?.content || '')
-
-      return finalMessage;
+      return (message?.content || '')
     } catch (error) {
       outro(`${chalk.red('✖')} ${JSON.stringify(params)}`);
 
@@ -126,7 +123,7 @@ export const getOpenCommitLatestVersion = async (): Promise<
   string | undefined
 > => {
   try {
-    const { stdout } = await execa('npm', ['view', 'opencommit', 'version']);
+    const { stdout } = await execa('npm', ['view', 'github:takuya-o/opencommit', 'version']);
     return stdout;
   } catch (_) {
     outro('Error while getting the latest version of opencommit');

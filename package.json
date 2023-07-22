@@ -1,6 +1,6 @@
 {
   "name": "opencommit",
-  "version": "2.2.10",
+  "version": "2.4.2",
   "description": "Auto-generate impressive commits in 1 second. Killing lame commits with AI 🤯🔫",
   "keywords": [
     "git",
@@ -40,9 +40,10 @@
     "watch": "npm run -S build -- --sourcemap --watch",
     "start": "node ./out/cli.cjs",
     "dev": "ts-node ./src/cli.ts",
+    "upgrade": "npx --yes npm-check-updates -u && npm update && npm dedup",
     "clean": "rm -rf .npm/ node_modules/ out/*; npm ci",
     "build": "rimraf out && node esbuild.config.js",
-    "deploy": "npm run build:push && git push --tags && npm publish --tag latest",
+    "deploy": "npm run build:push && npm version patch && git push --tags && git push && npm publish --tag latest",
     "build:push": "npm run build && git add . && git commit -m 'build' && git push",
     "lint": "eslint src --ext ts && tsc --noEmit",
     "format": "prettier --write src"
@@ -50,15 +51,15 @@
   "devDependencies": {
     "@types/ini": "^1.3.31",
     "@types/inquirer": "^9.0.3",
-    "@types/node": "^20.2.5",
-    "@typescript-eslint/eslint-plugin": "^5.59.9",
-    "@typescript-eslint/parser": "^5.59.9",
-    "dotenv": "^16.1.4",
-    "esbuild": "^0.17.19",
-    "eslint": "^8.42.0",
-    "prettier": "^2.8.8",
+    "@types/node": "^20.4.3",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.1.0",
+    "dotenv": "^16.3.1",
+    "esbuild": "^0.18.15",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@actions/core": "^1.10.0",
@@ -66,15 +67,15 @@
     "@actions/github": "^5.1.1",
     "@clack/prompts": "^0.6.3",
     "@dqbd/tiktoken": "^1.0.7",
-    "@octokit/webhooks-schemas": "^7.0.3",
-    "@octokit/webhooks-types": "^7.0.3",
+    "@octokit/webhooks-schemas": "^7.1.0",
+    "@octokit/webhooks-types": "^7.1.0",
     "axios": "^1.4.0",
-    "chalk": "^5.2.0",
+    "chalk": "^5.3.0",
     "cleye": "^1.3.2",
     "execa": "^7.1.1",
     "ignore": "^5.2.4",
     "ini": "^4.1.1",
-    "inquirer": "^9.2.7",
-    "openai": "^3.2.1"
+    "inquirer": "^9.2.8",
+    "openai": "^3.3.0"
   }
 }

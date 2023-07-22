@@ -1,12 +1,12 @@
-import { command } from 'cleye';
-import { join as pathJoin } from 'path';
-import { parse as iniParse, stringify as iniStringify } from 'ini';
-import { existsSync, writeFileSync, readFileSync } from 'fs';
-import { homedir } from 'os';
 import { intro, outro } from '@clack/prompts';
 import chalk from 'chalk';
-import { COMMANDS } from '../CommandsEnum';
-import { getI18nLocal } from '../i18n';
+import { command } from 'cleye';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { parse as iniParse, stringify as iniStringify } from 'ini';
+import { homedir } from 'os';
+import { join as pathJoin } from 'path';
+import { COMMANDS } from '../CommandsEnum.js';
+import { getI18nLocal } from '../i18n/';
 
 import * as dotenv from 'dotenv';
 
@@ -24,7 +24,7 @@ export enum CONFIG_KEYS {
   OCO_MODEL = 'OCO_MODEL',
   OCO_LANGUAGE = 'OCO_LANGUAGE',
   OCO_DISABLE_GIT_PUSH = 'OCO_DISABLE_GIT_PUSH',
-  OCO_PREFIX = 'OCO_PREFIX'
+  OCO_MESSAGE_TEMPLATE_PLACEHOLDER = 'OCO_MESSAGE_TEMPLATE_PLACEHOLDER'
 }
 
 export const DEFAULT_MODEL_TOKEN_LIMIT = 4096;
@@ -155,22 +155,25 @@ export const configValidators = {
   [CONFIG_KEYS.OCO_MODEL](value: any) {
     validateConfig(
       CONFIG_KEYS.OCO_MODEL,
-      ['gpt-3.5-turbo', 'gpt-4'].includes(value)
+      [
+        'gpt-3.5-turbo',
+        'gpt-4',
+        'gpt-3.5-turbo-16k',
+        'gpt-3.5-turbo-0613'
+      ].includes(value)
       || ( typeof value === 'string' && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/) ),
-      `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default) or model deployed name.`
+      `${value} is not supported yet, use 'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0613' or 'gpt-3.5-turbo-16k' (default) or model deployed name.`
     );
     return value;
   },
-
-  [CONFIG_KEYS.OCO_PREFIX](value: any) {
+  [CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER](value: any) {
     validateConfig(
-      CONFIG_KEYS.OCO_PREFIX,
-      true,
-      'Cannot be empty'
+      CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
+      value.startsWith('$'),
+      `${value} must start with $, for example: '$msg'`
     );
     return value;
   }
-
 };
 
 export type ConfigType = {
@@ -185,16 +188,18 @@ export const getConfig = (): ConfigType | null => {
 
   const configFromEnv = {
     OCO_OPENAI_API_KEY: process.env.OCO_OPENAI_API_KEY,
-    OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : undefined,
+    OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS
+      ? Number(process.env.OCO_OPENAI_MAX_TOKENS)
+      : undefined,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
-    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || '2023-05-15',
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || '2023-06-01-preview',
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === 'true' ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
-    OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo',
+    OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo-16k',
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || 'en',
-    OCO_DISABLE_GIT_PUSH: process.env.OCO_DISABLE_GITPUSH === 'true' ? true : false,
-    OCO_PREFIX: process.env.OCO_PREFIX || '',
+    OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
+    OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
   };
 
   const configExists = existsSync(configPath);
@@ -207,7 +212,10 @@ export const getConfig = (): ConfigType | null => {
   const config = iniParse(configFile);
 
   for (const configKey of Object.keys(config)) {
-    if (!config[configKey] || ['null', 'undefined'].includes(config[configKey])) {
+    if (
+      !config[configKey] ||
+      ['null', 'undefined'].includes(config[configKey])
+    ) {
       config[configKey] = undefined;
       continue;
     }

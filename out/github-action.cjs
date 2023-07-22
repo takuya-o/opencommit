@@ -976,12 +976,12 @@ var require_lib = __commonJS({
     var RetryableHttpVerbs = ["OPTIONS", "GET", "DELETE", "HEAD"];
     var ExponentialBackoffCeiling = 10;
     var ExponentialBackoffTimeSlice = 5;
-    var HttpClientError = class extends Error {
+    var HttpClientError = class _HttpClientError extends Error {
       constructor(message, statusCode) {
         super(message);
         this.name = "HttpClientError";
         this.statusCode = statusCode;
-        Object.setPrototypeOf(this, HttpClientError.prototype);
+        Object.setPrototypeOf(this, _HttpClientError.prototype);
       }
     };
     exports.HttpClientError = HttpClientError;
@@ -1572,13 +1572,13 @@ var require_oidc_utils = __commonJS({
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var core_1 = require_core();
-    var OidcClient = class {
+    var OidcClient = class _OidcClient {
       static createHttpClient(allowRetry = true, maxRetry = 10) {
         const requestOptions = {
           allowRetries: allowRetry,
           maxRetries: maxRetry
         };
-        return new http_client_1.HttpClient("actions/oidc-client", [new auth_1.BearerCredentialHandler(OidcClient.getRequestToken())], requestOptions);
+        return new http_client_1.HttpClient("actions/oidc-client", [new auth_1.BearerCredentialHandler(_OidcClient.getRequestToken())], requestOptions);
       }
       static getRequestToken() {
         const token = process.env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"];
@@ -1597,7 +1597,7 @@ var require_oidc_utils = __commonJS({
       static getCall(id_token_url) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-          const httpclient = OidcClient.createHttpClient();
+          const httpclient = _OidcClient.createHttpClient();
           const res = yield httpclient.getJson(id_token_url).catch((error) => {
             throw new Error(`Failed to get ID Token. 
  
@@ -1615,13 +1615,13 @@ var require_oidc_utils = __commonJS({
       static getIDToken(audience) {
         return __awaiter(this, void 0, void 0, function* () {
           try {
-            let id_token_url = OidcClient.getIDTokenUrl();
+            let id_token_url = _OidcClient.getIDTokenUrl();
             if (audience) {
               const encodedAudience = encodeURIComponent(audience);
               id_token_url = `${id_token_url}&audience=${encodedAudience}`;
             }
             core_1.debug(`ID token url is ${id_token_url}`);
-            const id_token = yield OidcClient.getCall(id_token_url);
+            const id_token = yield _OidcClient.getCall(id_token_url);
             core_1.setSecret(id_token);
             return id_token;
           } catch (error) {
@@ -4600,7 +4600,7 @@ var require_lib3 = __commonJS({
     var Readable2 = Stream.Readable;
     var BUFFER = Symbol("buffer");
     var TYPE = Symbol("type");
-    var Blob2 = class {
+    var Blob2 = class _Blob {
       constructor() {
         this[TYPE] = "";
         const blobParts = arguments[0];
@@ -4619,7 +4619,7 @@ var require_lib3 = __commonJS({
               buffer = Buffer.from(element.buffer, element.byteOffset, element.byteLength);
             } else if (element instanceof ArrayBuffer) {
               buffer = Buffer.from(element);
-            } else if (element instanceof Blob2) {
+            } else if (element instanceof _Blob) {
               buffer = element[BUFFER];
             } else {
               buffer = Buffer.from(typeof element === "string" ? element : String(element));
@@ -4681,7 +4681,7 @@ var require_lib3 = __commonJS({
         const span = Math.max(relativeEnd - relativeStart, 0);
         const buffer = this[BUFFER];
         const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
-        const blob = new Blob2([], { type: arguments[2] });
+        const blob = new _Blob([], { type: arguments[2] });
         blob[BUFFER] = slicedBuffer;
         return blob;
       }
@@ -5058,7 +5058,7 @@ var require_lib3 = __commonJS({
       return void 0;
     }
     var MAP = Symbol("map");
-    var Headers = class {
+    var Headers = class _Headers {
       /**
        * Headers class
        *
@@ -5068,7 +5068,7 @@ var require_lib3 = __commonJS({
       constructor() {
         let init = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : void 0;
         this[MAP] = /* @__PURE__ */ Object.create(null);
-        if (init instanceof Headers) {
+        if (init instanceof _Headers) {
           const rawHeaders = init.raw();
           const headerNames = Object.keys(rawHeaders);
           for (const headerName of headerNames) {
@@ -5337,7 +5337,7 @@ var require_lib3 = __commonJS({
     }
     var INTERNALS$1 = Symbol("Response internals");
     var STATUS_CODES = http2.STATUS_CODES;
-    var Response = class {
+    var Response = class _Response {
       constructor() {
         let body = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : null;
         let opts = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
@@ -5385,7 +5385,7 @@ var require_lib3 = __commonJS({
        * @return  Response
        */
       clone() {
-        return new Response(clone(this), {
+        return new _Response(clone(this), {
           url: this.url,
           status: this.status,
           statusText: this.statusText,
@@ -5429,7 +5429,7 @@ var require_lib3 = __commonJS({
       const proto2 = signal && typeof signal === "object" && Object.getPrototypeOf(signal);
       return !!(proto2 && proto2.constructor.name === "AbortSignal");
     }
-    var Request = class {
+    var Request = class _Request {
       constructor(input) {
         let init = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
         let parsedURL;
@@ -5499,7 +5499,7 @@ var require_lib3 = __commonJS({
        * @return  Request
        */
       clone() {
-        return new Request(this);
+        return new _Request(this);
       }
     };
     Body.mixIn(Request.prototype);
@@ -5800,7 +5800,7 @@ var require_lib3 = __commonJS({
         const headers = response.headers;
         if (headers["transfer-encoding"] === "chunked" && !headers["content-length"]) {
           response.once("close", function(hadError) {
-            const hasDataListener = socket.listenerCount("data") > 0;
+            const hasDataListener = socket && socket.listenerCount("data") > 0;
             if (hasDataListener && !hadError) {
               const err = new Error("Premature close");
               err.code = "ERR_STREAM_PREMATURE_CLOSE";
@@ -8617,7 +8617,7 @@ var require_toolrunner = __commonJS({
       return args;
     }
     exports.argStringToArray = argStringToArray;
-    var ExecState = class extends events.EventEmitter {
+    var ExecState = class _ExecState extends events.EventEmitter {
       constructor(options, toolPath) {
         super();
         this.processClosed = false;
@@ -8644,7 +8644,7 @@ var require_toolrunner = __commonJS({
         if (this.processClosed) {
           this._setResult();
         } else if (this.processExited) {
-          this.timeout = timers_1.setTimeout(ExecState.HandleTimeout, this.delay, this);
+          this.timeout = timers_1.setTimeout(_ExecState.HandleTimeout, this.delay, this);
         }
       }
       _debug(message) {
@@ -11940,12 +11940,14 @@ var require_api = __commonJS({
     exports.ChatCompletionRequestMessageRoleEnum = {
       System: "system",
       User: "user",
-      Assistant: "assistant"
+      Assistant: "assistant",
+      Function: "function"
     };
     exports.ChatCompletionResponseMessageRoleEnum = {
       System: "system",
       User: "user",
-      Assistant: "assistant"
+      Assistant: "assistant",
+      Function: "function"
     };
     exports.CreateImageRequestSizeEnum = {
       _256x256: "256x256",
@@ -12015,7 +12017,7 @@ var require_api = __commonJS({
         }),
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12072,7 +12074,7 @@ var require_api = __commonJS({
         }),
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12414,7 +12416,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -12467,7 +12469,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -12857,7 +12859,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12884,7 +12886,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13028,7 +13030,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13046,7 +13048,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13243,7 +13245,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the chat message
+         * @summary Creates a model response for the given chat conversation.
          * @param {CreateChatCompletionRequest} createChatCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13264,7 +13266,7 @@ var require_api = __commonJS({
         },
         /**
          *
-         * @summary Creates a completion for the provided prompt and parameters
+         * @summary Creates a completion for the provided prompt and parameters.
          * @param {CreateCompletionRequest} createCompletionRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13378,7 +13380,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Transcribes audio into the input language.
-         * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13393,7 +13395,7 @@ var require_api = __commonJS({
         /**
          *
          * @summary Translates audio into into English.
-         * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+         * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
          * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
          * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
          * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13551,7 +13553,7 @@ var require_api = __commonJS({
       }
       /**
        *
-       * @summary Creates a completion for the chat message
+       * @summary Creates a model response for the given chat conversation.
        * @param {CreateChatCompletionRequest} createChatCompletionRequest
        * @param {*} [options] Override http request option.
        * @throws {RequiredError}
@@ -13574,7 +13576,7 @@ var require_api = __commonJS({
       }
       /**
        *
-       * @summary Creates a completion for the provided prompt and parameters
+       * @summary Creates a completion for the provided prompt and parameters.
        * @param {CreateCompletionRequest} createCompletionRequest
        * @param {*} [options] Override http request option.
        * @throws {RequiredError}
@@ -13698,7 +13700,7 @@ var require_api = __commonJS({
       /**
        *
        * @summary Transcribes audio into the input language.
-       * @param {File} file The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {File} file The audio file object (not file name) to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
        * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
        * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
        * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13714,7 +13716,7 @@ var require_api = __commonJS({
       /**
        *
        * @summary Translates audio into into English.
-       * @param {File} file The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+       * @param {File} file The audio file object (not file name) translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
        * @param {string} model ID of the model to use. Only &#x60;whisper-1&#x60; is currently available.
        * @param {string} [prompt] An optional text to guide the model\\\&#39;s style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
        * @param {string} [responseFormat] The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -13867,7 +13869,7 @@ var require_package = __commonJS({
   "node_modules/openai/package.json"(exports, module2) {
     module2.exports = {
       name: "openai",
-      version: "3.2.1",
+      version: "3.3.0",
       description: "Node.js library for the OpenAI API",
       repository: {
         type: "git",
@@ -23680,7 +23682,7 @@ var require_package2 = __commonJS({
   "node_modules/dotenv/package.json"(exports, module2) {
     module2.exports = {
       name: "dotenv",
-      version: "16.1.4",
+      version: "16.3.1",
       description: "Loads environment variables from .env file",
       main: "lib/main.js",
       types: "lib/main.d.ts",
@@ -23780,7 +23782,7 @@ var require_main = __commonJS({
       if (!result.parsed) {
         throw new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
       }
-      const keys = _dotenvKey().split(",");
+      const keys = _dotenvKey(options).split(",");
       const length = keys.length;
       let decrypted;
       for (let i2 = 0; i2 < length; i2++) {
@@ -23806,7 +23808,10 @@ var require_main = __commonJS({
     function _debug(message) {
       console.log(`[dotenv@${version2}][DEBUG] ${message}`);
     }
-    function _dotenvKey() {
+    function _dotenvKey(options) {
+      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+        return options.DOTENV_KEY;
+      }
       if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
         return process.env.DOTENV_KEY;
       }
@@ -23850,7 +23855,11 @@ var require_main = __commonJS({
     function _configVault(options) {
       _log("Loading env from encrypted .env.vault");
       const parsed = DotenvModule._parseVault(options);
-      DotenvModule.populate(process.env, parsed, options);
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsed, options);
       return { parsed };
     }
     function configDotenv(options) {
@@ -23867,7 +23876,11 @@ var require_main = __commonJS({
       }
       try {
         const parsed = DotenvModule.parse(fs.readFileSync(dotenvPath, { encoding }));
-        DotenvModule.populate(process.env, parsed, options);
+        let processEnv = process.env;
+        if (options && options.processEnv != null) {
+          processEnv = options.processEnv;
+        }
+        DotenvModule.populate(processEnv, parsed, options);
         return { parsed };
       } catch (e2) {
         if (debug) {
@@ -23878,7 +23891,7 @@ var require_main = __commonJS({
     }
     function config4(options) {
       const vaultPath = _vaultPath(options);
-      if (_dotenvKey().length === 0) {
+      if (_dotenvKey(options).length === 0) {
         return DotenvModule.configDotenv(options);
       }
       if (!fs.existsSync(vaultPath)) {
@@ -24087,7 +24100,7 @@ var require_tiktoken_bg = __commonJS({
         wasm.__wbindgen_export_3(addHeapObject(e2));
       }
     }
-    var Tiktoken2 = class {
+    var Tiktoken2 = class _Tiktoken {
       /**
        * @param {string} tiktoken_bfe
        * @param {any} special_tokens
@@ -24101,7 +24114,7 @@ var require_tiktoken_bg = __commonJS({
         const ptr1 = passStringToWasm0(pat_str, wasm.__wbindgen_export_0, wasm.__wbindgen_export_1);
         const len1 = WASM_VECTOR_LEN;
         const ret = wasm.tiktoken_new(ptr0, len0, addHeapObject(special_tokens), ptr1, len1);
-        return Tiktoken2.__wrap(ret);
+        return _Tiktoken.__wrap(ret);
       }
       /** @returns {string | undefined} */
       get name() {
@@ -24121,7 +24134,7 @@ var require_tiktoken_bg = __commonJS({
         }
       }
       static __wrap(ptr) {
-        const obj = Object.create(Tiktoken2.prototype);
+        const obj = Object.create(_Tiktoken.prototype);
         obj.ptr = ptr;
         return obj;
       }
@@ -28031,7 +28044,7 @@ utils_default.forEach(["post", "put", "patch"], function forEachMethodWithData2(
 var Axios_default = Axios;
 
 // node_modules/axios/lib/cancel/CancelToken.js
-var CancelToken = class {
+var CancelToken = class _CancelToken {
   constructor(executor) {
     if (typeof executor !== "function") {
       throw new TypeError("executor must be a function.");
@@ -28109,7 +28122,7 @@ var CancelToken = class {
    */
   static source() {
     let cancel;
-    const token = new CancelToken(function executor(c) {
+    const token = new _CancelToken(function executor(c) {
       cancel = c;
     });
     return {
@@ -28514,7 +28527,7 @@ function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
     return 1;
   }
   if ("CI" in env) {
-    if ("GITHUB_ACTIONS" in env) {
+    if ("GITHUB_ACTIONS" in env || "GITEA_ACTIONS" in env) {
       return 3;
     }
     if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "BUILDKITE", "DRONE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
@@ -28854,10 +28867,10 @@ function G3(t, e2) {
 }
 
 // src/commands/config.ts
-var import_path = require("path");
-var import_ini = __toESM(require_ini(), 1);
 var import_fs = require("fs");
+var import_ini = __toESM(require_ini(), 1);
 var import_os = require("os");
+var import_path = require("path");
 
 // src/i18n/en.json
 var en_default = {
@@ -29167,16 +29180,21 @@ var configValidators = {
   ["OCO_MODEL" /* OCO_MODEL */](value) {
     validateConfig(
       "OCO_MODEL" /* OCO_MODEL */,
-      ["gpt-3.5-turbo", "gpt-4"].includes(value) || typeof value === "string" && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/),
-      `${value} is not supported yet, use 'gpt-4' or 'gpt-3.5-turbo' (default) or model deployed name.`
+      [
+        "gpt-3.5-turbo",
+        "gpt-4",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-0613"
+      ].includes(value) || typeof value === "string" && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/),
+      `${value} is not supported yet, use 'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0613' or 'gpt-3.5-turbo-16k' (default) or model deployed name.`
     );
     return value;
   },
-  ["OCO_PREFIX" /* OCO_PREFIX */](value) {
+  ["OCO_MESSAGE_TEMPLATE_PLACEHOLDER" /* OCO_MESSAGE_TEMPLATE_PLACEHOLDER */](value) {
     validateConfig(
-      "OCO_PREFIX" /* OCO_PREFIX */,
-      true,
-      "Cannot be empty"
+      "OCO_MESSAGE_TEMPLATE_PLACEHOLDER" /* OCO_MESSAGE_TEMPLATE_PLACEHOLDER */,
+      value.startsWith("$"),
+      `${value} must start with $, for example: '$msg'`
     );
     return value;
   }
@@ -29190,13 +29208,13 @@ var getConfig = () => {
     OCO_OPENAI_MAX_TOKENS: process.env.OCO_OPENAI_MAX_TOKENS ? Number(process.env.OCO_OPENAI_MAX_TOKENS) : void 0,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
-    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-05-15",
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || "2023-06-01-preview",
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === "true" ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === "true" ? true : false,
-    OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo",
+    OCO_MODEL: process.env.OCO_MODEL || "gpt-3.5-turbo-16k",
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || "en",
-    OCO_DISABLE_GIT_PUSH: process.env.OCO_DISABLE_GITPUSH === "true" ? true : false,
-    OCO_PREFIX: process.env.OCO_PREFIX || ""
+    OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
+    OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
   };
   const configExists = (0, import_fs.existsSync)(configPath);
   if (!configExists) {
@@ -30102,8 +30120,8 @@ var getSpawnedResult = async ({ stdout, stderr, all: all3 }, { encoding, buffer,
 };
 
 // node_modules/execa/lib/promise.js
-var nativePromisePrototype = (async () => {
-})().constructor.prototype;
+var nativePromisePrototype = (/* @__PURE__ */ (async () => {
+})()).constructor.prototype;
 var descriptors2 = ["then", "catch", "finally"].map((property) => [
   property,
   Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
@@ -30469,7 +30487,7 @@ var OpenAi = class {
     }
     this.openAI = new import_openai.OpenAIApi(this.openAiApiConfiguration);
   }
-  generateCommitMessage = async (messages, prefix) => {
+  generateCommitMessage = async (messages) => {
     const params = {
       model: MODEL,
       messages,
@@ -30478,14 +30496,13 @@ var OpenAi = class {
       max_tokens: maxTokens || 500
     };
     try {
-      const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content) + 4).reduce((a2, b) => a2 + b, 0);
+      const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content || "") + 4).reduce((a2, b) => a2 + b, 0);
       if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - maxTokens) {
         throw new Error("TOO_MUCH_TOKENS" /* tooMuchTokens */);
       }
       const { data } = await this.openAI.createChatCompletion(params);
       const message = data.choices[0].message;
-      const finalMessage = (prefix ? prefix + " " : "") + (message?.content || "");
-      return finalMessage;
+      return message?.content || "";
     } catch (error) {
       ce(`${source_default.red("\u2716")} ${JSON.stringify(params)}`);
       const err = error;
@@ -30562,9 +30579,13 @@ app.use((_, res, next) => {
   {
     role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
     content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${translation.commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
 ${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u{1F41B} " : ""}${i18n["en"].commitFix}
-${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
+  },
+  {
+    role: import_openai2.ChatCompletionRequestMessageRoleEnum.Assistant,
+    content: (translation === i18n["en"] ? "" : `${config3?.OCO_EMOJI ? "\u2728 " : ""}${translation.commitFeat}
+${config3?.OCO_DESCRIPTION ? "\n" + translation.commitDescription + "\n\n" : ""}`) + `${config3?.OCO_EMOJI ? "\u2728 " : ""}${i18n["en"].commitFeat}
 ${config3?.OCO_DESCRIPTION ? "\n" + i18n["en"].commitDescription : ""}`
   }
 ];
@@ -30577,17 +30598,16 @@ var generateCommitMessageChatCompletionPrompt = (diff) => {
   return chatContextAsCompletionRequest;
 };
 var INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
-  (msg) => tokenCount(msg.content) + 4
+  (msg) => tokenCount(msg.content || "") + 4
 ).reduce((a2, b) => a2 + b, 0);
 var ADJUSTMENT_FACTOR = 20;
-var generateCommitMessageByDiff = async (diff, prefix) => {
+var generateCommitMessageByDiff = async (diff) => {
   try {
     const MAX_REQUEST_TOKENS = DEFAULT_MODEL_TOKEN_LIMIT - ADJUSTMENT_FACTOR - INIT_MESSAGES_PROMPT_LENGTH - config3?.OCO_OPENAI_MAX_TOKENS;
     if (tokenCount(diff) >= MAX_REQUEST_TOKENS) {
       const commitMessagePromises = getCommitMsgsPromisesFromFileDiffs(
         diff,
-        MAX_REQUEST_TOKENS,
-        prefix
+        MAX_REQUEST_TOKENS
       );
       const commitMessages = [];
       for (const promise of commitMessagePromises) {
@@ -30597,7 +30617,7 @@ var generateCommitMessageByDiff = async (diff, prefix) => {
       return commitMessages.join("\n\n");
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(diff);
-      const commitMessage = await api.generateCommitMessage(messages, prefix);
+      const commitMessage = await api.generateCommitMessage(messages);
       if (!commitMessage)
         throw new Error("EMPTY_MESSAGE" /* emptyMessage */);
       return commitMessage;
@@ -30606,7 +30626,7 @@ var generateCommitMessageByDiff = async (diff, prefix) => {
     throw error;
   }
 };
-function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength, prefix) {
+function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength) {
   const hunkHeaderSeparator = "@@ ";
   const [fileHeader, ...fileDiffByLines] = fileDiff.split(hunkHeaderSeparator);
   const mergedChanges = mergeDiffs(
@@ -30627,7 +30647,7 @@ function getMessagesPromisesByChangesInFile(fileDiff, separator, maxChangeLength
     const messages = generateCommitMessageChatCompletionPrompt(
       separator + lineDiff
     );
-    return api.generateCommitMessage(messages, prefix);
+    return api.generateCommitMessage(messages);
   });
   return commitMsgsFromFileLineDiffs;
 }
@@ -30653,7 +30673,7 @@ function splitDiff(diff, maxChangeLength) {
   }
   return splitDiffs;
 }
-function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, prefix) {
+function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength) {
   const separator = "diff --git ";
   const diffByFiles = diff.split(separator).slice(1);
   const mergedFilesDiffs = mergeDiffs(diffByFiles, maxDiffLength);
@@ -30663,15 +30683,14 @@ function getCommitMsgsPromisesFromFileDiffs(diff, maxDiffLength, prefix) {
       const messagesPromises = getMessagesPromisesByChangesInFile(
         fileDiff,
         separator,
-        maxDiffLength,
-        prefix
+        maxDiffLength
       );
       commitMessagePromises.push(...messagesPromises);
     } else {
       const messages = generateCommitMessageChatCompletionPrompt(
         separator + fileDiff
       );
-      commitMessagePromises.push(api.generateCommitMessage(messages, prefix));
+      commitMessagePromises.push(api.generateCommitMessage(messages));
     }
   }
   return commitMessagePromises;
@@ -30715,8 +30734,7 @@ async function improveMessagesInChunks(diffsAndSHAs) {
   const chunkSize = diffsAndSHAs.length % 2 === 0 ? 4 : 3;
   ce(`Improving commit messages in chunks of ${chunkSize}.`);
   const improvePromises = diffsAndSHAs.map(
-    (commit) => generateCommitMessageByDiff(commit.diff, "")
-    //TODO: support prefix
+    (commit) => generateCommitMessageByDiff(commit.diff)
   );
   let improvedMessagesAndSHAs = [];
   for (let step = 0; step < improvePromises.length; step += chunkSize) {

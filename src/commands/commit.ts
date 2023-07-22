@@ -1,14 +1,11 @@
 import { execa } from 'execa';
-import {
-  generateCommitMessageByDiff
-} from '../generateCommitMessageFromGitDiff';
+import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff';
 import {
   assertGitRepo,
   getChangedFiles,
   getDiff,
   getStagedFiles,
-  gitAdd,
-  getCurrentGitBranch
+  gitAdd
 } from '../utils/git';
 import {
   spinner,
@@ -19,28 +16,44 @@ import {
   multiselect,
   select
 } from '@clack/prompts';
+import { getConfig } from '../commands/config';
 import chalk from 'chalk';
 import { trytm } from '../utils/trytm';
-import { getConfig } from './config';
+
+const config = getConfig();
 
 const getGitRemotes = async () => {
   const { stdout } = await execa('git', ['remote']);
   return stdout.split('\n').filter((remote) => Boolean(remote.trim()));
 };
 
-const config = getConfig();
+// Check for the presence of message templates
+const checkMessageTemplate = (extraArgs: string[]): string | false => {
+  for (const key in extraArgs) {
+    if (extraArgs[key].includes(config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER))
+      return extraArgs[key];
+  }
+  return false;
+};
 
 const generateCommitMessageFromGitDiff = async (
   diff: string,
   extraArgs: string[]
 ): Promise<void> => {
+  const messageTemplate = checkMessageTemplate(extraArgs);
   await assertGitRepo();
 
   const commitSpinner = spinner();
   commitSpinner.start('Generating the commit message');
   try {
-    const commitMessage = await generateCommitMessageByDiff(diff, await generatePrefix());
+    let commitMessage = await generateCommitMessageByDiff(diff);
 
+    if (typeof messageTemplate === 'string') {
+      commitMessage = messageTemplate.replace(
+        config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
+        commitMessage
+      );
+    }
     commitSpinner.stop('📝 Commit message generated');
 
     outro(
@@ -220,46 +233,3 @@ export async function commit(
 
   process.exit(0);
 }
-
-async function generatePrefix() {
-  const prefix = config?.OCO_PREFIX
-
-  if (prefix === undefined) {
-    return undefined;
-  }
-
-  const prefixIsRegexString = prefix.startsWith('/') && prefix.endsWith('/');
-
-  if (prefixIsRegexString) {
-    try {
-      return await generatePrefixFromRegex(prefix);
-    } catch (error) {
-      outro(`${chalk.red('✖')} Prefix Regex is invalid : ${error}`);
-      process.exit(1);
-    }
-  }
-
-  return prefix;
-}
-
-async function generatePrefixFromRegex(regex: string) {
-
-  // We currently only support regex input from git branch name
-
-  const branch = await getCurrentGitBranch();
-
-  if (branch === undefined) {
-    return undefined;
-  }
-
-  const regexWithoutSlashes = regex.slice(1, -1);
-  const regexObject = new RegExp(regexWithoutSlashes);
-  const match = branch.match(regexObject);
-
-  if (match === null) {
-    return undefined;
-  }
-
-  return match.length > 1 ? match[1] : match[0];
-}
-

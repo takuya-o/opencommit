@@ -47,9 +47,7 @@ export const prepareCommitMessageHook = async (
     spin.start('Generating commit message');
 
     const commitMessage = await generateCommitMessageByDiff(
-      await getDiff({ files: staged }),
-      '' //TODO: Support prefix
-    );
+      await getDiff({ files: staged }));
     spin.stop('Done');
 
     const fileContent = await fs.readFile(messageFilePath);

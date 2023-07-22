@@ -52,7 +52,7 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
   const chunkSize = diffsAndSHAs!.length % 2 === 0 ? 4 : 3;
   outro(`Improving commit messages in chunks of ${chunkSize}.`);
   const improvePromises = diffsAndSHAs!.map((commit) =>
-    generateCommitMessageByDiff(commit.diff, '')  //TODO: support prefix
+    generateCommitMessageByDiff(commit.diff)
   );
 
   let improvedMessagesAndSHAs: MsgAndSHA[] = [];
