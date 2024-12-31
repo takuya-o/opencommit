@@ -1,5 +1,3 @@
-import { execa } from 'execa';
-import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff';
 import {
   assertGitRepo,
   getChangedFiles,
@@ -8,16 +6,18 @@ import {
   gitAdd
 } from '../utils/git';
 import {
-  spinner,
   confirm,
-  outro,
-  isCancel,
   intro,
+  isCancel,
   multiselect,
-  select
+  outro,
+  select,
+  spinner
 } from '@clack/prompts';
-import { getConfig } from '../commands/config';
 import chalk from 'chalk';
+import { execa } from 'execa';
+import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff';
+import { getConfig } from '../commands/config';
 import { trytm } from '../utils/trytm';
 
 const config = getConfig();
@@ -30,12 +30,17 @@ const getGitRemotes = async () => {
 // Check for the presence of message templates
 const checkMessageTemplate = (extraArgs: string[]): string | false => {
   for (const key in extraArgs) {
-    if (extraArgs[key].includes(config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER))
+    if (
+      extraArgs[key].includes(
+        config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER as string
+      )
+    )
       return extraArgs[key];
   }
   return false;
 };
 
+// eslint-disable-next-line max-lines-per-function
 const generateCommitMessageFromGitDiff = async (
   diff: string,
   extraArgs: string[]
@@ -50,7 +55,7 @@ const generateCommitMessageFromGitDiff = async (
 
     if (typeof messageTemplate === 'string') {
       commitMessage = messageTemplate.replace(
-        config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
+        config?.OCO_MESSAGE_TEMPLATE_PLACEHOLDER as string,
         commitMessage
       );
     }
@@ -80,7 +85,7 @@ ${chalk.grey('——————————————————')}`
       outro(stdout);
 
       // user isn't pushing, return early
-      if(config?.OCO_DISABLE_GIT_PUSH === true) return
+      if (config?.OCO_DISABLE_GIT_PUSH === true) return;
 
       const remotes = await getGitRemotes();
 
@@ -149,9 +154,10 @@ ${chalk.grey('——————————————————')}`
   }
 };
 
+// eslint-disable-next-line max-lines-per-function
 export async function commit(
   extraArgs: string[] = [],
-  isStageAllFlag: Boolean = false
+  isStageAllFlag: boolean = false
 ) {
   if (isStageAllFlag) {
     const changedFiles = await getChangedFiles();

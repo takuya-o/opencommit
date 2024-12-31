@@ -1,11 +1,9 @@
-import {
-  ChatCompletionRequestMessage,
-  ChatCompletionRequestMessageRoleEnum
-} from 'openai';
+import { ChatCompletionMessageParam as ChatCompletionRequestMessage } from 'openai/resources';
+// import { ChatCompletionRequestMessageRoleEnum } from "openai"
 import { api } from './api';
 import { getConfig } from './commands/config';
 import { mergeDiffs } from './utils/mergeDiffs';
-import { i18n, I18nLocals } from './i18n';
+import { I18nLocals, i18n } from './i18n';
 import { tokenCount } from './utils/tokenCount';
 
 const config = getConfig();
@@ -13,16 +11,16 @@ const translation = i18n[(config?.OCO_LANGUAGE as I18nLocals) || 'en'];
 
 const INIT_MESSAGES_PROMPT: Array<ChatCompletionRequestMessage> = [
   {
-    role: ChatCompletionRequestMessageRoleEnum.System,
+    role: 'system', //ChatCompletionRequestMessageRoleEnum.System,
     // prettier-ignore
     content: `You are to act as the author of a commit message in git. Your mission is to create clean and comprehensive commit messages in the conventional commit convention and explain WHAT were the changes and WHY the changes were done. I'll send you an output of 'git diff --staged' command, and you convert it into a commit message.
 ${config?.OCO_EMOJI ? 'Use GitMoji convention to preface the commit.' : 'Do not preface the commit with anything.'}
 ${config?.OCO_DESCRIPTION ? 'Add a short description of WHY the changes are done after the commit message. Don\'t start it with "This commit", just describe the changes.' : "Don't add any descriptions to the commit, only commit message."}
 Use the present tense. Lines must not be longer than 74 characters. Use ${translation.localLanguage} to answer. And insert its translation by ${translation.localLanguage}.`
-    },
-    {
-        role: ChatCompletionRequestMessageRoleEnum.User,
-        content: `diff --git a/src/server.ts b/src/server.ts
+  },
+  {
+    role: 'user', //ChatCompletionRequestMessageRoleEnum.User,
+    content: `diff --git a/src/server.ts b/src/server.ts
 index ad4db42..f3b18a9 100644
 --- a/src/server.ts
 +++ b/src/server.ts
@@ -48,19 +46,23 @@ app.use((_, res, next) => {
   });`
   },
   {
-    role: ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: (translation === i18n['en'] ? '' :
-`${config?.OCO_EMOJI ? '🐛 ' : ''}${translation.commitFix}
+    role: 'assistant', //ChatCompletionRequestMessageRoleEnum.Assistant,
+    content:
+      (translation === i18n['en']
+        ? ''
+        : `${config?.OCO_EMOJI ? '🐛 ' : ''}${translation.commitFix}
 ${config?.OCO_DESCRIPTION ? '\n' + translation.commitDescription + '\n\n' : ''}`) +
-`${config?.OCO_EMOJI ? '🐛 ' : ''}${i18n['en'].commitFix}
+      `${config?.OCO_EMOJI ? '🐛 ' : ''}${i18n['en'].commitFix}
 ${config?.OCO_DESCRIPTION ? '\n' + i18n['en'].commitDescription : ''}`
   },
   {
-    role: ChatCompletionRequestMessageRoleEnum.Assistant,
-    content: (translation === i18n['en'] ? '' :
-`${config?.OCO_EMOJI ? '✨ ' : ''}${translation.commitFeat}
+    role: 'assistant', //ChatCompletionRequestMessageRoleEnum.Assistant,
+    content:
+      (translation === i18n['en']
+        ? ''
+        : `${config?.OCO_EMOJI ? '✨ ' : ''}${translation.commitFeat}
 ${config?.OCO_DESCRIPTION ? '\n' + translation.commitDescription + '\n\n' : ''}`) +
-`${config?.OCO_EMOJI ? '✨ ' : ''}${i18n['en'].commitFeat}
+      `${config?.OCO_EMOJI ? '✨ ' : ''}${i18n['en'].commitFeat}
 ${config?.OCO_DESCRIPTION ? '\n' + i18n['en'].commitDescription : ''}`
   }
 ];
@@ -71,7 +73,7 @@ const generateCommitMessageChatCompletionPrompt = (
   const chatContextAsCompletionRequest = [...INIT_MESSAGES_PROMPT];
 
   chatContextAsCompletionRequest.push({
-    role: ChatCompletionRequestMessageRoleEnum.User,
+    role: 'user', //ChatCompletionRequestMessageRoleEnum.User,
     content: diff
   });
 
@@ -85,7 +87,7 @@ export enum GenerateCommitMessageErrorEnum {
 }
 
 const INIT_MESSAGES_PROMPT_LENGTH = INIT_MESSAGES_PROMPT.map(
-  (msg) => tokenCount(msg.content || '') + 4
+  (msg) => tokenCount((msg.content as string) || '') + 4
 ).reduce((a, b) => a + b, 0);
 
 const ADJUSTMENT_FACTOR = 20;
@@ -95,7 +97,7 @@ export const generateCommitMessageByDiff = async (
 ): Promise<string> => {
   try {
     const MAX_REQUEST_TOKENS =
-    (config?.OCO_TOKEN_LIMIT || 4096) -
+      (config?.OCO_TOKEN_LIMIT || 4096) -
       ADJUSTMENT_FACTOR -
       INIT_MESSAGES_PROMPT_LENGTH -
       config?.OCO_OPENAI_MAX_TOKENS;

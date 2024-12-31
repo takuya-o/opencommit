@@ -1,27 +1,24 @@
+import { CONFIG_MODES, getConfig } from './commands/config';
+import {
+  OpenAI as OpenAIApi,
+  ClientOptions as OpenAiApiConfiguration
+} from 'openai';
 import { intro, outro } from '@clack/prompts';
+import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
+import { ChatCompletionMessageParam as ChatCompletionRequestMessage } from 'openai/resources';
+import { GenerateCommitMessageErrorEnum } from './generateCommitMessageFromGitDiff';
 import axios from 'axios';
 import chalk from 'chalk';
-import {
-  ChatCompletionRequestMessage,
-  Configuration as OpenAiApiConfiguration,
-  OpenAIApi
-} from 'openai';
-
-import {
-  CONFIG_MODES,
-  getConfig
-} from './commands/config';
-import { tokenCount } from './utils/tokenCount';
-import { GenerateCommitMessageErrorEnum } from './generateCommitMessageFromGitDiff';
 import { execa } from 'execa';
+import { tokenCount } from './utils/tokenCount';
 
 const config = getConfig();
 
-let maxTokens = config?.OCO_OPENAI_MAX_TOKENS;
-let basePath = config?.OCO_OPENAI_BASE_PATH;
-let apiKey = config?.OCO_OPENAI_API_KEY;
-let apiType = config?.OCO_OPENAI_API_TYPE || 'openai';
-let tokenLimit = config?.OCO_TOKEN_LIMIT  || 4096;
+const maxTokens = Number(config?.OCO_OPENAI_MAX_TOKENS) || 800;
+const basePath = config?.OCO_OPENAI_BASE_PATH as string | undefined
+const apiKey = config?.OCO_OPENAI_API_KEY as string | undefined
+const apiType = config?.OCO_OPENAI_API_TYPE || 'openai';
+const tokenLimit = Number(config?.OCO_TOKEN_LIMIT) || 4096;
 
 const [command, mode] = process.argv.slice(2);
 
@@ -38,34 +35,30 @@ if (!apiKey && command !== 'config' && mode !== CONFIG_MODES.set) {
   process.exit(1);
 }
 
-const MODEL = config?.OCO_MODEL || 'gpt-3.5-turbo';
-const VERSION = config?.OCO_OPENAI_VERSION || '2023-05-15';
+const MODEL = (config?.OCO_MODEL as string | undefined) ?? 'gpt-4o-mini';
+const VERSION =
+  (config?.OCO_OPENAI_VERSION as string | undefined) ?? '2024-10-21';
 
 class OpenAi {
-  private openAiApiConfiguration = new OpenAiApiConfiguration({
+  private openAiApiConfiguration: OpenAiApiConfiguration = {
     apiKey: apiKey
-  });
+  };
   private openAI!: OpenAIApi;
 
   constructor() {
     switch (apiType) {
       case 'azure':
-        this.openAiApiConfiguration.baseOptions =  {
-          headers: {
-            "api-key": apiKey,
-          },
-          params: {
-            'api-version': VERSION,
-          }
-        };
+        this.openAiApiConfiguration.defaultQuery = { 'api-version': VERSION };
+        this.openAiApiConfiguration.defaultHeaders = { 'api-key': apiKey };
         if (basePath) {
-          this.openAiApiConfiguration.basePath = basePath + 'openai/deployments/' + MODEL;
+          this.openAiApiConfiguration.baseURL =
+            basePath + 'openai/deployments/' + MODEL;
         }
         break;
       case 'openai':
       default:
         if (basePath) {
-          this.openAiApiConfiguration.basePath = basePath;
+          this.openAiApiConfiguration.baseURL = basePath;
         }
         break;
     }
@@ -75,7 +68,7 @@ class OpenAi {
   public generateCommitMessage = async (
     messages: Array<ChatCompletionRequestMessage>
   ): Promise<string | undefined> => {
-    const params = {
+    const params: ChatCompletionCreateParamsBase = {
       model: MODEL,
       messages,
       temperature: 0,
@@ -84,18 +77,18 @@ class OpenAi {
     };
     try {
       const REQUEST_TOKENS = messages
-        .map((msg) => tokenCount(msg.content || '') + 4)
+        .map((msg) => tokenCount((msg.content as string) || '') + 4)
         .reduce((a, b) => a + b, 0);
 
       if (REQUEST_TOKENS > tokenLimit - maxTokens) {
         throw new Error(GenerateCommitMessageErrorEnum.tooMuchTokens);
       }
 
-      const { data } = await this.openAI.createChatCompletion(params);
+      const data = await this.openAI.chat.completions.create(params); //   .createChatCompletion(params);
 
       const message = data.choices[0].message;
 
-      return (message?.content || '')
+      return message?.content || '';
     } catch (error) {
       outro(`${chalk.red('✖')} ${JSON.stringify(params)}`);
 
@@ -123,10 +116,14 @@ export const getOpenCommitLatestVersion = async (): Promise<
   string | undefined
 > => {
   try {
-    const { stdout } = await execa('npm', ['view', 'github:takuya-o/opencommit', 'version']);
+    const { stdout } = await execa('npm', [
+      'view',
+      'github:takuya-o/opencommit',
+      'version'
+    ]);
     return stdout;
-  } catch (_) {
-    outro('Error while getting the latest version of opencommit');
+  } catch (e) {
+    outro(`Error while getting the latest version of opencommit ${e}`);
     return undefined;
   }
 };

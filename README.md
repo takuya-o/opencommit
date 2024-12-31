@@ -168,7 +168,7 @@ To remove preface emojis:
 oco config set OCO_EMOJI=false
 ```
 
-### Switch to Azure OpenAI
+### Using Azure OpenAI
 
 By default OpenCommit uses [OpenAI](https://openai.com).
 

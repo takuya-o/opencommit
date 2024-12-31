@@ -1,18 +1,18 @@
-import { intro, outro } from '@clack/prompts';
-import chalk from 'chalk';
-import { command } from 'cleye';
+import * as dotenv from 'dotenv';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { parse as iniParse, stringify as iniStringify } from 'ini';
+import { intro, outro } from '@clack/prompts';
+import { COMMANDS } from '../CommandsEnum.js';
+import chalk from 'chalk';
+import { command } from 'cleye';
+import { getI18nLocal } from '../i18n/';
 import { homedir } from 'os';
 import { join as pathJoin } from 'path';
-import { COMMANDS } from '../CommandsEnum.js';
-import { getI18nLocal } from '../i18n/';
-
-import * as dotenv from 'dotenv';
 
 dotenv.config();
-let configCache:ConfigType | null = null
+let configCache: ConfigType | null = null;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export enum CONFIG_KEYS {
   OCO_OPENAI_API_KEY = 'OCO_OPENAI_API_KEY',
   OCO_OPENAI_MAX_TOKENS = 'OCO_OPENAI_MAX_TOKENS',
@@ -28,8 +28,7 @@ export enum CONFIG_KEYS {
   OCO_MESSAGE_TEMPLATE_PLACEHOLDER = 'OCO_MESSAGE_TEMPLATE_PLACEHOLDER'
 }
 
-export const DEFAULT_MODEL_TOKEN_LIMIT = 4096;
-
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export enum CONFIG_MODES {
   get = 'get',
   set = 'set'
@@ -37,7 +36,7 @@ export enum CONFIG_MODES {
 
 const validateConfig = (
   key: string,
-  condition: any,
+  condition: unknown,
   validationMessage: string
 ) => {
   if (!condition) {
@@ -50,7 +49,7 @@ const validateConfig = (
 };
 
 export const configValidators = {
-  [CONFIG_KEYS.OCO_OPENAI_API_KEY](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_API_KEY](value: string) {
     validateConfig(CONFIG_KEYS.OCO_OPENAI_API_KEY, value, 'Cannot be empty');
     // validateConfig(
     //   CONFIG_KEYS.OCO_OPENAI_API_KEY,
@@ -59,14 +58,15 @@ export const configValidators = {
     // );
     validateConfig(
       CONFIG_KEYS.OCO_OPENAI_API_KEY,
-      value.length === 51 || value.length === 32 ,
-      'Must be 51 or 32 characters long'
+      typeof value === 'string' &&
+        (value.length === 51 || value.length === 32 || value.length === 39),
+      'Must be 51, 32, or 39 characters long'
     );
 
     return value;
   },
 
-  [CONFIG_KEYS.OCO_DESCRIPTION](value: any) {
+  [CONFIG_KEYS.OCO_DESCRIPTION](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_DESCRIPTION,
       typeof value === 'boolean',
@@ -76,13 +76,13 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS](value: unknown) {
     // If the value is a string, convert it to a number.
     if (typeof value === 'string') {
       value = parseInt(value);
       validateConfig(
         CONFIG_KEYS.OCO_OPENAI_MAX_TOKENS,
-        !isNaN(value),
+        !isNaN(Number(value)),
         'Must be a number'
       );
     }
@@ -95,7 +95,7 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OCO_EMOJI](value: any) {
+  [CONFIG_KEYS.OCO_EMOJI](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_EMOJI,
       typeof value === 'boolean',
@@ -104,7 +104,7 @@ export const configValidators = {
 
     return value;
   },
-  [CONFIG_KEYS.OCO_DISABLE_GIT_PUSH](value: any) {
+  [CONFIG_KEYS.OCO_DISABLE_GIT_PUSH](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_DISABLE_GIT_PUSH,
       typeof value === 'boolean',
@@ -112,13 +112,13 @@ export const configValidators = {
     );
     return value;
   },
-  [CONFIG_KEYS.OCO_TOKEN_LIMIT](value: any) {
+  [CONFIG_KEYS.OCO_TOKEN_LIMIT](value: unknown) {
     // If the value is a string, convert it to a number.
     if (typeof value === 'string') {
       value = parseInt(value);
       validateConfig(
         CONFIG_KEYS.OCO_TOKEN_LIMIT,
-        !isNaN(value),
+        !isNaN(Number(value)),
         'Must be a number'
       );
     }
@@ -129,7 +129,7 @@ export const configValidators = {
     );
     return value;
   },
-  [CONFIG_KEYS.OCO_LANGUAGE](value: any) {
+  [CONFIG_KEYS.OCO_LANGUAGE](value: string) {
     validateConfig(
       CONFIG_KEYS.OCO_LANGUAGE,
       getI18nLocal(value),
@@ -138,7 +138,7 @@ export const configValidators = {
     return getI18nLocal(value);
   },
 
-  [CONFIG_KEYS.OCO_OPENAI_BASE_PATH](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_BASE_PATH](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_OPENAI_BASE_PATH,
       typeof value === 'string',
@@ -147,7 +147,7 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OCO_OPENAI_API_TYPE](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_API_TYPE](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_OPENAI_API_TYPE,
       typeof value === 'string',
@@ -161,30 +161,50 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.OCO_OPENAI_VERSION](value: any) {
+  [CONFIG_KEYS.OCO_OPENAI_VERSION](value: unknown) {
     validateConfig(
       CONFIG_KEYS.OCO_OPENAI_VERSION,
-      typeof value === 'string' && value.match(/^[1-9][0-9]{3}-[01][0-9]-[0-3][0-9]/),
+      typeof value === 'string' &&
+        value.match(/^[1-9][0-9]{3}-[01][0-9]-[0-3][0-9]/),
       'Must be start with YYYY-MM-DD string'
     );
     return value;
   },
 
-  [CONFIG_KEYS.OCO_MODEL](value: any) {
+  [CONFIG_KEYS.OCO_MODEL](value: string) {
     validateConfig(
       CONFIG_KEYS.OCO_MODEL,
       [
         'gpt-3.5-turbo',
         'gpt-4',
         'gpt-3.5-turbo-16k',
-        'gpt-3.5-turbo-0613'
-      ].includes(value)
-      || ( typeof value === 'string' && value.match(/^[a-zA-Z0-9~\-]{1,63}[a-zA-Z0-9]$/) ),
+        'gpt-3.5-turbo-0613',
+        'gpt-4o',
+        'gpt-4o-2024-11-20',
+        'gpt-4o-2024-08-06',
+        'gpt-4o-2024-05-13',
+        'gpt-4o-mini',
+        'gpt-4o-mini-2024-07-18',
+        'o1',
+        'o1-2024-12-17',
+        'o1-preview',
+        'o1-preview-2024-09-12',
+        'o1-mini',
+        'o1-mini-2024-09-12',
+        // Google Gemini
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro',
+        'gemini-1.0-pro', //EOL 2025/02/15
+      ].includes(value) ||
+        (typeof value === 'string' &&
+          value.match(/^[a-zA-Z0-9~-]{1,63}[a-zA-Z0-9]$/)),
       `${value} is not supported yet, use 'gpt-4', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0613' or 'gpt-3.5-turbo-16k' (default) or model deployed name.`
     );
     return value;
   },
-  [CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER](value: any) {
+  [CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER](value: string) {
     validateConfig(
       CONFIG_KEYS.OCO_MESSAGE_TEMPLATE_PLACEHOLDER,
       value.startsWith('$'),
@@ -195,14 +215,14 @@ export const configValidators = {
 };
 
 export type ConfigType = {
-  [key in CONFIG_KEYS]?: any;
+  [key in CONFIG_KEYS]?: string | number | boolean;
 };
 
 const configPath = pathJoin(homedir(), '.opencommit');
 
 export const getConfig = (): ConfigType | null => {
   // If it is enable, use configCache
-  if (configCache) return configCache
+  if (configCache) return configCache;
 
   const configFromEnv = {
     OCO_OPENAI_API_KEY: process.env.OCO_OPENAI_API_KEY,
@@ -211,14 +231,15 @@ export const getConfig = (): ConfigType | null => {
       : undefined,
     OCO_OPENAI_BASE_PATH: process.env.OCO_OPENAI_BASE_PATH,
     OCO_OPENAI_API_TYPE: process.env.OCO_OPENAI_API_TYPE,
-    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || '2023-06-01-preview',
+    OCO_OPENAI_VERSION: process.env.OCO_OPENAI_VERSION || '2024-10-21',
     OCO_DESCRIPTION: process.env.OCO_DESCRIPTION === 'true' ? true : false,
     OCO_EMOJI: process.env.OCO_EMOJI === 'true' ? true : false,
-    OCO_MODEL: process.env.OCO_MODEL || 'gpt-3.5-turbo-16k',
-    OCO_TOKEN_LIMIT:4096,
+    OCO_MODEL: process.env.OCO_MODEL || 'gpt-4o-mini',
+    OCO_TOKEN_LIMIT: 4096,
     OCO_LANGUAGE: process.env.OCO_LANGUAGE || 'en',
     OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
-    OCO_MESSAGE_TEMPLATE_PLACEHOLDER: process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
+    OCO_MESSAGE_TEMPLATE_PLACEHOLDER:
+      process.env.OCO_MESSAGE_TEMPLATE_PLACEHOLDER
   };
 
   const configExists = existsSync(configPath);
@@ -247,7 +268,7 @@ export const getConfig = (): ConfigType | null => {
       config[configKey] = validValue;
     } catch (error) {
       outro(
-        `'${configKey}' name is invalid, it should be either 'OCO_${configKey.toUpperCase()}' or it doesn't exist.`
+        `'${configKey}' name is invalid, it should be either 'OCO_${configKey.toUpperCase()}' or it doesn't exist. ${error}`
       );
       outro(
         `Manually fix the '.env' file or global '~/.opencommit' config file.`
@@ -257,7 +278,7 @@ export const getConfig = (): ConfigType | null => {
   }
 
   // Store configCache
-  configCache = config
+  configCache = config;
   return config;
 };
 
@@ -265,7 +286,7 @@ export const setConfig = (keyValues: [key: string, value: string][]) => {
   const config = getConfig() || {};
 
   for (const [configKey, configValue] of keyValues) {
-    if (!configValidators.hasOwnProperty(configKey)) {
+    if (!Object.prototype.hasOwnProperty.call(configValidators, configKey)) {
       throw new Error(`Unsupported config key: ${configKey}`);
     }
 
@@ -273,13 +294,13 @@ export const setConfig = (keyValues: [key: string, value: string][]) => {
 
     try {
       parsedConfigValue = JSON.parse(configValue);
-    } catch (error) {
+    } catch (_error) {
       parsedConfigValue = configValue;
     }
 
     const validValue =
       configValidators[configKey as CONFIG_KEYS](parsedConfigValue);
-    config[configKey as CONFIG_KEYS] = validValue;
+    config[configKey as CONFIG_KEYS] = validValue as string | number | boolean;
   }
 
   writeFileSync(configPath, iniStringify(config), 'utf8');

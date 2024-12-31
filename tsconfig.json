@@ -22,6 +22,7 @@
     "skipLibCheck": true
   },
   "exclude": ["node_modules"],
+  "include": ["src"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

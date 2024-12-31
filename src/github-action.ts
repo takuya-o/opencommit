@@ -1,12 +1,13 @@
-import core from '@actions/core';
-import github from '@actions/github';
-import exec from '@actions/exec';
+/* eslint-disable no-console */
 import { intro, outro } from '@clack/prompts';
-import { PushEvent } from '@octokit/webhooks-types';
-import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff';
-import { sleep } from './utils/sleep';
-import { randomIntFromInterval } from './utils/randomIntFromInterval';
 import { unlinkSync, writeFileSync } from 'fs';
+import { PushEvent } from '@octokit/webhooks-types';
+import core from '@actions/core';
+import exec from '@actions/exec';
+import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff';
+import github from '@actions/github';
+import { randomIntFromInterval } from './utils/randomIntFromInterval';
+import { sleep } from './utils/sleep';
 
 // This should be a token with access to your repository scoped in as a secret.
 // The YML workflow will need to set GITHUB_TOKEN with the GitHub Secret Token
@@ -55,7 +56,7 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
     generateCommitMessageByDiff(commit.diff)
   );
 
-  let improvedMessagesAndSHAs: MsgAndSHA[] = [];
+  const improvedMessagesAndSHAs: MsgAndSHA[] = [];
   for (let step = 0; step < improvePromises.length; step += chunkSize) {
     const chunkOfPromises = improvePromises.slice(step, step + chunkSize);
 
@@ -207,8 +208,8 @@ async function run() {
         `OpenCommit was called on ${github.context.payload.action}. OpenCommit is supposed to be used on "push" action.`
       );
     }
-  } catch (error: any) {
-    const err = error?.message || error;
+  } catch (error) {
+    const err = ((error instanceof Error) && error?.message) || error;
     core.setFailed(err);
   }
 }

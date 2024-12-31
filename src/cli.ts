@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-import { cli } from 'cleye';
-import packageJSON from '../package.json' assert { type: 'json' };
-
-import { configCommand } from './commands/config';
 import { hookCommand, isHookCalled } from './commands/githook.js';
-import { prepareCommitMessageHook } from './commands/prepare-commit-msg-hook';
-import { commit } from './commands/commit';
 import { checkIsLatestVersion } from './utils/checkIsLatestVersion';
+import { cli } from 'cleye';
+import { commit } from './commands/commit';
+import { configCommand } from './commands/config';
+import packageJSON from '../package.json' assert { type: 'json' };
+import { prepareCommitMessageHook } from './commands/prepare-commit-msg-hook';
 
 const extraArgs = process.argv.slice(2);
 
