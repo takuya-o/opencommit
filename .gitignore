@@ -4,10 +4,9 @@ temp/
 build/
 application.log
 .DS_Store
-/*.env
+/.env*
 logfile.log
 uncaughtExceptions.log
-.vscode
 src/*.json
 .idea
 test.ts

@@ -9,10 +9,10 @@
     "version": "0.2.0",
     "configurations": [
       {   // https://www.npmjs.com/package/tsx#debugging-method-1-run-tsx-directly-from-vscode
-        "name": "Node TypeScript テスト",
+        "name": "Google Gemin Test",
         "type": "node",
         "request": "launch",
-        //"envFile": "${workspaceFolder}/.env.debug",
+        "envFile": "${workspaceFolder}/.env.debug.gemini",
         // Debug current file in VSCode
         "program": "${workspaceFolder}/src/cli.ts", //"${file}",
         //"stopOnEntry": true,
@@ -25,9 +25,9 @@
         Open terminal when debugging starts (Optional)
         Useful to see console.logs
         */
-        "console": "integratedTerminal",
+        "console": "integratedTerminal", //Defaultの"internalConsole"だとデバッグコンソールなのでインタラクティブなYes/Noの入力ができない
         "internalConsoleOptions": "neverOpen", //デバッグ セッション中の [デバッグ コンソール] パネルの表示/非表示を制御
-        //"outputCapture": "std", //LogがDEBUG CONSOLEに出る
+        "outputCapture": "std", //LogがDEBUG CONSOLEに出る
         // Files to exclude from debugger (e.g. call stack)
         "skipFiles": [
           // Node.js internal core modules
@@ -35,6 +35,48 @@
           // Ignore all dependencies (optional)
           "${workspaceFolder}/node_modules/**",
         ],
+      },
+      {
+        "name": "Azure OpenAI Test",
+        "type": "node",
+        "request": "launch",
+        "envFile": "${workspaceFolder}/.env.debug.azure",
+        // Debug current file in VSCode
+        "program": "${workspaceFolder}/src/cli.ts",
+        //"stopOnEntry": true,
+        /*
+        Path to tsx binary
+        Assuming locally installed
+        */
+        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+        /*
+        Open terminal when debugging starts (Optional)
+        Useful to see console.logs
+        */
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        // Files to exclude from debugger (e.g. call stack)
+        "skipFiles": [
+          // Node.js internal core modules
+          "<node_internals>/**",
+          // Ignore all dependencies (optional)
+          "${workspaceFolder}/node_modules/**",
+        ],
+      },
+      // IntelliSense を使用して利用可能な属性を学べます。
+      // 既存の属性の説明をホバーして表示します。
+      // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Program",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "program": "${file}",
+        "outFiles": [
+          "${workspaceFolder}/**/*.js"
+        ]
       },
     ]
   },

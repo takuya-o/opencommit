@@ -1,131 +1,115 @@
-import { CONFIG_MODES, getConfig } from './commands/config';
-import {
-  OpenAI as OpenAIApi,
-  ClientOptions as OpenAiApiConfiguration
-} from 'openai';
-import { intro, outro } from '@clack/prompts';
-import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
-import { ChatCompletionMessageParam as ChatCompletionRequestMessage } from 'openai/resources';
-import { GenerateCommitMessageErrorEnum } from './generateCommitMessageFromGitDiff';
-import axios from 'axios';
-import chalk from 'chalk';
-import { execa } from 'execa';
-import { tokenCount } from './utils/tokenCount';
+import { CONFIG_MODES, getConfig } from './commands/config'
+import { OpenAI as OpenAIApi, ClientOptions as OpenAiApiConfiguration } from 'openai'
+import { intro, outro } from '@clack/prompts'
+import { ChatCompletion, ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions'
+import { ChatCompletionMessageParam as ChatCompletionRequestMessage } from 'openai/resources'
+import { GenerateCommitMessageErrorEnum } from './generateCommitMessageFromGitDiff'
+import axios from 'axios'
+import chalk from 'chalk'
+import { execa } from 'execa'
+import { tokenCount } from './utils/tokenCount'
 
-const config = getConfig();
+const config = getConfig()
 
-const maxTokens = Number(config?.OCO_OPENAI_MAX_TOKENS) || 800;
+const maxTokens = Number(config?.OCO_OPENAI_MAX_TOKENS) || 500
 const basePath = config?.OCO_OPENAI_BASE_PATH as string | undefined
 const apiKey = config?.OCO_OPENAI_API_KEY as string | undefined
-const apiType = config?.OCO_OPENAI_API_TYPE || 'openai';
-const tokenLimit = Number(config?.OCO_TOKEN_LIMIT) || 4096;
+const apiType = config?.OCO_OPENAI_API_TYPE || 'openai'
+const tokenLimit = Number(config?.OCO_TOKEN_LIMIT) || 4096
 
-const [command, mode] = process.argv.slice(2);
+const [command, mode] = process.argv.slice(2)
 
 if (!apiKey && command !== 'config' && mode !== CONFIG_MODES.set) {
-  intro('opencommit');
+  intro('opencommit')
 
   outro(
-    'OCO_OPENAI_API_KEY is not set, please run `oco config set OCO_OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`'
-  );
-  outro(
-    'For help look into README https://github.com/di-sukharev/opencommit#setup'
-  );
+    'OCO_OPENAI_API_KEY is not set, please run `oco config set OCO_OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`',
+  )
+  outro('For help look into README https://github.com/di-sukharev/opencommit#setup')
 
-  process.exit(1);
+  process.exit(1)
 }
 
-const MODEL = (config?.OCO_MODEL as string | undefined) ?? 'gpt-4o-mini';
-const VERSION =
-  (config?.OCO_OPENAI_VERSION as string | undefined) ?? '2024-10-21';
+const MODEL = (config?.OCO_MODEL as string | undefined) ?? 'gpt-4o-mini'
+const VERSION = (config?.OCO_OPENAI_VERSION as string | undefined) ?? '2024-10-21'
 
 class OpenAi {
   private openAiApiConfiguration: OpenAiApiConfiguration = {
-    apiKey: apiKey
-  };
-  private openAI!: OpenAIApi;
+    apiKey: apiKey,
+  }
+  private openAI!: OpenAIApi
 
   constructor() {
     switch (apiType) {
       case 'azure':
-        this.openAiApiConfiguration.defaultQuery = { 'api-version': VERSION };
-        this.openAiApiConfiguration.defaultHeaders = { 'api-key': apiKey };
+        this.openAiApiConfiguration.defaultQuery = { 'api-version': VERSION }
+        this.openAiApiConfiguration.defaultHeaders = { 'api-key': apiKey }
         if (basePath) {
-          this.openAiApiConfiguration.baseURL =
-            basePath + 'openai/deployments/' + MODEL;
+          this.openAiApiConfiguration.baseURL = basePath + 'openai/deployments/' + MODEL
         }
-        break;
+        break
+      case 'google':
+      case 'gemini':
+        this.openAiApiConfiguration.baseURL = 'https://generativelanguage.googleapis.com/v1beta/'
+        break
       case 'openai':
       default:
         if (basePath) {
-          this.openAiApiConfiguration.baseURL = basePath;
+          this.openAiApiConfiguration.baseURL = basePath
         }
-        break;
+        break
     }
-    this.openAI = new OpenAIApi(this.openAiApiConfiguration);
+    this.openAI = new OpenAIApi(this.openAiApiConfiguration)
   }
 
-  public generateCommitMessage = async (
-    messages: Array<ChatCompletionRequestMessage>
-  ): Promise<string | undefined> => {
+  public generateCommitMessage = async (messages: Array<ChatCompletionRequestMessage>): Promise<string | undefined> => {
     const params: ChatCompletionCreateParamsBase = {
       model: MODEL,
       messages,
       temperature: 0,
       top_p: 0.1,
-      max_tokens: maxTokens || 500
-    };
+      max_tokens: maxTokens || 500,
+    }
     try {
       const REQUEST_TOKENS = messages
-        .map((msg) => tokenCount((msg.content as string) || '') + 4)
-        .reduce((a, b) => a + b, 0);
+        .map(msg => tokenCount((msg.content as string, params.model) || '') + 4)
+        .reduce((a, b) => a + b, 0)
 
       if (REQUEST_TOKENS > tokenLimit - maxTokens) {
-        throw new Error(GenerateCommitMessageErrorEnum.tooMuchTokens);
+        throw new Error(GenerateCommitMessageErrorEnum.tooMuchTokens)
       }
 
-      const data = await this.openAI.chat.completions.create(params); //   .createChatCompletion(params);
+      const data = (await this.openAI.chat.completions.create(params)) as ChatCompletion
 
-      const message = data.choices[0].message;
+      const message = data.choices[0].message
 
-      return message?.content || '';
+      return message?.content || ''
     } catch (error) {
-      outro(`${chalk.red('✖')} ${JSON.stringify(params)}`);
+      outro(`${chalk.red('✖')} ${JSON.stringify(params)}`)
 
-      const err = error as Error;
-      outro(`${chalk.red('✖')} ${err?.message || err}`);
+      const err = error as Error
+      outro(`${chalk.red('✖')} ${err?.message || err}`)
 
-      if (
-        axios.isAxiosError<{ error?: { message: string } }>(error) &&
-        error.response?.status === 401
-      ) {
-        const openAiError = error.response.data.error;
+      if (axios.isAxiosError<{ error?: { message: string } }>(error) && error.response?.status === 401) {
+        const openAiError = error.response.data.error
 
-        if (openAiError?.message) outro(openAiError.message);
-        outro(
-          'For help look into README https://github.com/di-sukharev/opencommit#setup'
-        );
+        if (openAiError?.message) outro(openAiError.message)
+        outro('For help look into README https://github.com/di-sukharev/opencommit#setup')
       }
 
-      throw err;
+      throw err
     }
-  };
+  }
 }
 
-export const getOpenCommitLatestVersion = async (): Promise<
-  string | undefined
-> => {
+export const getOpenCommitLatestVersion = async (): Promise<string | undefined> => {
   try {
-    const { stdout } = await execa('npm', [
-      'view',
-      'github:takuya-o/opencommit',
-      'version'
-    ]);
-    return stdout;
+    const { stdout } = await execa('npm', ['view', 'github:takuya-o/opencommit', 'version'])
+    return stdout
   } catch (e) {
-    outro(`Error while getting the latest version of opencommit ${e}`);
-    return undefined;
+    outro(`Error while getting the latest version of opencommit ${e}`)
+    return undefined
   }
-};
+}
 
-export const api = new OpenAi();
+export const api = new OpenAi()
