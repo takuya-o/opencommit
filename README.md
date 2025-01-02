@@ -25,6 +25,7 @@ This repository is forked from the original [di-sukharev/opencommit](https://git
 Enhancing functionality adopting early some pull requests I need.
 
 Added features
+* Support [Google Gemini Models via the OpenAI Library](https://developers.googleblog.com/en/gemini-is-now-accessible-from-the-openai-library/)
 * Support [Azure OpenAI Service #167](https://github.com/di-sukharev/opencommit/pull/167)
 * Support [push config #220](https://github.com/di-sukharev/opencommit/pull/220)
 * Add translations to English commit messages
@@ -138,12 +139,13 @@ Create a `.env` file and add OpenCommit config variables there like this:
 ```env
 OCO_OPENAI_API_KEY=<your OpenAI API token>
 OCO_OPENAI_MAX_TOKENS=<max response tokens from OpenAI API>
-OCO_OPENAI_BASE_PATH=<may be used to set proxy path to OpenAI api>
+OCO_OPENAI_BASE_PATH=<may be used to set proxy path to OpenAI API. Required for Azure OpenAI. example: 'https://YourInstanceName.openai.azure.com/'>
 OCO_DESCRIPTION=<postface a message with ~3 sentences description>
 OCO_EMOJI=<add GitMoji>
-OCO_MODEL=<either gpt-3.5-turbo or gpt-4>
+OCO_MODEL=<either gpt-3.5-turbo, gpt-4, gemini-2.0-flash-exp or etc.. For Azure, set the deployment name>
 OCO_LANGUAGE=<locale, scroll to the bottom to see options>
 OCO_MESSAGE_TEMPLATE_PLACEHOLDER=<message template placeholder, example: '$msg'>
+OCO_OPENAI_API_TYPE=<'openai', 'azure' or 'google'. The default is 'openai' >
 ```
 
 ### Global config for all repos
