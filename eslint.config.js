@@ -18,12 +18,12 @@ export default tseslint.config({
     "max-lines": ["warn", {"max": 500}], //GitLab250
     //"complexity": ["error", { "max": 5 }], //GitLab5
     "import/order": "off",
-    "sort-imports": "off",
+    "sort-imports": "off", //opencommit special
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-vars": ["error", {
       "argsIgnorePattern": "^_",
       "caughtErrorsIgnorePattern": "^_",
-      "varsIgnorePattern": "^[A-Z]"
+      "varsIgnorePattern": "^[_A-Z]"
     }],
     /** 命名規則 */
     "@typescript-eslint/naming-convention": [
@@ -32,6 +32,10 @@ export default tseslint.config({
         "selector": "typeLike",
         "format": ["PascalCase"]
       },
+      { // enumはアッパーケース di-sukharevスタイル
+        "selector": "enum",
+        "format": ["PascalCase", "UPPER_CASE"]
+      },
       { // グローバル定数はアッパーケース
         "selector": "variable",
         "modifiers": ["global", "const"],
@@ -39,15 +43,15 @@ export default tseslint.config({
       },
       { // 変数名はキャメルケース
         "selector": "variable",
-        "format": ["camelCase", "UPPER_CASE"]
+        "format": ["camelCase", "UPPER_CASE"] // opencommit special
       }
     ],
     // 未使用の変数や関数は宣言禁止、ただし大文字で始まっているものはクラスなので許す
     "no-unused-vars": ["error", {
       "argsIgnorePattern": "^_",
       "caughtErrorsIgnorePattern": "^_",
-      "varsIgnorePattern": "^[A-Z]"
+      "varsIgnorePattern": "^[_A-Z]"
     }],
-    "no-console": "error"
+    "no-console": "off" //opencommit special
   },
 });

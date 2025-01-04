@@ -11,6 +11,7 @@ src/*.json
 .idea
 test.ts
 /.npm/
+notes.md
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,emacs,Windows,MacOS
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,emacs,Windows,MacOS
@@ -73,7 +74,8 @@ flycheck_*.el
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -265,3 +267,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/node,emacs,Windows,MacOS
+

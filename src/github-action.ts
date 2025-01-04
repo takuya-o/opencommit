@@ -1,11 +1,10 @@
-/* eslint-disable no-console */
-import { intro, outro } from '@clack/prompts'
-import { unlinkSync, writeFileSync } from 'fs'
-import { PushEvent } from '@octokit/webhooks-types'
 import core from '@actions/core'
 import exec from '@actions/exec'
-import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff'
 import github from '@actions/github'
+import { intro, outro } from '@clack/prompts'
+import { PushEvent } from '@octokit/webhooks-types'
+import { unlinkSync, writeFileSync } from 'fs'
+import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff'
 import { randomIntFromInterval } from './utils/randomIntFromInterval'
 import { sleep } from './utils/sleep'
 
@@ -23,14 +22,17 @@ type SHA = string
 type Diff = string
 
 async function getCommitDiff(commitSha: string) {
-  const diffResponse = await octokit.request<string>('GET /repos/{owner}/{repo}/commits/{ref}', {
-    owner,
-    repo,
-    ref: commitSha,
-    headers: {
-      Accept: 'application/vnd.github.v3.diff',
+  const diffResponse = await octokit.request<string>(
+    'GET /repos/{owner}/{repo}/commits/{ref}',
+    {
+      owner,
+      repo,
+      ref: commitSha,
+      headers: {
+        Accept: 'application/vnd.github.v3.diff',
+      },
     },
-  })
+  )
   return { sha: commitSha, diff: diffResponse.data }
 }
 
@@ -49,7 +51,9 @@ interface MsgAndSHA {
 async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
   const chunkSize = diffsAndSHAs!.length % 2 === 0 ? 4 : 3
   outro(`Improving commit messages in chunks of ${chunkSize}.`)
-  const improvePromises = diffsAndSHAs!.map(commit => generateCommitMessageByDiff(commit.diff))
+  const improvePromises = diffsAndSHAs!.map(commit =>
+    generateCommitMessageByDiff(commit.diff, false),
+  )
 
   const improvedMessagesAndSHAs: MsgAndSHA[] = []
   for (let step = 0; step < improvePromises.length; step += chunkSize) {
@@ -58,20 +62,25 @@ async function improveMessagesInChunks(diffsAndSHAs: DiffAndSHA[]) {
     try {
       const chunkOfImprovedMessages = await Promise.all(chunkOfPromises)
 
-      const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map((improvedMsg, i) => {
-        const index = improvedMessagesAndSHAs.length
-        const sha = diffsAndSHAs![index + i].sha
+      const chunkOfImprovedMessagesBySha = chunkOfImprovedMessages.map(
+        (improvedMsg, i) => {
+          const index = improvedMessagesAndSHAs.length
+          const sha = diffsAndSHAs![index + i].sha
 
-        return { sha, msg: improvedMsg }
-      })
+          return { sha, msg: improvedMsg }
+        },
+      )
 
       improvedMessagesAndSHAs.push(...chunkOfImprovedMessagesBySha)
 
       // sometimes openAI errors with 429 code (too many requests),
       // so lets sleep a bit
-      const sleepFor = 1000 * randomIntFromInterval(1, 5) + 100 * randomIntFromInterval(1, 5)
+      const sleepFor =
+        1000 * randomIntFromInterval(1, 5) + 100 * randomIntFromInterval(1, 5)
 
-      outro(`Improved ${chunkOfPromises.length} messages. Sleeping for ${sleepFor}`)
+      outro(
+        `Improved ${chunkOfPromises.length} messages. Sleeping for ${sleepFor}`,
+      )
 
       await sleep(sleepFor)
     } catch (error) {
@@ -102,7 +111,10 @@ const getDiffsBySHAs = async (SHAs: string[]) => {
   return diffs
 }
 
-async function improveCommitMessages(commitsToImprove: { id: string; message: string }[]): Promise<void> {
+// eslint-disable-next-line max-lines-per-function
+async function improveCommitMessages(
+  commitsToImprove: { id: string; message: string }[],
+): Promise<void> {
   if (commitsToImprove.length) {
     outro(`Found ${commitsToImprove.length} commits to improve.`)
   } else {
@@ -117,10 +129,26 @@ async function improveCommitMessages(commitsToImprove: { id: string; message: st
 
   const improvedMessagesWithSHAs = await improveMessagesInChunks(diffsWithSHAs)
 
-  console.log(`Improved ${improvedMessagesWithSHAs.length} commits: `, improvedMessagesWithSHAs)
+  console.log(
+    `Improved ${improvedMessagesWithSHAs.length} commits: `,
+    improvedMessagesWithSHAs,
+  )
 
-  const createCommitMessageFile = (message: string, index: number) => writeFileSync(`./commit-${index}.txt`, message)
-  improvedMessagesWithSHAs.forEach(({ msg }, i) => createCommitMessageFile(msg, i))
+  // Check if there are actually any changes in the commit messages
+  const messagesChanged = improvedMessagesWithSHAs.some(
+    ({ msg }, index) => msg !== commitsToImprove[index].message,
+  )
+
+  if (!messagesChanged) {
+    console.log('No changes in commit messages detected, skipping rebase')
+    return
+  }
+
+  const createCommitMessageFile = (message: string, index: number) =>
+    writeFileSync(`./commit-${index}.txt`, message)
+  improvedMessagesWithSHAs.forEach(({ msg }, i) =>
+    createCommitMessageFile(msg, i),
+  )
 
   writeFileSync(`./count.txt`, '0')
 
@@ -134,15 +162,20 @@ async function improveCommitMessages(commitsToImprove: { id: string; message: st
 
   await exec.exec(`chmod +x ./rebase-exec.sh`)
 
-  await exec.exec('git', ['rebase', `${commitsToImprove[0].id}^`, '--exec', './rebase-exec.sh'], {
-    env: {
-      GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
-      GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR!,
-      GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`,
+  await exec.exec(
+    'git',
+    ['rebase', `${commitsToImprove[0].id}^`, '--exec', './rebase-exec.sh'],
+    {
+      env: {
+        GIT_SEQUENCE_EDITOR: 'sed -i -e "s/^pick/reword/g"',
+        GIT_COMMITTER_NAME: process.env.GITHUB_ACTOR!,
+        GIT_COMMITTER_EMAIL: `${process.env.GITHUB_ACTOR}@users.noreply.github.com`,
+      },
     },
-  })
+  )
 
-  const deleteCommitMessageFile = (index: number) => unlinkSync(`./commit-${index}.txt`)
+  const deleteCommitMessageFile = (index: number) =>
+    unlinkSync(`./commit-${index}.txt`)
   commitsToImprove.forEach((_commit, i) => deleteCommitMessageFile(i))
 
   unlinkSync('./count.txt')
@@ -170,7 +203,8 @@ async function run() {
       const commits = payload.commits
 
       // Set local Git user identity for future git history manipulations
-      if (payload.pusher.email) await exec.exec('git', ['config', 'user.email', payload.pusher.email])
+      if (payload.pusher.email)
+        await exec.exec('git', ['config', 'user.email', payload.pusher.email])
 
       await exec.exec('git', ['config', 'user.name', payload.pusher.name])
 
@@ -185,7 +219,8 @@ async function run() {
       )
     }
   } catch (error) {
-    const err = (error instanceof Error && error?.message) || (error as object).toString()
+    const err =
+      (error instanceof Error && error?.message) || (error as object).toString()
     core.setFailed(err)
   }
 }

@@ -1,11 +1,11 @@
+import { intro, outro } from '@clack/prompts'
+import chalk from 'chalk'
+import { command } from 'cleye'
+import { existsSync } from 'fs'
 import fs from 'fs/promises'
 import path from 'path'
-import { command } from 'cleye'
 import { assertGitRepo, getCoreHooksPath } from '../utils/git.js'
-import { existsSync } from 'fs'
-import chalk from 'chalk'
-import { intro, outro } from '@clack/prompts'
-import { COMMANDS } from '../CommandsEnum.js'
+import { COMMANDS } from './ENUMS'
 
 const HOOK_NAME = 'prepare-commit-msg'
 const DEFAULT_SYMLINK_URL = path.join('.git', 'hooks', HOOK_NAME)
@@ -54,7 +54,8 @@ export const hookCommand = command(
             realPath = null
           }
 
-          if (realPath === HOOK_URL) return outro(`OpenCommit is already set as '${HOOK_NAME}'`)
+          if (realPath === HOOK_URL)
+            return outro(`OpenCommit is already set as '${HOOK_NAME}'`)
 
           throw new Error(
             `Different ${HOOK_NAME} is already set. Remove it before setting opencommit as '${HOOK_NAME}' hook.`,
@@ -72,7 +73,9 @@ export const hookCommand = command(
         intro(`unsetting opencommit as '${HOOK_NAME}' hook from ${SYMLINK_URL}`)
 
         if (!(await isHookExists())) {
-          return outro(`OpenCommit wasn't previously set as '${HOOK_NAME}' hook, nothing to remove`)
+          return outro(
+            `OpenCommit wasn't previously set as '${HOOK_NAME}' hook, nothing to remove`,
+          )
         }
 
         const realpath = await fs.realpath(SYMLINK_URL)
@@ -86,7 +89,9 @@ export const hookCommand = command(
         return outro(`${chalk.green('✔')} Hook is removed`)
       }
 
-      throw new Error(`Unsupported mode: ${mode}. Supported modes are: 'set' or 'unset'`)
+      throw new Error(
+        `Unsupported mode: ${mode}. Supported modes are: 'set' or 'unset'. Run: \`oco hook set\``,
+      )
     } catch (error) {
       outro(`${chalk.red('✖')} ${error}`)
       process.exit(1)

@@ -21,8 +21,8 @@
 
     "skipLibCheck": true
   },
+  "include": ["test/jest-setup.ts", "src"],
   "exclude": ["node_modules"],
-  "include": ["src"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

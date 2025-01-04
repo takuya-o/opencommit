@@ -36,5 +36,5 @@
 // # Devコンテナでgit commitするときに必要な設定
 // scp -p user@example.com:.ssh/config ~/.ssh/
 // sudo sh -c "apt update &&  apt install git-secrets  connect-proxy"
-// # OpenCommitの設定は、.opencommetではなく環境変数で行う。
+// # OpenCommitの設定は、.opencommitではなく環境変数で行う。
 
