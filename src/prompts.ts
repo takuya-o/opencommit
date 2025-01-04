@@ -187,34 +187,46 @@ export const INIT_DIFF_PROMPT: OpenAI.Chat.Completions.ChatCompletionMessagePara
 
 const getContent = (translation: ConsistencyPrompt) => {
   const config = getConfig()
-  const fix = config.OCO_EMOJI
-    ? `🐛 ${removeConventionalCommitWord(translation.commitFix)}`
-    : translation.commitFix
-
   const feat = config.OCO_EMOJI
     ? `✨ ${removeConventionalCommitWord(translation.commitFeat)}`
     : translation.commitFeat
+  const description = config.OCO_DESCRIPTION
+    ? translation.commitDescription
+    : ''
+  // English translation
+  let featEn = ''
+  let descriptionEn = ''
+  if (translation !== i18n['en']) {
+    featEn = config.OCO_EMOJI
+      ? `✨ ${removeConventionalCommitWord(i18n['en'].commitFeat)}\n\n`
+      : `${i18n['en'].commitFeat}\n\n`
+    descriptionEn = config.OCO_DESCRIPTION
+      ? `${i18n['en'].commitDescription}`
+      : ''
+  }
+  return `${feat}\n\n${description}${featEn}${descriptionEn}`
+}
 
+const getContentFix = (translation: ConsistencyPrompt) => {
+  const config = getConfig()
+  const fix = config.OCO_EMOJI
+    ? `🐛 ${removeConventionalCommitWord(translation.commitFix)}`
+    : translation.commitFix
   const description = config.OCO_DESCRIPTION
     ? translation.commitDescription
     : ''
   // English translation
   let fixEn = ''
-  let featEn = ''
   let descriptionEn = ''
   if (translation !== i18n['en']) {
     fixEn = config.OCO_EMOJI
-      ? `\n\n🐛 ${removeConventionalCommitWord(i18n['en'].commitFix)}\n`
-      : `\n\n${i18n['en'].commitFix}\n`
-    featEn = config.OCO_EMOJI
-      ? `✨ ${removeConventionalCommitWord(i18n['en'].commitFeat)}\n`
-      : `${i18n['en'].commitFeat}\n`
+      ? `\n\n🐛 ${removeConventionalCommitWord(i18n['en'].commitFix)}\n\n`
+      : `\n\n${i18n['en'].commitFix}\n\n`
     descriptionEn = config.OCO_DESCRIPTION
       ? `${i18n['en'].commitDescription}`
       : ''
   }
-
-  return `${fix}\n${feat}\n${description}${fixEn}${featEn}${descriptionEn}`
+  return `${fix}\n\n${description}${fixEn}${descriptionEn}`
 }
 
 const INIT_CONSISTENCY_PROMPT = (
@@ -222,6 +234,12 @@ const INIT_CONSISTENCY_PROMPT = (
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam => ({
   role: 'assistant', //ChatCompletionRequestMessageRoleEnum.Assistant,
   content: getContent(translation),
+})
+const INIT_FIX_CONSISTENCY_PROMPT = (
+  translation: ConsistencyPrompt,
+): OpenAI.Chat.Completions.ChatCompletionMessageParam => ({
+  role: 'assistant', //ChatCompletionRequestMessageRoleEnum.Assistant,
+  content: getContentFix(translation),
 })
 
 export const getMainCommitPrompt = async (
@@ -248,6 +266,11 @@ export const getMainCommitPrompt = async (
           commitLintConfig.prompts,
         ),
         INIT_DIFF_PROMPT,
+        INIT_FIX_CONSISTENCY_PROMPT(
+          commitLintConfig.consistency[
+            translation.localLanguage
+          ] as ConsistencyPrompt,
+        ),
         INIT_CONSISTENCY_PROMPT(
           commitLintConfig.consistency[
             translation.localLanguage
@@ -259,6 +282,7 @@ export const getMainCommitPrompt = async (
       return [
         INIT_MAIN_PROMPT(translation.localLanguage, fullGitMojiSpec, context),
         INIT_DIFF_PROMPT,
+        INIT_FIX_CONSISTENCY_PROMPT(translation),
         INIT_CONSISTENCY_PROMPT(translation),
       ]
   }
