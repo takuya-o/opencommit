@@ -596,6 +596,7 @@ export const DEFAULT_CONFIG: ConfigType = {
 
 const initGlobalConfig = (configPath: string = defaultConfigPath) => {
   writeFileSync(configPath, iniStringify(DEFAULT_CONFIG), 'utf8')
+  console.info(`write initialized Global Config in ${configPath}`)
   return DEFAULT_CONFIG
 }
 
@@ -644,7 +645,7 @@ const getEnvConfig = (envPath: string, setDefaultValues = true) => {
     OCO_TOKEN_LIMIT:
       Number(process.env.OCO_TOKEN_LIMIT) ||
       (setDefaultValues ? 4096 : undefined),
-    OCO_DISABLE_GIT_PUSH: Boolean(process.env.OCO_DISABLE_GIT_PUSH),
+    OCO_DISABLE_GIT_PUSH: parseConfigVarValue(process.env.OCO_DISABLE_GIT_PUSH),
   }
 }
 
@@ -673,6 +674,7 @@ export const writeGlobalConfig = (
   configPath: string = defaultConfigPath,
 ) => {
   writeFileSync(configPath, iniStringify(config), 'utf8')
+  console.info(`write Global Config in ${configPath}`)
   configCache = config as ConfigType
 }
 
@@ -755,6 +757,10 @@ let configCache: ConfigType | undefined = undefined
 let configNoDefaultCache: ConfigType | undefined = undefined
 export function setConfigNoDefaultCache(config: ConfigType) {
   configNoDefaultCache = config
+}
+export function clearConfigCaches() {
+  configCache = undefined
+  configNoDefaultCache = undefined
 }
 
 export const getConfig = ({

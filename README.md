@@ -124,10 +124,11 @@ oco --yes
 Create a `.env` file and add OpenCommit config variables there like this:
 
 ```env
-OCO_OPENAI_API_TYPE=<'openai', 'azure' or 'google'. The default is 'openai' >
-OCO_OPENAI_API_KEY=<your OpenAI API token>
-OCO_OPENAI_BASE_PATH=<may be used to set proxy path to OpenAI API. Required for Azure OpenAI. example: 'https://YourInstanceName.openai.azure.com/'>
-OCO_OPENAI_MAX_TOKENS=<max response tokens from OpenAI API>
+OCO_OPENAI_API_TYPE=<'openai', 'azure', 'gemini' or 'google'. The default is 'openai' > Obsolete, recommend using OCO_AI_PROVIDER
+OCO_OPENAI_API_KEY=<your OpenAI API token> Obsolete, recommend using OCO_API_KEY
+OCO_OPENAI_BASE_PATH=<may be used to set proxy path to OpenAI API. Required for Azure OpenAI. example: 'https://YourInstanceName.openai.azure.com/'> Obsolete, recommend using OCO_API_URL
+OCO_OPENAI_MAX_TOKENS=<max response tokens from OpenAI API> Obsolete, recommend using OCO_TOKENS_MAX_OUTPUT
+OCO_TOKEN_LIMIT=<max response tokens to OpenAI API> Obsolete, recommend using OCO_TOKENS_MAX_INPUT
 ...
 OCO_DESCRIPTION=<postface a message with ~3 sentences description of the changes>
 OCO_EMOJI=<boolean, add GitMoji>
@@ -204,14 +205,14 @@ You may switch to gpt-4o which performs better, but costs more 🤠
 
 ```sh
 oco config set OCO_MODEL=gpt-4o
-oco config set OCO_TOKEN_LIMIT=32768
+oco config set OCO_TOKENS_MAX_OUTPUT=32768
 ```
 
 or for as a cheaper option:
 
 ```sh
 oco config set OCO_MODEL=gpt-3.5-turbo
-oco config set OCO_TOKEN_LIMIT=16384
+oco config set OCO_TOKENS_MAX_OUTPUT=16384
 ```
 
 ### Switch to other LLM providers with a custom URL

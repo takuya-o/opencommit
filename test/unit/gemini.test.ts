@@ -7,23 +7,25 @@ import {
   OCO_AI_PROVIDER_ENUM
 } from '../../src/commands/config';
 import { OpenAI } from 'openai';
+import { AiEngineConfig } from '../../src/engine/Engine';
 
+// eslint-disable-next-line max-lines-per-function
 describe('Gemini', () => {
   let gemini: GeminiEngine;
   let mockConfig: ConfigType;
   let mockGoogleGenerativeAi: GoogleGenerativeAI;
   let mockGenerativeModel: GenerativeModel;
-  let mockExit: jest.SpyInstance<never, [code?: number | undefined], any>;
+  let mockExit: jest.SpyInstance<never, [code?: string | number | null | undefined], unknown>;
 
-  const noop: (...args: any[]) => any = (...args: any[]) => {};
+  //const noop: (...args: any[]) => any = (...args: any[]) => {};
 
   const mockGemini = () => {
-    mockConfig = getConfig() as ConfigType;
+    mockConfig = getConfig({setDefaultValues: false}) as ConfigType;
 
     gemini = new GeminiEngine({
-      apiKey: mockConfig.OCO_API_KEY,
+      apiKey: mockConfig.OCO_API_KEY || '',
       model: mockConfig.OCO_MODEL
-    });
+    } as AiEngineConfig);
   };
 
   const oldEnv = process.env;
@@ -42,7 +44,7 @@ describe('Gemini', () => {
 
     mockExit = jest.spyOn(process, 'exit').mockImplementation();
 
-    mockConfig = getConfig() as ConfigType;
+    mockConfig = getConfig({setDefaultValues: false}) as ConfigType;
 
     mockConfig.OCO_AI_PROVIDER = OCO_AI_PROVIDER_ENUM.GEMINI;
     mockConfig.OCO_API_KEY = 'mock-api-key';
@@ -55,7 +57,7 @@ describe('Gemini', () => {
   });
 
   afterEach(() => {
-    gemini = undefined as any;
+    gemini = undefined as never;
   });
 
   afterAll(() => {

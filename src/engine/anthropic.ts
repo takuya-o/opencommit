@@ -6,6 +6,7 @@ import { OpenAI } from 'openai'
 import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff'
 import { tokenCount } from '../utils/tokenCount'
 import { AiEngine, AiEngineConfig } from './Engine'
+import { TextBlock } from '@anthropic-ai/sdk/resources'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface AnthropicConfig extends AiEngineConfig {}
@@ -50,7 +51,7 @@ export class AnthropicEngine implements AiEngine {
 
       const data = await this.client.messages.create(params)
 
-      const message = data?.content[0].text
+      const message = (data?.content[0] as TextBlock).text // type === 'text' を確認すべき
 
       return message
     } catch (error) {

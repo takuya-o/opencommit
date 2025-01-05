@@ -1,13 +1,14 @@
 import { existsSync, readFileSync, rmSync } from 'fs';
 import {
+  clearConfigCaches,
   CONFIG_KEYS,
   DEFAULT_CONFIG,
   getConfig,
   setConfig
 } from '../../src/commands/config';
 import { prepareFile } from './utils';
-import { dirname } from 'path';
 
+// eslint-disable-next-line max-lines-per-function
 describe('config', () => {
   const originalEnv = { ...process.env };
   let globalConfigFile: { filePath: string; cleanup: () => Promise<void> };
@@ -48,6 +49,7 @@ describe('config', () => {
     return await prepareFile(fileName, fileContent);
   };
 
+  // eslint-disable-next-line max-lines-per-function
   describe('getConfig', () => {
     it('should prioritize local .env over global .opencommit config', async () => {
       globalConfigFile = await generateConfig('.opencommit', {
@@ -84,6 +86,7 @@ describe('config', () => {
         OCO_API_URL: 'local-api-url'
       });
 
+      clearConfigCaches()
       const config = getConfig({
         globalPath: globalConfigFile.filePath,
         envPath: envConfigFile.filePath
@@ -109,6 +112,7 @@ describe('config', () => {
         OCO_ONE_LINE_COMMIT: 'false'
       });
 
+      clearConfigCaches()
       const config = getConfig({
         globalPath: globalConfigFile.filePath,
         envPath: envConfigFile.filePath
@@ -130,6 +134,7 @@ describe('config', () => {
 
       envConfigFile = await generateConfig('.env', {});
 
+      clearConfigCaches()
       const config = getConfig({
         globalPath: globalConfigFile.filePath,
         envPath: envConfigFile.filePath
@@ -152,6 +157,7 @@ describe('config', () => {
         OCO_API_KEY: 'null'
       });
 
+      clearConfigCaches()
       const config = getConfig({
         globalPath: globalConfigFile.filePath,
         envPath: envConfigFile.filePath
@@ -165,6 +171,7 @@ describe('config', () => {
       globalConfigFile = await generateConfig('.opencommit', {});
       envConfigFile = await generateConfig('.env', {});
 
+      clearConfigCaches()
       const config = getConfig({
         globalPath: globalConfigFile.filePath,
         envPath: envConfigFile.filePath
@@ -175,6 +182,7 @@ describe('config', () => {
     });
   });
 
+  // eslint-disable-next-line max-lines-per-function
   describe('setConfig', () => {
     beforeEach(async () => {
       // we create and delete the file to have the parent directory, but not the file, to test the creation of the file
@@ -186,6 +194,7 @@ describe('config', () => {
       const isGlobalConfigFileExist = existsSync(globalConfigFile.filePath);
       expect(isGlobalConfigFileExist).toBe(false);
 
+      clearConfigCaches()
       await setConfig(
         [[CONFIG_KEYS.OCO_API_KEY, 'persisted-key_1']],
         globalConfigFile.filePath

@@ -13,15 +13,17 @@ export class OpenAiEngine implements AiEngine {
 
   constructor(config: OpenAiConfig) {
     this.config = config
+    const openAIconfig: OpenAiConfig = { apiKey: config.apiKey } as OpenAiConfig
 
-    if (!config.baseURL) {
-      this.client = new OpenAI({ apiKey: config.apiKey })
-    } else {
-      this.client = new OpenAI({
-        apiKey: config.apiKey,
-        baseURL: config.baseURL,
-      })
-    }
+    ;(
+      ['baseURL', 'defaultQuery', 'defaultHeaders'] as Array<keyof OpenAiConfig>
+    ).forEach((key: keyof OpenAiConfig) => {
+      if (config[key]) {
+        openAIconfig[key] = config[key] as never
+      }
+    })
+
+    this.client = new OpenAI(openAIconfig)
   }
 
   public generateCommitMessage = async (
