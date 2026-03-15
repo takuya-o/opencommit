@@ -63,7 +63,7 @@
           "${workspaceFolder}/node_modules/**",
         ],
       },
-            {
+      {
         "name": "OpenAI Test",
         "type": "node",
         "request": "launch",

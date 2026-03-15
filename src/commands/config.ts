@@ -58,7 +58,7 @@ export enum CONFIG_MODES {
 
 export const MODEL_LIST = {
   openai: [
-    'gpt-4o-mini',
+    'gpt-5.4',
     'gpt-3.5-turbo',
     'gpt-3.5-turbo-instruct',
     'gpt-3.5-turbo-0613',
@@ -83,17 +83,45 @@ export const MODEL_LIST = {
     'gpt-4-32k-0613',
     'gpt-4o',
     'gpt-4o-2024-05-13',
+    'gpt-4o-mini',
     'gpt-4o-mini-2024-07-18',
     // current
     'gpt-4o-2024-08-06',
     'gpt-4o-2024-11-20',
     'gpt-4o-mini-2024-07-18',
+    'chatgpt-4o-latest',
     'o1',
     'o1-2024-12-17',
     'o1-preview',
     'o1-preview-2024-09-12',
     'o1-mini',
     'o1-mini-2024-09-12',
+    'o3-pro',
+    'o3-pro-2025-06-10',
+    'o3-mini',
+    'o3-mini-2025-01-31',
+    'o3',
+    'o3-2025-04-10',
+    'o4-mini',
+    'o4-mini-2025-04-16',
+    'gpt-4.1-nano',
+    'gpt-4.1-nano-2025-04-14',
+    'gpt-4.1-mini',
+    'gpt-4.1-mini-2025-04-14',
+    'gpt-4.1',
+    'gpt-4.1-2025-04-14',
+    'gpt-5-nano',
+    'gpt-5-nano-2025-08-07',
+    'gpt-5-mini',
+    'gpt-5-mini-2025-08-07',
+    'gpt-5',
+    'gpt-5-2025-08-07',
+    'gpt-5.1',
+    'gpt-5.2',
+    'gpt-5.3-chat-latest',
+    'gpt-5-chat-latest',
+    'gpt-5.4',
+    'gpt-5.4-2026-03-05',
   ],
 
   anthropic: [
@@ -104,6 +132,8 @@ export const MODEL_LIST = {
   ],
 
   gemini: [
+    'gemini-flash-latest',
+    'gemini-flash-lite-latest',
     'gemini-1.5-flash',
     'gemini-1.5-pro',
     'gemini-1.0-pro', //EOL 2025/02/15
@@ -112,6 +142,12 @@ export const MODEL_LIST = {
     // current
     'gemini-2.0-flash-exp',
     'gemini-1.5-flash-8b',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+    'gemini-3-flash-preview',
+    'gemini-3.1-flash-lite-preview',
+    'gemini-3.1-pro-preview',
   ],
 
   groq: [
@@ -617,9 +653,11 @@ const getEnvConfig = (envPath: string, setDefaultValues = true) => {
     OCO_API_KEY: process.env.OCO_API_KEY,
     OCO_AI_PROVIDER: process.env.OCO_AI_PROVIDER as OCO_AI_PROVIDER_ENUM,
 
-    OCO_TOKENS_MAX_INPUT: parseConfigVarValue(process.env.OCO_TOKENS_MAX_INPUT),
-    OCO_TOKENS_MAX_OUTPUT: parseConfigVarValue(
-      process.env.OCO_TOKENS_MAX_OUTPUT,
+    OCO_TOKENS_MAX_INPUT: Number(
+      parseConfigVarValue(process.env.OCO_TOKENS_MAX_INPUT),
+    ),
+    OCO_TOKENS_MAX_OUTPUT: Number(
+      parseConfigVarValue(process.env.OCO_TOKENS_MAX_OUTPUT),
     ),
 
     OCO_DESCRIPTION: parseConfigVarValue(process.env.OCO_DESCRIPTION),
@@ -696,6 +734,27 @@ export const getGlobalConfig = (
   } else {
     const configFile = readFileSync(configPath, 'utf8')
     globalConfig = iniParse(configFile) as ConfigType
+    // numberをstringで保存しているので、ここでnumberに変換する
+    if (globalConfig.OCO_TOKENS_MAX_INPUT) {
+      globalConfig.OCO_TOKENS_MAX_INPUT = Number(
+        globalConfig.OCO_TOKENS_MAX_INPUT,
+      )
+    }
+    if (globalConfig.OCO_TOKENS_MAX_OUTPUT) {
+      globalConfig.OCO_TOKENS_MAX_OUTPUT = Number(
+        globalConfig.OCO_TOKENS_MAX_OUTPUT,
+      )
+    }
+    // 過去互換
+    if (globalConfig.OCO_TOKEN_LIMIT) {
+      globalConfig.OCO_TOKEN_LIMIT = Number(globalConfig.OCO_TOKEN_LIMIT)
+    }
+    if (globalConfig.OCO_OPENAI_MAX_TOKENS) {
+      globalConfig.OCO_OPENAI_MAX_TOKENS = Number(
+        globalConfig.OCO_OPENAI_MAX_TOKENS,
+      )
+    }
+    // TODO:論理型も?
   }
 
   return globalConfig

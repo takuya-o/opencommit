@@ -46866,7 +46866,7 @@ function getI18nLocal(value) {
 // src/commands/config.ts
 var MODEL_LIST = {
   openai: [
-    "gpt-4o-mini",
+    "gpt-5.4",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-instruct",
     "gpt-3.5-turbo-0613",
@@ -46891,17 +46891,45 @@ var MODEL_LIST = {
     "gpt-4-32k-0613",
     "gpt-4o",
     "gpt-4o-2024-05-13",
+    "gpt-4o-mini",
     "gpt-4o-mini-2024-07-18",
     // current
     "gpt-4o-2024-08-06",
     "gpt-4o-2024-11-20",
     "gpt-4o-mini-2024-07-18",
+    "chatgpt-4o-latest",
     "o1",
     "o1-2024-12-17",
     "o1-preview",
     "o1-preview-2024-09-12",
     "o1-mini",
-    "o1-mini-2024-09-12"
+    "o1-mini-2024-09-12",
+    "o3-pro",
+    "o3-pro-2025-06-10",
+    "o3-mini",
+    "o3-mini-2025-01-31",
+    "o3",
+    "o3-2025-04-10",
+    "o4-mini",
+    "o4-mini-2025-04-16",
+    "gpt-4.1-nano",
+    "gpt-4.1-nano-2025-04-14",
+    "gpt-4.1-mini",
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1",
+    "gpt-4.1-2025-04-14",
+    "gpt-5-nano",
+    "gpt-5-nano-2025-08-07",
+    "gpt-5-mini",
+    "gpt-5-mini-2025-08-07",
+    "gpt-5",
+    "gpt-5-2025-08-07",
+    "gpt-5.1",
+    "gpt-5.2",
+    "gpt-5.3-chat-latest",
+    "gpt-5-chat-latest",
+    "gpt-5.4",
+    "gpt-5.4-2026-03-05"
   ],
   anthropic: [
     "claude-3-5-sonnet-20240620",
@@ -46910,6 +46938,8 @@ var MODEL_LIST = {
     "claude-3-haiku-20240307"
   ],
   gemini: [
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
     "gemini-1.5-flash",
     "gemini-1.5-pro",
     "gemini-1.0-pro",
@@ -46918,7 +46948,13 @@ var MODEL_LIST = {
     "text-embedding-004",
     // current
     "gemini-2.0-flash-exp",
-    "gemini-1.5-flash-8b"
+    "gemini-1.5-flash-8b",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-3.1-pro-preview"
   ],
   groq: [
     "llama3-70b-8192",
@@ -47297,9 +47333,11 @@ var getEnvConfig = (envPath, setDefaultValues = true) => {
     OCO_API_URL: process.env.OCO_API_URL,
     OCO_API_KEY: process.env.OCO_API_KEY,
     OCO_AI_PROVIDER: process.env.OCO_AI_PROVIDER,
-    OCO_TOKENS_MAX_INPUT: parseConfigVarValue(process.env.OCO_TOKENS_MAX_INPUT),
-    OCO_TOKENS_MAX_OUTPUT: parseConfigVarValue(
-      process.env.OCO_TOKENS_MAX_OUTPUT
+    OCO_TOKENS_MAX_INPUT: Number(
+      parseConfigVarValue(process.env.OCO_TOKENS_MAX_INPUT)
+    ),
+    OCO_TOKENS_MAX_OUTPUT: Number(
+      parseConfigVarValue(process.env.OCO_TOKENS_MAX_OUTPUT)
     ),
     OCO_DESCRIPTION: parseConfigVarValue(process.env.OCO_DESCRIPTION),
     OCO_EMOJI: parseConfigVarValue(process.env.OCO_EMOJI),
@@ -47355,6 +47393,24 @@ var getGlobalConfig = (configPath = defaultConfigPath, setDefaultValues = true) 
   } else {
     const configFile = (0, import_fs.readFileSync)(configPath, "utf8");
     globalConfig = (0, import_ini.parse)(configFile);
+    if (globalConfig.OCO_TOKENS_MAX_INPUT) {
+      globalConfig.OCO_TOKENS_MAX_INPUT = Number(
+        globalConfig.OCO_TOKENS_MAX_INPUT
+      );
+    }
+    if (globalConfig.OCO_TOKENS_MAX_OUTPUT) {
+      globalConfig.OCO_TOKENS_MAX_OUTPUT = Number(
+        globalConfig.OCO_TOKENS_MAX_OUTPUT
+      );
+    }
+    if (globalConfig.OCO_TOKEN_LIMIT) {
+      globalConfig.OCO_TOKEN_LIMIT = Number(globalConfig.OCO_TOKEN_LIMIT);
+    }
+    if (globalConfig.OCO_OPENAI_MAX_TOKENS) {
+      globalConfig.OCO_OPENAI_MAX_TOKENS = Number(
+        globalConfig.OCO_OPENAI_MAX_TOKENS
+      );
+    }
   }
   return globalConfig;
 };
