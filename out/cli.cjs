@@ -38709,6 +38709,7 @@ var package_default = {
     "eslint-config-prettier": "^9.1.0",
     jest: "^29.7.0",
     prettier: "^3.4.2",
+    rimraf: "^6.1.3",
     "ts-jest": "^29.2.5",
     tsx: "^4.19.2",
     typescript: "^5.7.2",
@@ -59818,9 +59819,13 @@ var OpenAiEngine = class {
       model: this.config.model,
       messages,
       temperature: 0,
-      top_p: 0.1,
-      max_tokens: this.config.maxTokensOutput
+      top_p: 0.1
     };
+    if (this.config.model.startsWith("gpt-4") || this.config.model.startsWith("o") || this.config.model.startsWith("gpt-5")) {
+      params.max_completion_tokens = this.config.maxTokensOutput;
+    } else {
+      params.max_tokens = this.config.maxTokensOutput;
+    }
     try {
       const REQUEST_TOKENS = messages.map((msg) => tokenCount(msg.content) + 4).reduce((a4, b6) => a4 + b6, 0);
       if (REQUEST_TOKENS > this.config.maxTokensInput - this.config.maxTokensOutput)

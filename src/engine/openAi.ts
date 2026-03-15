@@ -29,14 +29,28 @@ export class OpenAiEngine implements AiEngine {
   public generateCommitMessage = async (
     messages: Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>,
   ): Promise<string | null> => {
-    const params = {
+    const params: {
+      model: string
+      messages: Array<OpenAI.Chat.Completions.ChatCompletionMessageParam>
+      temperature: number
+      top_p: number
+      max_tokens?: number
+      max_completion_tokens?: number
+    } = {
       model: this.config.model,
       messages,
       temperature: 0,
       top_p: 0.1,
-      max_tokens: this.config.maxTokensOutput,
     }
-
+    if (
+      this.config.model.startsWith('gpt-4') ||
+      this.config.model.startsWith('o') ||
+      this.config.model.startsWith('gpt-5')
+    ) {
+      params.max_completion_tokens = this.config.maxTokensOutput
+    } else {
+      params.max_tokens = this.config.maxTokensOutput
+    }
     try {
       const REQUEST_TOKENS = messages
         .map(msg => tokenCount(msg.content as string) + 4)
