@@ -7,7 +7,7 @@ import {
 } from '@google/generative-ai'
 import axios from 'axios'
 import { OpenAI } from 'openai'
-import { AiEngine, AiEngineConfig } from './Engine'
+import { AiEngine, AiEngineConfig } from './Engine.js'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface GeminiConfig extends AiEngineConfig {}

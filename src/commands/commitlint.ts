@@ -1,9 +1,9 @@
 import { intro, outro } from '@clack/prompts'
 import chalk from 'chalk'
 import { command } from 'cleye'
-import { configureCommitlintIntegration } from '../modules/commitlint/config'
-import { getCommitlintLLMConfig } from '../modules/commitlint/utils'
-import { COMMANDS } from './ENUMS'
+import { configureCommitlintIntegration } from '../modules/commitlint/config.js'
+import { getCommitlintLLMConfig } from '../modules/commitlint/utils.js'
+import { COMMANDS } from './ENUMS.js'
 
 export enum CONFIG_MODES {
   get = 'get',

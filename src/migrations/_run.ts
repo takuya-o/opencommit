@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { homedir } from 'os'
 import { join as pathJoin } from 'path'
-import { migrations } from './_migrations'
+import { migrations } from './_migrations.js'
 import { outro } from '@clack/prompts'
 import chalk from 'chalk'
 import {
@@ -11,7 +11,7 @@ import {
   //getIsGlobalConfigFileExist,
   OCO_AI_PROVIDER_ENUM,
   writeGlobalConfig,
-} from '../commands/config'
+} from '../commands/config.js'
 
 const migrationsFile = pathJoin(homedir(), '.opencommit_migrations')
 

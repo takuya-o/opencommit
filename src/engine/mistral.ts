@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { Mistral } from '@mistralai/mistralai'
 import { OpenAI } from 'openai'
-import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff'
-import { tokenCount } from '../utils/tokenCount'
-import { AiEngine, AiEngineConfig } from './Engine'
+import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff.js'
+import { tokenCount } from '../utils/tokenCount.js'
+import { AiEngine, AiEngineConfig } from './Engine.js'
 import {
   AssistantMessage as MistralAssistantMessage,
   SystemMessage as MistralSystemMessage,

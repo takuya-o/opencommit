@@ -4,7 +4,6 @@ import { GoogleGenerativeAI as GeminiClient } from '@google/generative-ai'
 import { AxiosInstance as RawAxiosClient } from 'axios'
 import { OpenAI as OpenAIClient } from 'openai'
 import { Mistral as MistralClient } from '@mistralai/mistralai'
-import { DefaultQuery, Headers } from 'openai/core'
 
 export interface AiEngineConfig {
   apiKey: string
@@ -12,8 +11,8 @@ export interface AiEngineConfig {
   maxTokensOutput: number
   maxTokensInput: number
   baseURL?: string
-  defaultQuery?: DefaultQuery
-  defaultHeaders?: Headers
+  defaultQuery?: Record<string, string | undefined>
+  defaultHeaders?: Record<string, string | undefined>
 }
 
 type Client =

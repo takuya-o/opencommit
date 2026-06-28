@@ -1,12 +1,12 @@
 import { note } from '@clack/prompts'
 import { OpenAI } from 'openai'
-import { getConfig } from './commands/config'
-import { i18n, I18nLocals } from './i18n'
-import { configureCommitlintIntegration } from './modules/commitlint/config'
-import { getCommitlintPrompts } from './modules/commitlint/prompts'
-import { ConsistencyPrompt } from './modules/commitlint/types'
-import * as utils from './modules/commitlint/utils'
-import { removeConventionalCommitWord } from './utils/removeConventionalCommitWord'
+import { getConfig } from './commands/config.js'
+import { i18n, I18nLocals } from './i18n/index.js'
+import { configureCommitlintIntegration } from './modules/commitlint/config.js'
+import { getCommitlintPrompts } from './modules/commitlint/prompts.js'
+import { ConsistencyPrompt } from './modules/commitlint/types.js'
+import * as utils from './modules/commitlint/utils.js'
+import { removeConventionalCommitWord } from './utils/removeConventionalCommitWord.js'
 
 const translation =
   i18n[

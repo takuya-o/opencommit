@@ -1,4 +1,4 @@
-import { OpenAiConfig, OpenAiEngine } from './openAi'
+import { OpenAiConfig, OpenAiEngine } from './openAi.js'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface GroqConfig extends OpenAiConfig {}

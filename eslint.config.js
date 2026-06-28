@@ -52,6 +52,7 @@ export default tseslint.config({
       "caughtErrorsIgnorePattern": "^_",
       "varsIgnorePattern": "^[_A-Z]"
     }],
-    "no-console": "off" //opencommit special
+    "no-console": "off", //opencommit special
+    "preserve-caught-error": "warn" // rethrowで{ cause: err }を付けてないと警告する
   },
 });

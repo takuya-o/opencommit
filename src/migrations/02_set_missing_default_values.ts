@@ -6,7 +6,7 @@ import {
   getIsGlobalConfigFileExist,
   hideKEY,
   writeGlobalConfig,
-} from '../commands/config'
+} from '../commands/config.js'
 
 export default function () {
   const globalConfig = getGlobalConfig(undefined, false)

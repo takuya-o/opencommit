@@ -3,7 +3,7 @@ import {
   getConfig,
   OCO_AI_PROVIDER_ENUM,
   setConfig,
-} from '../commands/config'
+} from '../commands/config.js'
 
 export default function () {
   const config = getConfig({ setDefaultValues: false })

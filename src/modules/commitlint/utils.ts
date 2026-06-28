@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 
-import { COMMITLINT_LLM_CONFIG_PATH } from './constants'
-import { CommitlintLLMConfig } from './types'
+import { COMMITLINT_LLM_CONFIG_PATH } from './constants.js'
+import { CommitlintLLMConfig } from './types.js'
 
 /**
  * Removes the "\n" only if occurring twice

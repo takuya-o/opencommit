@@ -9,9 +9,9 @@ import {
   RuleConfigTuple,
 } from '@commitlint/types'
 
-import { getConfig } from '../../commands/config'
-import { i18n, I18nLocals } from '../../i18n'
-import { IDENTITY, INIT_DIFF_PROMPT } from '../../prompts'
+import { getConfig } from '../../commands/config.js'
+import { i18n, I18nLocals } from '../../i18n/index.js'
+import { IDENTITY, INIT_DIFF_PROMPT } from '../../prompts.js'
 
 type DeepPartial<T> = {
   [P in keyof T]?: {

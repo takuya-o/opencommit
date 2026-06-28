@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { OpenAI } from 'openai'
-import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff'
-import { tokenCount } from '../utils/tokenCount'
-import { AiEngine, AiEngineConfig } from './Engine'
+import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff.js'
+import { tokenCount } from '../utils/tokenCount.js'
+import { AiEngine, AiEngineConfig } from './Engine.js'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface OpenAiConfig extends AiEngineConfig {}

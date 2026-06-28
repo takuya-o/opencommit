@@ -1,4 +1,4 @@
-import { tokenCount } from './tokenCount'
+import { tokenCount } from './tokenCount.js'
 
 export function mergeDiffs(arr: string[], maxStringLength: number): string[] {
   const mergedArr: string[] = []

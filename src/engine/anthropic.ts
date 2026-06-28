@@ -3,9 +3,9 @@ import { outro } from '@clack/prompts'
 import axios from 'axios'
 import chalk from 'chalk'
 import { OpenAI } from 'openai'
-import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff'
-import { tokenCount } from '../utils/tokenCount'
-import { AiEngine, AiEngineConfig } from './Engine'
+import { GenerateCommitMessageErrorEnum } from '../generateCommitMessageFromGitDiff.js'
+import { tokenCount } from '../utils/tokenCount.js'
+import { AiEngine, AiEngineConfig } from './Engine.js'
 import { TextBlock } from '@anthropic-ai/sdk/resources'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

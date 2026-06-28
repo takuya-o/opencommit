@@ -4,7 +4,79 @@
       "path": "."
     }
   ],
-  "settings": {},
+  "settings": {
+    "chat.tools.terminal.autoApprove": {
+      "/^cd /workspaces/opencommit && npm exec --no -- tsc --noEmit$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst base=path\\.resolve\\('src'\\);\nconst walk=\\(dir\\)=>fs\\.readdirSync\\(dir,\\{withFileTypes:true\\}\\)\\.flatMap\\(d=>d\\.isDirectory\\(\\)\\?walk\\(path\\.join\\(dir,d\\.name\\)\\):\\(d\\.name\\.endsWith\\('\\.ts'\\)\\?\\[path\\.join\\(dir,d\\.name\\)\\]:\\[\\]\\)\\);\nconst relImports=\\[\\]; const jsonImports=\\[\\];\nfor\\(const file of walk\\(base\\)\\)\\{\n const text=fs\\.readFileSync\\(file,'utf8'\\);\n const re=/\\^\\\\s\\*\\(\\?:import\\|export\\)\\\\s\\+\\[\\\\s\\\\S\\]\\+\\?from\\\\s\\+\\['\"\\]\\(\\\\\\.\\\\\\.\\\\/\\[\\^'\"\\]\\+\\|\\\\\\.\\\\/\\[\\^'\"\\]\\+\\)\\['\"\\]/gm;\n let m; while\\(m=re\\.exec\\(text\\)\\)\\{\n   const spec=m\\[1\\]; if\\(spec\\.endsWith\\('\\.json'\\)\\) jsonImports\\.push\\(\\{file,spec\\}\\); else if\\(spec\\.startsWith\\('\\./'\\)\\|\\|spec\\.startsWith\\('\\.\\./'\\)\\) relImports\\.push\\(\\{file,spec\\}\\)\n \\}\n\\}\nconsole\\.log\\('relative imports:', relImports\\.length\\);\nconsole\\.log\\('json imports:', jsonImports\\.length\\);\nconsole\\.log\\('first 30 relative:'\\); relImports\\.slice\\(0,30\\)\\.forEach\\(i=>console\\.log\\(i\\.file, i\\.spec\\)\\);\nconsole\\.log\\('first 30 json:'\\); jsonImports\\.slice\\(0,30\\)\\.forEach\\(i=>console\\.log\\(i\\.file, i\\.spec\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && npm exec --no -- tsc --noEmit --moduleResolution bundler --module ESNext$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst root=process\\.cwd\\(\\);\nconst walk=\\(dir\\)=>fs\\.readdirSync\\(dir,\\{withFileTypes:true\\}\\)\\.flatMap\\(d=>d\\.isDirectory\\(\\)\\?walk\\(path\\.join\\(dir,d\\.name\\)\\):\\(d\\.name\\.endsWith\\('\\.ts'\\)\\?\\[path\\.join\\(dir,d\\.name\\)\\]:\\[\\]\\)\\);\nconst files=walk\\(path\\.join\\(root,'src'\\)\\);\nconst relExts=\\['\\.js','\\.mjs','\\.cjs','\\.json','\\.node','\\.css','\\.ts','\\.tsx','\\.cts','\\.mts'\\];\nconst missingExt=\\[\\];\nconst jsonNeedsWith=\\[\\];\nconst jsonWithoutAttr=\\[\\];\nfor\\(const file of files\\)\\{\n const text=fs\\.readFileSync\\(file,'utf8'\\);\n const lines=text\\.split\\(/\\\\r\\?\\\\n/\\);\n for\\(let i=0;i<lines\\.length;i\\+\\+\\)\\{\n   const line=lines\\[i\\];\n   const m=line\\.match\\(/\\^\\\\s\\*\\(\\?:import\\|export\\)\\\\s\\+\\[\\\\s\\\\S\\]\\+\\?from\\\\s\\+\\['\"\\]\\(\\.\\+\\?\\)\\['\"\\]\\\\s\\*\\(\\?:;\\|\\$\\)/\\);\n   if\\(!m\\) continue;\n   const spec=m\\[1\\];\n   if\\(spec\\.startsWith\\('\\./'\\)\\|\\|spec\\.startsWith\\('\\.\\./'\\)\\)\\{\n     if\\(!relExts\\.some\\(ext=>spec\\.endsWith\\(ext\\)\\)\\)\\{\n       missingExt\\.push\\(\\{file,line:i\\+1,spec,code:line\\}\\);\n     \\}\n   \\}\n   if\\(spec\\.endsWith\\('\\.json'\\)\\)\\{\n     if\\(/with\\\\s\\*\\\\\\{\\[\\^\\}\\]\\*\\\\\\}/\\.test\\(line\\)\\) continue;\n     jsonWithoutAttr\\.push\\(\\{file,line:i\\+1,spec,code:line\\}\\);\n     if\\(/assert\\\\s\\*\\\\\\{/\\.test\\(line\\)\\) jsonNeedsWith\\.push\\(\\{file,line:i\\+1,spec,code:line\\}\\);\n   \\}\n \\}\n\\}\nconsole\\.log\\('missing-ext count', missingExt\\.length\\);\nmissingExt\\.slice\\(0,200\\)\\.forEach\\(r=>console\\.log\\(`\\$\\{path\\.relative\\(root,r\\.file\\)\\}:\\$\\{r\\.line\\} \\$\\{r\\.spec\\}`\\)\\);\nconsole\\.log\\('json-without-attr count', jsonWithoutAttr\\.length\\);\njsonWithoutAttr\\.slice\\(0,200\\)\\.forEach\\(r=>console\\.log\\(`\\$\\{path\\.relative\\(root,r\\.file\\)\\}:\\$\\{r\\.line\\} \\$\\{r\\.spec\\}`\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst root=process\\.cwd\\(\\);\nconst walk=\\(dir\\)=>fs\\.readdirSync\\(dir,\\{withFileTypes:true\\}\\)\\.flatMap\\(d=>d\\.isDirectory\\(\\)\\?walk\\(path\\.join\\(dir,d\\.name\\)\\):\\(d\\.name\\.endsWith\\('\\.ts'\\)\\?\\[path\\.join\\(dir,d\\.name\\)\\]:\\[\\]\\)\\);\nconst files=walk\\(path\\.join\\(root,'src'\\)\\);\nconst relExts=\\['\\.js','\\.mjs','\\.cjs','\\.json','\\.node','\\.css','\\.ts','\\.tsx','\\.cts','\\.mts'\\];\nconst missingExt=\\[\\];\nconst jsonAssert=\\[\\];\nfor\\(const file of files\\)\\{\n const lines=fs\\.readFileSync\\(file,'utf8'\\)\\.split\\(/\\\\r\\?\\\\n/\\);\n for\\(let i=0;i<lines\\.length;i\\+\\+\\)\\{\n  const line=lines\\[i\\];\n  const m=line\\.match\\(/from\\\\s\\+\\['\"\\]\\(\\.\\+\\?\\)\\['\"\\]/\\);\n  if\\(!m\\) continue;\n  const spec=m\\[1\\];\n  if\\(spec\\.startsWith\\('\\./'\\)\\|\\|spec\\.startsWith\\('\\.\\./'\\)\\)\\{\n    if\\(!relExts\\.some\\(ext=>spec\\.endsWith\\(ext\\)\\)\\) missingExt\\.push\\(\\{file:path\\.relative\\(root,file\\),line:i\\+1,spec,line\\}\\);\n  \\}\n  if\\(spec\\.endsWith\\('\\.json'\\) && /assert\\\\s\\*\\\\\\{/\\.test\\(line\\)\\) jsonAssert\\.push\\(\\{file:path\\.relative\\(root,file\\),line:i\\+1,spec,line\\}\\);\n \\}\n\\}\nconsole\\.log\\('missingExt', missingExt\\.length\\);\nmissingExt\\.slice\\(0,100\\)\\.forEach\\(r=>console\\.log\\(`\\$\\{r\\.file\\}:\\$\\{r\\.line\\} \\$\\{r\\.spec\\}`\\)\\);\nconsole\\.log\\('jsonAssert', jsonAssert\\.length\\);\njsonAssert\\.slice\\(0,100\\)\\.forEach\\(r=>console\\.log\\(`\\$\\{r\\.file\\}:\\$\\{r\\.line\\} \\$\\{r\\.line\\}`\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs = require\\('fs'\\);\nconst path = require\\('path'\\);\nconst root = process\\.cwd\\(\\);\nconst exts = \\['\\.js', '\\.mjs', '\\.cjs', '\\.json', '\\.node', '\\.css', '\\.ts', '\\.tsx', '\\.cts', '\\.mts'\\];\nconst files = \\[\\];\nconst walk = dir => fs\\.readdirSync\\(dir, \\{withFileTypes:true\\}\\)\\.forEach\\(d=>\\{\n  const full = path\\.join\\(dir,d\\.name\\);\n  if\\(d\\.isDirectory\\(\\)\\) walk\\(full\\);\n  else if\\(d\\.isFile\\(\\) && full\\.endsWith\\('\\.ts'\\)\\) files\\.push\\(full\\);\n\\}\\);\nwalk\\(path\\.join\\(root,'src'\\)\\);\nlet totalChanged=0;\nfor\\(const file of files\\)\\{\n  let text = fs\\.readFileSync\\(file,'utf8'\\);\n  const old = text;\n  // replace assert syntax to with\n  text = text\\.replace\\(/assert\\\\s\\*\\\\\\{\\\\s\\*type\\\\s\\*:\\\\s\\*\\(\\['\"\\]\\)json\\\\1\\\\s\\*\\\\\\}/g, \"with \\{ type: 'json' \\}\"\\);\n  // replace relative import paths missing extension\n  text = text\\.replace\\(/\\(\\^\\\\s\\*\\(\\?:import\\|export\\)\\\\s\\+\\[\\\\s\\\\S\\]\\*\\?from\\\\s\\+\\)\\(\\['\"\\]\\)\\(\\\\\\.\\\\\\.\\\\/\\|\\\\\\.\\\\/\\)\\(\\[\\^'\";\\]\\+\\?\\)\\(\\['\"\\]\\)\\(\\[\\\\s;\\]\\*\\$\\)/gm, \\(match, pfx, q, rel, spec, q2, suffix\\)=>\\{\n    const fullSpec = rel \\+ spec;\n    if\\(fullSpec\\.endsWith\\('\\.json'\\) \\|\\| exts\\.some\\(e=>fullSpec\\.endsWith\\(e\\)\\)\\) return match;\n    // if spec already has a known extension or is a directory import\\? add \\.js by default\n    return `\\$\\{pfx\\}\\$\\{q\\}\\$\\{fullSpec\\}\\.js\\$\\{q2\\}\\$\\{suffix\\}`;\n  \\}\\);\n  if\\(text !== old\\)\\{\n    fs\\.writeFileSync\\(file, text, 'utf8'\\);\n    totalChanged\\+\\+;\n    console\\.log\\('updated', path\\.relative\\(root, file\\)\\);\n  \\}\n\\}\nconsole\\.log\\('files changed:', totalChanged\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst dir=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai'\\);\nconst files = \\[\\];\nconst walk=\\(d\\)=>fs\\.readdirSync\\(d,\\{withFileTypes:true\\}\\)\\.forEach\\(ent=>\\{\n  const p=path\\.join\\(d,ent\\.name\\);\n  if\\(ent\\.isDirectory\\(\\)\\) walk\\(p\\);\n  else if\\(ent\\.name\\.endsWith\\('\\.ts'\\)\\|\\|ent\\.name\\.endsWith\\('\\.d\\.ts'\\)\\) files\\.push\\(p\\);\n\\}\\);\nwalk\\(dir\\);\nconst matches=files\\.flatMap\\(file=>\\{\n  const text=fs\\.readFileSync\\(file,'utf8'\\);\n  const regex=/export\\\\s\\+\\(\\?:type\\\\s\\+\\)\\?\\(DefaultQuery\\|Headers\\)\\\\b/g;\n  let m; const out=\\[\\];\n  while\\(\\(m=regex\\.exec\\(text\\)\\)\\) out\\.push\\(\\{file:path\\.relative\\(dir,file\\),name:m\\[1\\]\\}\\);\n  return out;\n\\}\\);\nconsole\\.log\\(matches\\.slice\\(0,50\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst pkg=JSON\\.parse\\(fs\\.readFileSync\\('node_modules/openai/package\\.json','utf8'\\)\\);\nconsole\\.log\\('exports:', pkg\\.exports\\);\nconsole\\.log\\('main:', pkg\\.main\\);\nconsole\\.log\\('types:', pkg\\.types\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst root=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai'\\);\nconst files=\\[\\];\nconst walk=\\(dir\\)=>fs\\.readdirSync\\(dir,\\{withFileTypes:true\\}\\)\\.forEach\\(d=>\\{const p=path\\.join\\(dir,d\\.name\\); if\\(d\\.isDirectory\\(\\)\\) walk\\(p\\); else if\\(/\\\\\\.d\\\\\\.ts\\$\\|\\\\\\.ts\\$/\\.test\\(d\\.name\\)\\) files\\.push\\(p\\)\\}\\);\nwalk\\(root\\);\nlet found=\\[\\];\nfor\\(const file of files\\)\\{\n const txt=fs\\.readFileSync\\(file,'utf8'\\);\n if\\(txt\\.includes\\('DefaultQuery'\\)\\|\\|txt\\.includes\\('type DefaultQuery'\\)\\|\\|txt\\.includes\\('interface Headers'\\)\\|\\|txt\\.includes\\('type Headers'\\)\\)\\{\n  found\\.push\\(file\\);\n \\}\n\\}\nconsole\\.log\\('found', found\\.length\\);\nconsole\\.log\\(found\\.slice\\(0,50\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && ls node_modules/openai/core node_modules/openai/src/core node_modules/openai/core 2>/dev/null \\|\\| true$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst pkgDir=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai'\\);\nconst walk=\\(dir\\)=>fs\\.readdirSync\\(dir,\\{withFileTypes:true\\}\\)\\.flatMap\\(d=>d\\.isDirectory\\(\\)\\?walk\\(path\\.join\\(dir,d\\.name\\)\\):\\(d\\.name\\.endsWith\\('\\.d\\.ts'\\)\\?\\[path\\.join\\(dir,d\\.name\\)\\]:\\[\\]\\)\\);\nconst files=walk\\(pkgDir\\);\nconst search=\\['DefaultQuery','type DefaultQuery','interface DefaultQuery','Headers '\\];\nconst results=\\[\\];\nfor\\(const file of files\\)\\{\n const text=fs\\.readFileSync\\(file,'utf8'\\);\n for\\(const term of search\\)\\{ if\\(text\\.includes\\(term\\)\\) results\\.push\\(\\{file:path\\.relative\\(pkgDir,file\\),term\\}\\); \\}\n\\}\nconsole\\.log\\(results\\.slice\\(0,50\\)\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst pkg=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai'\\);\nconst files=\\['index\\.d\\.ts','index\\.d\\.mts','azure\\.d\\.ts','core/error\\.d\\.ts','internal/headers\\.d\\.ts'\\];\nfor\\(const f of files\\)\\{\n  const p=path\\.join\\(pkg,f\\);\n  if\\(fs\\.existsSync\\(p\\)\\)\\{\n    console\\.log\\('===', f, '==='\\);\n    const text=fs\\.readFileSync\\(p,'utf8'\\);\n    const lines=text\\.split\\(/\\\\r\\?\\\\n/\\);\n    for\\(let i=0;i<lines\\.length;i\\+\\+\\)\\{\n      const line=lines\\[i\\];\n      if\\(line\\.includes\\('DefaultQuery'\\)\\|\\|line\\.includes\\(' Headers'\\)\\|\\|line\\.includes\\('type Headers'\\)\\|\\|line\\.includes\\('interface Headers'\\)\\)\\{\n        console\\.log\\(i\\+1, line\\);\n      \\}\n    \\}\n  \\}\n\\}\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst file=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai','index\\.d\\.ts'\\);\nconst text=fs\\.readFileSync\\(file,'utf8'\\);\nconst lines=text\\.split\\(/\\\\r\\?\\\\n/\\);\nfor\\(let i=0;i<lines\\.length;i\\+\\+\\)\\{\n  if\\(lines\\[i\\]\\.includes\\('export'\\) && \\(lines\\[i\\]\\.includes\\('Headers'\\)\\|\\|lines\\[i\\]\\.includes\\('DefaultQuery'\\)\\|\\|lines\\[i\\]\\.includes\\('OpenAI'\\)\\|\\|lines\\[i\\]\\.includes\\('interface'\\)\\|\\|lines\\[i\\]\\.includes\\('type '\\)\\)\\)\n    console\\.log\\(i\\+1, lines\\[i\\]\\);\n\\}\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst file=path\\.join\\(process\\.cwd\\(\\),'node_modules','openai','client\\.d\\.ts'\\);\nconst text=fs\\.readFileSync\\(file,'utf8'\\);\nconst lines=text\\.split\\(/\\\\r\\?\\\\n/\\);\nfor\\(let i=1;i<=lines\\.length;i\\+\\+\\)\\{\n  const line=lines\\[i-1\\];\n  if\\(line\\.includes\\('defaultQuery'\\)\\|\\|line\\.includes\\('defaultHeaders'\\)\\|\\|line\\.includes\\('HeadersLike'\\)\\)\\{\n    console\\.log\\(i, line\\);\n  \\}\n\\}\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst dir=path\\.join\\(process\\.cwd\\(\\),'node_modules','cli-testing-library'\\);\nconst files=fs\\.readdirSync\\(dir\\)\\.filter\\(f=>f\\.endsWith\\('\\.d\\.ts'\\)\\|\\|f\\.endsWith\\('\\.ts'\\)\\);\nconsole\\.log\\(files\\);\nif\\(files\\.includes\\('dist'\\)\\)\\{\n const dist=path\\.join\\(dir,'dist'\\);\n const distFiles=fs\\.readdirSync\\(dist\\)\\.filter\\(f=>f\\.endsWith\\('\\.d\\.ts'\\)\\);\n console\\.log\\('dist', distFiles\\);\n const p=path\\.join\\(dist,'esm','types\\.d\\.ts'\\);\n if\\(fs\\.existsSync\\(p\\)\\) console\\.log\\('esm/types\\.d\\.ts exists'\\);\n\\}\nif\\(fs\\.existsSync\\(path\\.join\\(dir,'dist','esm','types\\.d\\.ts'\\)\\)\\)\\{\n const text=fs\\.readFileSync\\(path\\.join\\(dir,'dist','esm','types\\.d\\.ts'\\),'utf8'\\);\n console\\.log\\(text\\.split\\('\\\\n'\\)\\.slice\\(0,80\\)\\.join\\('\\\\n'\\)\\);\n\\}\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && node - <<'NODE'\nconst fs=require\\('fs'\\);\nconst path=require\\('path'\\);\nconst pkg=JSON\\.parse\\(fs\\.readFileSync\\('node_modules/cli-testing-library/package\\.json','utf8'\\)\\);\nconsole\\.log\\(pkg\\.exports\\);\nconsole\\.log\\('types', pkg\\.types\\);\nconst dir=path\\.join\\(process\\.cwd\\(\\),'node_modules','cli-testing-library'\\);\nconst tree=\\(d, prefix=''\\)=>fs\\.readdirSync\\(d,\\{withFileTypes:true\\}\\)\\.forEach\\(ent=>\\{\n const p=path\\.join\\(d,ent\\.name\\);\n if\\(ent\\.isDirectory\\(\\)\\)\\{\n  if\\(prefix\\.length<40\\) tree\\(p, prefix\\+ent\\.name\\+'/'\\);\n \\} else if\\(ent\\.name\\.includes\\('extend'\\)\\|\\|ent\\.name\\.includes\\('jest'\\)\\|\\|ent\\.name\\.includes\\('types'\\)\\)\\{\n  console\\.log\\(prefix\\+ent\\.name\\);\n \\}\\}\\);\ntree\\(dir\\);\nNODE$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "/^cd /workspaces/opencommit && ls -l test/jest-setup\\.ts && sed -n '1,40p' test/jest-setup\\.ts && npm exec --no -- tsc --noEmit$/": {
+        "approve": true,
+        "matchCommandLine": true
+      },
+      "npm exec": true
+    }
+  },
   "launch": {
     "version": "0.2.0",
     "configurations": [

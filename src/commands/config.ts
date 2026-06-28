@@ -8,9 +8,9 @@ import { parse as iniParse, stringify as iniStringify } from 'ini'
 import { homedir } from 'os'
 import { join as pathJoin, resolve as pathResolve } from 'path'
 //current import { COMMANDS } from '../CommandsEnum.js'
-import { COMMANDS } from './ENUMS'
-import { TEST_MOCK_TYPES } from '../engine/testAi'
-import { getI18nLocal, i18n } from '../i18n'
+import { COMMANDS } from './ENUMS.js'
+import { TEST_MOCK_TYPES } from '../engine/testAi.js'
+import { getI18nLocal, i18n } from '../i18n/index.js'
 
 export enum CONFIG_KEYS {
   OCO_OPENAI_API_KEY = 'OCO_OPENAI_API_KEY',

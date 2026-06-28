@@ -9,16 +9,16 @@ import {
 } from '@clack/prompts'
 import chalk from 'chalk'
 import { execa } from 'execa'
-import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff'
+import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff.js'
 import {
   assertGitRepo,
   getChangedFiles,
   getDiff,
   getStagedFiles,
   gitAdd,
-} from '../utils/git'
-import { trytm } from '../utils/trytm'
-import { getConfig } from './config'
+} from '../utils/git.js'
+import { trytm } from '../utils/trytm.js'
+import { getConfig } from './config.js'
 
 const getGitRemotes = async () => {
   const { stdout } = await execa('git', ['remote'])

@@ -1,4 +1,4 @@
-import { i18n } from '../../i18n'
+import { i18n } from '../../i18n/index.js'
 
 export type ConsistencyPrompt = (typeof i18n)[keyof typeof i18n]
 

@@ -1,17 +1,17 @@
 import { spinner } from '@clack/prompts'
 
-import { getConfig } from '../../commands/config'
-import { i18n, I18nLocals } from '../../i18n'
-import { getEngine } from '../../utils/engine'
-import { COMMITLINT_LLM_CONFIG_PATH } from './constants'
-import { computeHash } from './crypto'
+import { getConfig } from '../../commands/config.js'
+import { i18n, I18nLocals } from '../../i18n/index.js'
+import { getEngine } from '../../utils/engine.js'
+import { COMMITLINT_LLM_CONFIG_PATH } from './constants.js'
+import { computeHash } from './crypto.js'
 import {
   getCommitlintPrompts,
   inferPromptsFromCommitlintConfig,
-} from './prompts'
-import { getCommitLintPWDConfig } from './pwd-commitlint'
-import { CommitlintLLMConfig } from './types'
-import * as utils from './utils'
+} from './prompts.js'
+import { getCommitLintPWDConfig } from './pwd-commitlint.js'
+import { CommitlintLLMConfig } from './types.js'
+import * as utils from './utils.js'
 
 const translation =
   i18n[

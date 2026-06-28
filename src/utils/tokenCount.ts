@@ -1,5 +1,5 @@
-import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json'
-import o200k_base from '@dqbd/tiktoken/encoders/o200k_base.json' assert { type: 'json' }
+import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json' with { type: 'json' }
+import o200k_base from '@dqbd/tiktoken/encoders/o200k_base.json' with { type: 'json' }
 import { Tiktoken } from '@dqbd/tiktoken/lite'
 
 export function tokenCount(content: string, model?: string): number {

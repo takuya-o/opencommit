@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OpenAI } from 'openai'
 
-import { AiEngine } from './Engine'
+import { AiEngine } from './Engine.js'
 
 export const TEST_MOCK_TYPES = [
   'commit-message',

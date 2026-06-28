@@ -1,11 +1,11 @@
-import { DEFAULT_TOKEN_LIMITS, getConfig } from './commands/config'
-import { getMainCommitPrompt } from './prompts'
-import { getEngine } from './utils/engine'
-import { mergeDiffs } from './utils/mergeDiffs'
-import { tokenCount } from './utils/tokenCount'
+import { DEFAULT_TOKEN_LIMITS, getConfig } from './commands/config.js'
+import { getMainCommitPrompt } from './prompts.js'
+import { getEngine } from './utils/engine.js'
+import { mergeDiffs } from './utils/mergeDiffs.js'
+import { tokenCount } from './utils/tokenCount.js'
 // current
 import { ChatCompletionMessageParam as ChatCompletionRequestMessage } from 'openai/resources'
-//OLD import { api } from './api'
+//OLD import { api } from './api.js'
 
 const config = getConfig({ setDefaultValues: false })
 const MAX_TOKENS_INPUT =

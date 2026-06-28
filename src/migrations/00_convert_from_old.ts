@@ -1,4 +1,4 @@
-import { CONFIG_KEYS, getConfig, setConfig } from '../commands/config'
+import { CONFIG_KEYS, getConfig, setConfig } from '../commands/config.js'
 
 export default function () {
   const config = getConfig({ setDefaultValues: false })

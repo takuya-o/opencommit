@@ -3,10 +3,10 @@
     "target": "ESNext",
     "lib": ["ES5", "ES6"],
 
-    "module": "ESNext",
+    "module": "nodenext",
     // "rootDir": "./src",
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
 
     "allowJs": true,
 

@@ -1,12 +1,12 @@
-import core from '@actions/core'
-import exec from '@actions/exec'
-import github from '@actions/github'
+import * as core from '@actions/core'
+import * as exec from '@actions/exec'
+import * as github from '@actions/github'
 import { intro, outro } from '@clack/prompts'
 import { PushEvent } from '@octokit/webhooks-types'
 import { unlinkSync, writeFileSync } from 'fs'
-import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff'
-import { randomIntFromInterval } from './utils/randomIntFromInterval'
-import { sleep } from './utils/sleep'
+import { generateCommitMessageByDiff } from './generateCommitMessageFromGitDiff.js'
+import { randomIntFromInterval } from './utils/randomIntFromInterval.js'
+import { sleep } from './utils/sleep.js'
 
 // This should be a token with access to your repository scoped in as a secret.
 // The YML workflow will need to set GITHUB_TOKEN with the GitHub Secret Token

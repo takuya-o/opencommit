@@ -3,9 +3,14 @@ import fs from 'fs/promises'
 
 import { intro, outro, spinner } from '@clack/prompts'
 
-import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff'
-import { getChangedFiles, getDiff, getStagedFiles, gitAdd } from '../utils/git'
-import { getConfig } from './config'
+import { generateCommitMessageByDiff } from '../generateCommitMessageFromGitDiff.js'
+import {
+  getChangedFiles,
+  getDiff,
+  getStagedFiles,
+  gitAdd,
+} from '../utils/git.js'
+import { getConfig } from './config.js'
 
 const [messageFilePath, commitSource] = process.argv.slice(2)
 

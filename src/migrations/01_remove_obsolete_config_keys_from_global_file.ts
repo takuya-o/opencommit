@@ -6,7 +6,7 @@ import {
   getGlobalConfig,
   getIsGlobalConfigFileExist,
   writeGlobalConfig,
-} from '../commands/config'
+} from '../commands/config.js'
 
 export default function () {
   const obsoleteKeys = [
